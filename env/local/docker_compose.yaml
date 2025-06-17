@@ -1,0 +1,71 @@
+services:
+  mysql:
+    image: mysql:8.4.3
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: poker
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "13306:3306"
+    networks:
+      poker_network:
+
+
+  redis:
+    image: redis:7.4.0
+    container_name: redis
+    environment:
+      REDIS_USER: default
+      REDIS_PASSWORD: 123456
+    ports:
+      - "16379:6379"
+    networks:
+      poker_network:
+
+
+  mongodb:
+    image: mongo:6.0
+    restart: always
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_DATABASE: poker
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    ports:
+      - "17017:17017"
+    networks:
+      poker_network:
+
+
+  etcd:
+    image: bitnami/etcd:3.5
+    restart: always
+    container_name: etcd
+    environment:
+      # 允许无认证访问（生产环境不建议）
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+    ports:
+      - "12379:2379"
+      - "12380:2380"
+    networks:
+      poker_network:
+
+
+  nats:
+    image: nats:2.9-alpine
+    container_name: nats
+    ports:
+      - "14222:4222" # 客户端端口
+      - "18222:8222" # 监控端口
+    command: --cluster nats://0.0.0.0:6222   --cluster_name NATS_CLUSTER --no_advertise
+    networks:
+      poker_network:
+
+
+networks:
+  poker_network:
+    driver: bridge
