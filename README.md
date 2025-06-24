@@ -6,7 +6,7 @@
 
 框架示意图：
 
-![pic.jpg](C:\Users\Administrator\GolandProjects\gamesvr\go-actor\blob\pic.jpg)
+![pic.jpg](./blob/pic.jpg)
 
 ## **快速开始**
 
