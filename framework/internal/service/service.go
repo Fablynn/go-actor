@@ -11,12 +11,14 @@ import (
 	"poker_server/library/encode"
 	"poker_server/library/mlog"
 	"poker_server/library/uerror"
+	"strings"
 	"sync/atomic"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type Service struct {
+	envType      pb.EnvType        // 环境类型
 	node         *pb.Node          // 节点信息
 	clusterObj   domain.ICluster   // 集群节点
 	tableObj     domain.ITable     // 路由表
@@ -28,6 +30,14 @@ func NewService(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (*Se
 	clusterObj := cluster.New()
 	tableObj := router.New()
 	tableObj.SetExpire(cfg.Common.RouterExpire)
+
+	var envType pb.EnvType
+	switch strings.ToLower(cfg.Common.Env) {
+	case "develop":
+		envType = pb.EnvType_EnvTypeDevelop
+	case "release":
+		envType = pb.EnvType_EnvTypeRelease
+	}
 
 	// 服务发现
 	dis, err := discovery.NewEtcd(cfg.Etcd)
@@ -47,6 +57,7 @@ func NewService(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (*Se
 		return nil, err
 	}
 	return &Service{
+		envType:      envType,
 		node:         node,
 		clusterObj:   clusterObj,
 		tableObj:     tableObj,
@@ -57,6 +68,10 @@ func NewService(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (*Se
 
 func (d *Service) Close() error {
 	return d.discoveryObj.Close()
+}
+
+func (d *Service) GetEnvType() pb.EnvType {
+	return d.envType
 }
 
 func (d *Service) GetNode() *pb.Node {
@@ -243,6 +258,7 @@ func (d *Service) dispatcher(head *pb.Head) error {
 }
 
 func (d *Service) sendToClient(head *pb.Head, buf []byte) error {
+	atomic.AddInt32(&head.Reference, 1)
 	head.Dst = &pb.NodeRouter{
 		NodeType: pb.NodeType_NodeTypeGate,
 		//	NodeId:     route.Get(pb.NodeType_NodeTypeGate),

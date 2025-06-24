@@ -68,7 +68,7 @@ func (n *Nats) SetBroadcastHandler(node *pb.Node, ff func(*pb.Head, []byte)) err
 			mlog.Errorf("nats解析packet包失败: %v", err)
 			return
 		}
-		mlog.Debugf("收到Nats广播数据包 bodySize:%d, pack:%v", len(msg.Data), pack)
+		mlog.Debug(pack.Head, "收到Nats广播数据包 bodySize:%d, pack:%v", len(msg.Data), pack)
 
 		// 执行函数
 		ff(pack.Head, pack.Body)
@@ -87,7 +87,7 @@ func (n *Nats) SetSendHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 			mlog.Errorf("nats解析packet包失败: %v", err)
 			return
 		}
-		mlog.Debugf("收到Nats单播数据包 bodySize:%d, pack:%v", len(msg.Data), pack)
+		mlog.Debug(pack.Head, "收到Nats单播数据包 bodySize:%d, pack:%v", len(msg.Data), pack)
 
 		// 更新路由信息
 		tabSrc := n.table.Get(pack.Head.Src.RouterType, pack.Head.Src.ActorId)
@@ -114,7 +114,7 @@ func (n *Nats) SetReplyHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 			mlog.Errorf("nats解析packet包失败: %v", err)
 			return
 		}
-		mlog.Debugf("收到Nats广播数据包 bodySize:%d, pack:%v", len(msg.Data), pack)
+		mlog.Debug(pack.Head, "收到Nats广播数据包 bodySize:%d, pack:%v", len(msg.Data), pack)
 
 		// 更新路由信息
 		tabSrc := n.table.Get(pack.Head.Src.RouterType, pack.Head.Src.ActorId)
@@ -158,13 +158,13 @@ func (d *Nats) Request(head *pb.Head, req []byte, rsp proto.Message) error {
 	reset(head, pb.SendType_POINT)
 	msgBuf, err := proto.Marshal(&pb.Packet{Head: head, Body: req})
 	if err != nil {
-		return uerror.New(1, pb.ErrorCode_MARSHAL_FAILED, "nats.Request序列化失败: %v", err)
+		return uerror.New(1, pb.ErrorCode_MARSHAL_FAILED, "nats.Request序列化失败: %v %v", head, err)
 	}
 
 	// 发送不同请求
 	resp, err := d.client.Request(d.replyChannel(head.Dst.NodeType, head.Dst.NodeId), msgBuf, 3000*time.Millisecond)
 	if err != nil {
-		return uerror.New(1, pb.ErrorCode_REQUEST_FAIELD, "nats.Request发送请求失败: %v", err)
+		return uerror.New(1, pb.ErrorCode_REQUEST_FAIELD, "nats.Request发送请求失败: %v %v", head, err)
 	}
 
 	if err := proto.Unmarshal(resp.Data, rsp); err != nil {

@@ -113,7 +113,7 @@ func (f *FuncInfo) localCmd(rval reflect.Value, head *pb.Head, args ...interface
 	ref := atomic.AddInt32(&head.Reference, 1)
 	return func() {
 		if head.Dst == nil || head.Src == nil {
-			mlog.Errorf("Actor(%s.%s) head参数错误，head:%v, args:%v", head.ActorName, head.FuncName, head, args)
+			mlog.Error(head, "Actor(%s.%s) head参数错误，args:%v", head.ActorName, head.FuncName, args)
 			return
 		}
 
@@ -162,7 +162,7 @@ func (f *FuncInfo) rpcCmd(rval reflect.Value, head *pb.Head, buf []byte) func() 
 	ref := atomic.AddInt32(&head.Reference, 1)
 	return func() {
 		if head.Dst == nil || head.Src == nil {
-			mlog.Errorf("Actor(%s.%s) head参数错误，head:%v, buf:%v", head.ActorName, head.FuncName, head, buf)
+			mlog.Error(head, "Actor(%s.%s) head参数错误，buf:%v", head.ActorName, head.FuncName, buf)
 			return
 		}
 
@@ -237,10 +237,10 @@ func response(head *pb.Head, results []reflect.Value, rsps ...reflect.Value) {
 			rspProto.SetHead(uerror.ToRspHead(err))
 		}
 		retErr := sendRspFunc(head, rsp.Interface().(proto.Message))
-		if retErr != nil {
-			mlog.Error(head, "error:%v, rsp:%v", retErr, rsp.Interface())
+		if err != nil {
+			mlog.Error(head, "rsp:%v, error:%v, reterr:%v", rsp.Interface(), err, retErr)
 		} else {
-			mlog.Debug(head, "rsp:%v", rsp.Interface())
+			mlog.Debug(head, "rsp:%v, reterr:%v", rsp.Interface(), retErr)
 		}
 	}
 }

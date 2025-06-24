@@ -8,6 +8,7 @@ import (
 	"poker_server/library/mlog"
 	"poker_server/library/uerror"
 	"poker_server/library/util"
+	"sync/atomic"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -43,6 +44,10 @@ func Close() error {
 
 func GetSelf() *pb.Node {
 	return core.GetNode()
+}
+
+func GetEnvType() pb.EnvType {
+	return core.GetEnvType()
 }
 
 // 跨服务发消息
@@ -91,7 +96,6 @@ func RegisterReplyHandler(f func(*pb.Head, []byte)) error {
 
 // 默认内网消息处理器
 func DefaultSendHandler(head *pb.Head, buf []byte) {
-	mlog.Debugf("收到Nats send数据包 head:%v, body:%d", head, len(buf))
 	head.ActorName = head.Dst.ActorName
 	head.FuncName = head.Dst.FuncName
 	head.ActorId = head.Dst.ActorId
@@ -102,7 +106,6 @@ func DefaultSendHandler(head *pb.Head, buf []byte) {
 
 // 默认内网消息处理器
 func DefaultReplyHandler(head *pb.Head, buf []byte) {
-	mlog.Debugf("收到Nats rpc数据包 head:%v, body:%d", head, len(buf))
 	head.ActorName = head.Dst.ActorName
 	head.FuncName = head.Dst.FuncName
 	head.ActorId = head.Dst.ActorId
@@ -113,7 +116,6 @@ func DefaultReplyHandler(head *pb.Head, buf []byte) {
 
 // 默认内网广播消息处理器
 func DefaultBroadcastHandler(head *pb.Head, buf []byte) {
-	mlog.Debugf("收到Nats broadcast数据包 head:%v, body:%d", head, len(buf))
 	head.ActorName = head.Dst.ActorName
 	head.FuncName = head.Dst.FuncName
 	head.ActorId = head.Dst.ActorId
@@ -139,6 +141,10 @@ func SendResponse(head *pb.Head, rsp proto.Message) error {
 		return uerror.New(1, pb.ErrorCode_PARAM_INVALID, "head is nil, head:%v", head)
 	}
 	return core.Send(head, rsp)
+}
+
+func StopAutoSendToClient(head *pb.Head) {
+	atomic.AddInt32(&head.Reference, 1)
 }
 
 func NewSrcRouter(rt pb.RouterType, id uint64, fs ...string) *pb.NodeRouter {
@@ -251,6 +257,16 @@ func SwapToGate(head *pb.Head, id uint64, fs ...string) *pb.Head {
 	head.Dst, head.Src = head.Src, head.Dst
 	head.Dst.NodeType = pb.NodeType_NodeTypeGate
 	head.Dst.RouterType = pb.RouterType_RouterTypeUid
+	head.Dst.ActorId = id
+	head.Dst.ActorName = util.Index[string](fs, 0, "")
+	head.Dst.FuncName = util.Index[string](fs, 1, "")
+	return head
+}
+
+func SwapToMatch(head *pb.Head, id uint64, fs ...string) *pb.Head {
+	head.Dst, head.Src = head.Src, head.Dst
+	head.Dst.NodeType = pb.NodeType_NodeTypeMatch
+	head.Dst.RouterType = pb.RouterType_RouterTypeDataType
 	head.Dst.ActorId = id
 	head.Dst.ActorName = util.Index[string](fs, 0, "")
 	head.Dst.FuncName = util.Index[string](fs, 1, "")

@@ -8,24 +8,25 @@ import (
 	"poker_server/library/timer"
 	"poker_server/library/uerror"
 	"reflect"
+	"sync/atomic"
 	"time"
 )
 
 type ActorPool struct {
+	name     string
 	id       uint64
 	poolSize int
 	pool     []*async.Async
 	rval     reflect.Value
-	name     string
 	funcs    map[string]*FuncInfo
 }
 
 func (d *ActorPool) GetId() uint64 {
-	return d.id
+	return atomic.LoadUint64(&d.id)
 }
 
 func (d *ActorPool) SetId(id uint64) {
-	d.id = id
+	atomic.StoreUint64(&d.id, id)
 }
 
 func (d *ActorPool) Start() {
@@ -35,7 +36,7 @@ func (d *ActorPool) Start() {
 }
 
 func (d *ActorPool) Stop() {
-	d.id = 0
+	atomic.StoreUint64(&d.id, 0)
 	for _, async := range d.pool {
 		async.Stop()
 	}

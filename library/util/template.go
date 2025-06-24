@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"poker_server/common/pb"
 	"poker_server/library/uerror"
+	"reflect"
 	"regexp"
 	"sync"
 	"time"
@@ -85,4 +86,13 @@ func Save(ppath, filename string, buf []byte) error {
 		return uerror.New(1, pb.ErrorCode_WRITE_FAIELD, "filename: %s, error: %v", fileName, err)
 	}
 	return nil
+}
+
+func SliceIsset[T any](dst T, src []T) bool {
+	for i := range src {
+		if reflect.DeepEqual(src[i], dst) {
+			return true
+		}
+	}
+	return false
 }

@@ -43,10 +43,7 @@ common:
   config_topic: poker/config
   router_expire: 90000
   discovery_expire: 20
-  secret_key: gH7%kL9!qW2#sD4*FpV6&nZ8@xJ0^yT1
-
-php:
-  user_info_url: http://192.168.50.250:8000/mg/callback/ACE/getUserInfo
+  secret_key: gH7%kL9!xavd123EQW@xJ0^yT1
 
 client:
   1:
