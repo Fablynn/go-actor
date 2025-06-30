@@ -93,7 +93,7 @@ head := framework.NewHead(dst, pb.RouterType, uint64(actorId), actorName, FuncNa
 actor.SendMsg(head, req, rsp)
 ```
 
-时间轮毫秒级定时器，有效降低golang自带四叉树最小堆计时器高度
+毫秒级定时器-时间轮，可有效降低golang自带四叉树最小堆计时器高度
 
 ```
 m.RegisterTimer(&pb.Head{
@@ -112,3 +112,28 @@ ret.SetId(uint64(pb.DataType_DataTypeReport))
 ret.Start()
 actor.Register(ret)
 ```
+
+
+
+## **扩展工具**
+
+### pbtool:
+
+通过标签可自动生成pb对象，redis服务序列化、反序列化工具类
+
+```
+//@pbtool:[string|hash]|db_name|fieldName:fieldType|#备注
+// 示例注释规则 @pbtool 表示protobuf对象参与注释解析 redis工具模板
+// [string|hash] 表示protobuf对象序列化存储的两种模板
+// db_name 指定存储db
+// fieldName1:fieldType1,fieldName2:fieldType2 索引字段类型
+// #备注 标签
+
+@pbtool:string|poker|generator|#房间id生成器
+@pbtool:hash|poker|user_info|uid@uint64|#玩家永久缓存信息
+@pbtool:hash|poker|texas|RoomId@uint64|#德州游戏房间信息数据
+```
+
+### cfgtool:
+
+解析文件table对象为指定pb文件
