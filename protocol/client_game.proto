@@ -1,0 +1,57 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "packet.proto";
+import "player_data.proto";
+import "global_enum_cfg.proto";
+
+message GetBagReq {
+}
+
+message GetBagRsp {
+  RspHead         head = 1;  //请求结果信息
+  repeated PbItem list = 2;
+}
+
+message RewardReq {
+  repeated Reward reward_list = 1;  // 奖励列表
+}
+
+message RewardRsp {
+  RspHead         head        = 1;  // 响应头
+  repeated Reward reward_list = 2;  // 奖励列表
+}
+
+message ConsumeReq {
+  repeated Reward reward_list = 1;  // 奖励列表
+}
+
+message ConsumeRsp {
+  RspHead         head        = 1;  // 响应头
+  repeated Reward reward_list = 2;  // 奖励列表
+}
+
+message HttpRspHead {
+  int32  code    = 1;  // 响应码
+  string message = 2;  // 响应消息
+}
+
+message HttpPlayerInfoRsp {
+  HttpRspHead resp_msg  = 1;  // 响应头
+  PlayerInfo  resp_data = 2;  // 玩家信息
+}
+
+message QueryPlayerDataReq {
+  uint64 uid = 1;
+}
+
+message QueryPlayerDataRsp {
+  RspHead        head       = 1;  //请求结果信息
+  PlayerDataBase data       = 2;
+  MatchType      match_type = 3;
+  GameType       game_type  = 4;
+  RoomType       room_type  = 5;
+  CoinType       coin_type  = 6;
+}

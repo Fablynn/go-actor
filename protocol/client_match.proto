@@ -1,0 +1,27 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "packet.proto";
+import "client_room.proto";
+
+// 获取房间列表请求
+message TexasRoomListReq {
+  int32 game_type = 1;  // 游戏类型
+  int32 coin_type = 2;  // 币种类型
+}
+
+message TexasRoomListRsp {
+  RspHead                head      = 1;
+  repeated TexasRoomInfo room_list = 2;  // 房间列表
+}
+
+message HasRoomReq {
+  uint64 room_id = 1;
+}
+
+message HasRoomRsp {
+  RspHead head     = 1;
+  bool    is_exist = 2;
+}
