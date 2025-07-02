@@ -13,7 +13,7 @@ OUTPUT=./output
 
 ## 需要编译的服务
 TARGET_ENV=local develop release pre
-TARGET=gate db builder match room game gm #client
+TARGET=gate client  # db builder match room game gm
 STOP_TARGET=gate gm builder match room game db
 LINUX=$(TARGET:%=%_linux)
 BUILD=$(TARGET:%=%_build)

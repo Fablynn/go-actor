@@ -12,11 +12,6 @@ import (
 func Init(cfg *yaml.ServerConfig) error {
 	api := http.NewServeMux()
 	api.HandleFunc("/api/room/token", genToken)
-	api.HandleFunc("/api/room/list", texasRoomList)
-	api.HandleFunc("/api/game/buyin", buyInApi)
-	api.HandleFunc("/api/room/sng/list", sngRoomList)
-	api.HandleFunc("/api/room/rummy/list", rummyRoomList)
-	api.HandleFunc("/api/game/reconnect", gameReconnect)
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.HttpPort), api)
 }
 
