@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"poker_server/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/internal/base"
 	"sort"
 	"strings"
 )

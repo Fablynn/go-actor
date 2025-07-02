@@ -2,9 +2,9 @@ package yaml
 
 import (
 	"fmt"
+	"go-actor/common/pb"
+	"go-actor/library/uerror"
 	"os"
-	"poker_server/common/pb"
-	"poker_server/library/uerror"
 	"strings"
 
 	"gopkg.in/yaml.v3"

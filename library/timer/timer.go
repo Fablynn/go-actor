@@ -1,10 +1,10 @@
 package timer
 
 import (
-	"poker_server/common/pb"
-	"poker_server/library/async"
-	"poker_server/library/mlog"
-	"poker_server/library/uerror"
+	"go-actor/common/pb"
+	"go-actor/library/async"
+	"go-actor/library/mlog"
+	"go-actor/library/uerror"
 	"sort"
 	"sync/atomic"
 	"time"

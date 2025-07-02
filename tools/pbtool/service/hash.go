@@ -3,11 +3,11 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"go-actor/tools/pbtool/domain"
+	"go-actor/tools/pbtool/internal/base"
+	"go-actor/tools/pbtool/internal/manager"
+	"go-actor/tools/pbtool/internal/templ"
 	"path"
-	"poker_server/tools/pbtool/domain"
-	"poker_server/tools/pbtool/internal/base"
-	"poker_server/tools/pbtool/internal/manager"
-	"poker_server/tools/pbtool/internal/templ"
 )
 
 func GenHash(buf *bytes.Buffer) error {

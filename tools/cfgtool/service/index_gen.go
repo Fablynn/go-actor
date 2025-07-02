@@ -2,14 +2,14 @@ package service
 
 import (
 	"bytes"
-	"poker_server/library/uerror"
-	"poker_server/tools/cfgtool/internal/manager"
-	"poker_server/tools/cfgtool/internal/templ"
+	"go-actor/library/uerror"
+	"go-actor/tools/cfgtool/internal/manager"
+	"go-actor/tools/cfgtool/internal/templ"
 
 	"sort"
 
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
 )
 
 type IndexInfo struct {

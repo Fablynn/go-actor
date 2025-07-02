@@ -2,10 +2,10 @@ package test
 
 import (
 	"bytes"
-	"poker_server/tools/pbtool/domain"
-	"poker_server/tools/pbtool/internal/base"
-	"poker_server/tools/pbtool/internal/parse"
-	"poker_server/tools/pbtool/service"
+	"go-actor/tools/pbtool/domain"
+	"go-actor/tools/pbtool/internal/base"
+	"go-actor/tools/pbtool/internal/parse"
+	"go-actor/tools/pbtool/service"
 	"testing"
 )
 

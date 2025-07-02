@@ -1,8 +1,8 @@
 package token
 
 import (
-	"poker_server/common/pb"
-	"poker_server/library/uerror"
+	"go-actor/common/pb"
+	"go-actor/library/uerror"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -24,7 +24,7 @@ type Token struct {
 
 func GenToken(tt *Token) (string, error) {
 	tt.RegisteredClaims = jwt.RegisteredClaims{
-		Issuer:    "poker_server",                                          // 签发者
+		Issuer:    "go-actor",                                              // 签发者
 		IssuedAt:  jwt.NewNumericDate(time.Now()),                          // 签发时间
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(1500000 * time.Hour)), // 过期时间
 	}

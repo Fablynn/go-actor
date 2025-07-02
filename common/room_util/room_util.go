@@ -1,6 +1,6 @@
 package room_util
 
-import "poker_server/common/pb"
+import "go-actor/common/pb"
 
 func TexasRoomIdTo(roomId uint64) (pb.MatchType, pb.GameType, pb.CoinType) {
 	return pb.MatchType((roomId >> 40) & 0xFF), pb.GameType((roomId >> 32) & 0xFF), pb.CoinType((roomId >> 24) & 0xFF)

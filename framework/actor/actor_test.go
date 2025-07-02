@@ -1,7 +1,7 @@
 package actor
 
 import (
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 	"reflect"
 	"testing"
 )

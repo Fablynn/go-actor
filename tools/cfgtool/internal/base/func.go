@@ -2,7 +2,7 @@ package base
 
 import (
 	"fmt"
-	"poker_server/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/domain"
 	"strings"
 
 	"github.com/spf13/cast"

@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"poker_server/tools/cfgtool/internal/base"
-	"poker_server/tools/cfgtool/internal/manager"
+	"go-actor/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/internal/manager"
 	"strings"
 
 	"github.com/iancoleman/strcase"

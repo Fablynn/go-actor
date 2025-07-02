@@ -2,12 +2,12 @@ package manager
 
 import (
 	"encoding/json"
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/framework/actor"
-	"poker_server/library/async"
-	"poker_server/library/mlog"
-	"poker_server/server/client/internal/player"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/framework/actor"
+	"go-actor/library/async"
+	"go-actor/library/mlog"
+	"go-actor/server/client/internal/player"
 	"reflect"
 
 	"github.com/golang/protobuf/proto"

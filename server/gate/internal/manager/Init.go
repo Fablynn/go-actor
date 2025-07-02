@@ -1,14 +1,14 @@
 package manager
 
 import (
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/framework"
-	"poker_server/framework/actor"
-	"poker_server/framework/token"
-	"poker_server/library/async"
-	"poker_server/library/mlog"
-	"poker_server/server/gate/internal/http"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/framework"
+	"go-actor/framework/actor"
+	"go-actor/framework/token"
+	"go-actor/library/async"
+	"go-actor/library/mlog"
+	"go-actor/server/gate/internal/http"
 )
 
 var (

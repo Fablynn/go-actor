@@ -2,10 +2,10 @@ package router
 
 import (
 	"fmt"
-	"poker_server/common/pb"
-	"poker_server/framework/domain"
-	"poker_server/library/async"
-	"poker_server/library/mlog"
+	"go-actor/common/pb"
+	"go-actor/framework/domain"
+	"go-actor/library/async"
+	"go-actor/library/mlog"
 	"sync"
 	"time"
 )

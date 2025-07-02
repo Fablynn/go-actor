@@ -1,7 +1,7 @@
 package router
 
 import (
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 	"sync/atomic"
 	"time"
 )

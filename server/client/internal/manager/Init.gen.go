@@ -5,7 +5,7 @@
 package manager
 
 import (
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -19,10 +19,14 @@ func init() {
 	cmds[16777217] = func() proto.Message { return &pb.GateLoginResponse{} }
 	cmds[33554432] = func() proto.Message { return &pb.GateHeartRequest{} }
 	cmds[33554433] = func() proto.Message { return &pb.GateHeartResponse{} }
+	cmds[33554434] = func() proto.Message { return &pb.GetBagReq{} }
+	cmds[33554435] = func() proto.Message { return &pb.GetBagRsp{} }
 	cmds[50331648] = func() proto.Message { return &pb.TexasRoomListReq{} }
 	cmds[50331649] = func() proto.Message { return &pb.TexasRoomListRsp{} }
 	cmds[50331650] = func() proto.Message { return &pb.RummyRoomListReq{} }
 	cmds[50331651] = func() proto.Message { return &pb.RummyRoomListRsp{} }
+	cmds[50331652] = func() proto.Message { return &pb.SngJoinRoomReq{} }
+	cmds[50331653] = func() proto.Message { return &pb.SngJoinRoomRsp{} }
 	cmds[67108864] = func() proto.Message { return &pb.TexasEventNotify{} }
 	cmds[67108866] = func() proto.Message { return &pb.TexasJoinRoomReq{} }
 	cmds[67108867] = func() proto.Message { return &pb.TexasJoinRoomRsp{} }
@@ -55,6 +59,8 @@ func init() {
 	cmds[67108905] = func() proto.Message { return &pb.RummyGetOutCardsRsp{} }
 	cmds[67108906] = func() proto.Message { return &pb.TexasStatisticsReq{} }
 	cmds[67108907] = func() proto.Message { return &pb.TexasStatisticsRsp{} }
+	cmds[67108908] = func() proto.Message { return &pb.SngRankReq{} }
+	cmds[67108909] = func() proto.Message { return &pb.SngRankRsp{} }
 	cmds[67108912] = func() proto.Message { return &pb.RummyChangeRoomReq{} }
 	cmds[67108913] = func() proto.Message { return &pb.RummyChangeRoomRsp{} }
 	cmds[83886080] = func() proto.Message { return &pb.TexasGameReportReq{} }

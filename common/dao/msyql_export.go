@@ -1,9 +1,9 @@
 package dao
 
 import (
-	"poker_server/common/dao/internal/manager"
-	"poker_server/common/dao/internal/mysql"
-	"poker_server/common/yaml"
+	"go-actor/common/dao/internal/manager"
+	"go-actor/common/dao/internal/mysql"
+	"go-actor/common/yaml"
 )
 
 func RegisterMysqlTable(dbname string, tables ...interface{}) {

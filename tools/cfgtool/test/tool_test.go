@@ -2,12 +2,12 @@ package test
 
 import (
 	"bytes"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/internal/manager"
+	"go-actor/tools/cfgtool/internal/parser"
+	"go-actor/tools/cfgtool/service"
 	"path"
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
-	"poker_server/tools/cfgtool/internal/manager"
-	"poker_server/tools/cfgtool/internal/parser"
-	"poker_server/tools/cfgtool/service"
 	"testing"
 )
 

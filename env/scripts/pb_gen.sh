@@ -2,7 +2,7 @@
 
 GO_BIN="$(go env GOPATH)/bin"
 SYSTEM=$(go env GOOS)
-PROTO_PATH=../poker_protocol
+PROTO_PATH=./protocol
 PB_GO_PATH=./common/pb
 
 rm -rf ${PB_GO_PATH} && mkdir -p ${PB_GO_PATH}

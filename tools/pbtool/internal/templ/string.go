@@ -15,9 +15,9 @@ package {{$pkg}}
 
 import (
 	"fmt"
-	"poker_server/common/dao/internal/manager"
-	"poker_server/common/pb"
-	"poker_server/library/uerror"
+	"go-actor/common/dao/internal/manager"
+	"go-actor/common/pb"
+	"go-actor/library/uerror"
 	"time"
 
 	"github.com/golang/protobuf/proto"

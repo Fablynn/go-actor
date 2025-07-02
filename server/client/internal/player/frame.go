@@ -2,10 +2,10 @@ package player
 
 import (
 	"encoding/binary"
-	"poker_server/common/config/repository/router_config"
-	"poker_server/common/pb"
-	"poker_server/framework"
-	"poker_server/library/uerror"
+	"go-actor/common/config/repository/router_config"
+	"go-actor/common/pb"
+	"go-actor/framework"
+	"go-actor/library/uerror"
 )
 
 type WsPacket struct {

@@ -1,13 +1,13 @@
 package framework
 
 import (
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/framework/actor"
-	"poker_server/framework/internal/service"
-	"poker_server/library/mlog"
-	"poker_server/library/uerror"
-	"poker_server/library/util"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/framework/actor"
+	"go-actor/framework/internal/service"
+	"go-actor/library/mlog"
+	"go-actor/library/uerror"
+	"go-actor/library/util"
 	"sync/atomic"
 
 	"github.com/golang/protobuf/proto"

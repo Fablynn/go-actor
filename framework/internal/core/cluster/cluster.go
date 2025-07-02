@@ -1,9 +1,9 @@
 package cluster
 
 import (
-	"poker_server/common/pb"
-	"poker_server/library/mlog"
-	"poker_server/library/random"
+	"go-actor/common/pb"
+	"go-actor/library/mlog"
+	"go-actor/library/random"
 	"sync"
 )
 

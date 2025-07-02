@@ -2,9 +2,9 @@ package mysql
 
 import (
 	"fmt"
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/library/uerror"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/library/uerror"
 	"sync/atomic"
 
 	_ "github.com/go-sql-driver/mysql"

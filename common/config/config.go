@@ -2,12 +2,12 @@ package config
 
 import (
 	"fmt"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/library/uerror"
 	"io/ioutil"
 	"os"
 	"path"
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/library/uerror"
 )
 
 var (

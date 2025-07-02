@@ -1,11 +1,11 @@
 package test
 
 import (
-	"poker_server/common/config"
-	"poker_server/common/dao"
-	"poker_server/common/dao/domain"
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
+	"go-actor/common/config"
+	"go-actor/common/dao"
+	"go-actor/common/dao/domain"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"

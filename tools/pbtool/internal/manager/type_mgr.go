@@ -1,6 +1,6 @@
 package manager
 
-import "poker_server/tools/pbtool/internal/base"
+import "go-actor/tools/pbtool/internal/base"
 
 var (
 	stringMgr = make(map[string]*base.String)

@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/manager"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/manager"
 )
 
 func parseReference() {

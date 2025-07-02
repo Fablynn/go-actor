@@ -2,8 +2,8 @@ package uerror
 
 import (
 	"fmt"
+	"go-actor/common/pb"
 	"path"
-	"poker_server/common/pb"
 	"runtime"
 )
 

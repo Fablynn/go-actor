@@ -28,12 +28,12 @@ mongodb:
         host: localhost:17017
 
 etcd:
-  topic: poker_server/etcd
+  topic: go-actor/etcd
   endpoints:
     - http://localhost:12379
 
 nats:
-  topic: poker_server/nats
+  topic: go-actor/nats
   endpoints: localhost:14222
 
 common:

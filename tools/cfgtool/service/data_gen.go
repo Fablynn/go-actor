@@ -1,12 +1,12 @@
 package service
 
 import (
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
-	"poker_server/tools/cfgtool/internal/manager"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/internal/manager"
 	"strings"
 
-	"poker_server/library/uerror"
+	"go-actor/library/uerror"
 
 	"github.com/golang/protobuf/jsonpb"
 )

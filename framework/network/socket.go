@@ -2,9 +2,9 @@ package network
 
 import (
 	"encoding/binary"
-	"poker_server/common/pb"
-	"poker_server/framework/domain"
-	"poker_server/library/uerror"
+	"go-actor/common/pb"
+	"go-actor/framework/domain"
+	"go-actor/library/uerror"
 	"time"
 
 	"github.com/gorilla/websocket"

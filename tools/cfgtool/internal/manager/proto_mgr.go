@@ -2,9 +2,9 @@ package manager
 
 import (
 	"bytes"
-	"poker_server/library/uerror"
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
+	"go-actor/library/uerror"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"

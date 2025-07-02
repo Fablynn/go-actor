@@ -8,7 +8,7 @@ const httpKitTpl = `
 package {{.Pkg}}
 
 import (
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 
 	"github.com/golang/protobuf/proto"
 )

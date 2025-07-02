@@ -3,15 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"poker_server/common/config"
-	"poker_server/common/dao"
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/framework"
-	"poker_server/library/async"
-	"poker_server/library/mlog"
-	"poker_server/library/signal"
-	"poker_server/server/gate/internal/manager"
+	"go-actor/common/config"
+	"go-actor/common/dao"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/framework"
+	"go-actor/library/async"
+	"go-actor/library/mlog"
+	"go-actor/library/signal"
+	"go-actor/server/gate/internal/manager"
 )
 
 func main() {

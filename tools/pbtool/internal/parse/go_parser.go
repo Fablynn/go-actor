@@ -1,14 +1,14 @@
 package parse
 
 import (
+	"go-actor/common/pb"
+	"go-actor/library/uerror"
+	"go-actor/tools/pbtool/domain"
+	"go-actor/tools/pbtool/internal/base"
+	"go-actor/tools/pbtool/internal/manager"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"poker_server/common/pb"
-	"poker_server/library/uerror"
-	"poker_server/tools/pbtool/domain"
-	"poker_server/tools/pbtool/internal/base"
-	"poker_server/tools/pbtool/internal/manager"
 	"strings"
 
 	"github.com/iancoleman/strcase"

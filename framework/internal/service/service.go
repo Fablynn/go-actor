@@ -1,16 +1,16 @@
 package service
 
 import (
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/framework/domain"
-	"poker_server/framework/internal/core/bus"
-	"poker_server/framework/internal/core/cluster"
-	"poker_server/framework/internal/core/discovery"
-	"poker_server/framework/internal/core/router"
-	"poker_server/library/encode"
-	"poker_server/library/mlog"
-	"poker_server/library/uerror"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/framework/domain"
+	"go-actor/framework/internal/core/bus"
+	"go-actor/framework/internal/core/cluster"
+	"go-actor/framework/internal/core/discovery"
+	"go-actor/framework/internal/core/router"
+	"go-actor/library/encode"
+	"go-actor/library/mlog"
+	"go-actor/library/uerror"
 	"strings"
 	"sync/atomic"
 

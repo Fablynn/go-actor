@@ -2,7 +2,7 @@ package util
 
 import (
 	"github.com/sony/sonyflake"
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 	"time"
 )
 

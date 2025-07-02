@@ -2,7 +2,7 @@ package filter
 
 import (
 	"fmt"
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 )
 
 var (

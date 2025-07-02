@@ -2,10 +2,10 @@ package manager
 
 import (
 	"context"
-	"poker_server/common/dao/internal/redis"
-	"poker_server/common/pb"
-	"poker_server/common/yaml"
-	"poker_server/library/uerror"
+	"go-actor/common/dao/internal/redis"
+	"go-actor/common/pb"
+	"go-actor/common/yaml"
+	"go-actor/library/uerror"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"

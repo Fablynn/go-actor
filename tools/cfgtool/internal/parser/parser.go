@@ -2,11 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"go-actor/library/uerror"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/internal/manager"
 	"path"
-	"poker_server/library/uerror"
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
-	"poker_server/tools/cfgtool/internal/manager"
 	"strings"
 
 	"github.com/xuri/excelize/v2"

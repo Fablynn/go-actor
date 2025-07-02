@@ -1,12 +1,12 @@
 package actor
 
 import (
-	"poker_server/common/pb"
-	"poker_server/framework/domain"
-	"poker_server/library/encode"
-	"poker_server/library/mlog"
-	"poker_server/library/uerror"
-	"poker_server/library/util"
+	"go-actor/common/pb"
+	"go-actor/framework/domain"
+	"go-actor/library/encode"
+	"go-actor/library/mlog"
+	"go-actor/library/uerror"
+	"go-actor/library/util"
 	"reflect"
 	"sync/atomic"
 

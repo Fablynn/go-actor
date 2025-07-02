@@ -1,0 +1,49 @@
+syntax = "proto3";
+package poker;
+
+option go_package = "./pb";
+
+// 错误码
+enum ErrorCode {
+  SUCCESS                 = 0;   // 成功
+  UNKNOWN                 = 1;   // 未知错误
+  FAILED                  = 2;   // 失败
+  OPEN_FILE_FAILED        = 3;   // 打开文件失败
+  PARSE_FAILED            = 4;   // 解析失败
+  CONFIG_NOT_FOUND        = 5;   // 配置文件不存在
+  CONNECT_FAILED          = 6;   // 网络连接失败
+  PING_FAILED             = 7;   // ping失败
+  CLIENT_NOT_FOUND        = 8;   // 客户端未找到
+  FUNC_NOT_FOUND          = 9;   // 函数未找到
+  ACTOR_ID_NOT_FOUND      = 10;  // Actor ID未找到
+  SEND_TYPE_NOT_SUPPORTED = 11;  // 发送类型不支持
+  ACTOR_NOT_SUPPORTED     = 12;  // Actor未找到
+  SUBSCRIBE_FAILED        = 13;  // 订阅失败
+  MARSHAL_FAILED          = 14;  // 序列化失败
+  UNMARSHAL_FAILED        = 15;  // 反序列化失败
+  REQUEST_FAIELD          = 16;  // 请求失败
+  PARAM_INVALID           = 17;  // 参数检查失败
+  NODE_NOT_FOUND          = 18;  // 节点未找到
+  MAX_SIZE_LIMIT          = 19;  // 超过最大限制
+  MIN_SIZE_LIMIT          = 20;  // 小于最小限制
+  READ_FAIELD             = 21;  // 读取失败
+  WRITE_FAIELD            = 22;  // 写入失败
+  TYPE_ASSERT_FAILED      = 23;  // 类型转换失败
+  CMD_NOT_FOUND           = 24;  // 命令未找到
+  TIME_OUT                = 25;  // 超时
+  SYSTEM_CALL_FAILED      = 26;  // 系统调用失败
+  TYPE_NOT_SUPPORTED      = 27;  // 类型不支持
+  PLAYER_NOT_FOUND        = 28;  // 玩家未找到
+  NIL_POINTER             = 29;  // 空指针异常
+  MYSQL_READ_FAILED       = 30;  // mysql读数据失败
+  MYSQL_SAVE_FAILED       = 31;  // mysql写数据失败
+
+  // game错误码
+  GAME_PROP_NOT_ENOUGH      = 500;  // 游戏道具不足
+  GAME_PLAYER_NOT_LOGIN     = 501;  // 玩家未登录
+  GAME_PLAYER_IN_OTHER_GAME = 502;  // 玩家已在其他游戏中
+  GAME_PLAYER_NOT_IN_ROOM   = 503;  // 玩家未在游戏中
+
+  // db错误码
+  DB_TEXAS_GAME_DATA_NOT_FOUND = 2000;  // 数据不存在
+}

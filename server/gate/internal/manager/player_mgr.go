@@ -2,12 +2,12 @@ package manager
 
 import (
 	"fmt"
+	"go-actor/common/pb"
+	"go-actor/framework/actor"
+	"go-actor/library/async"
+	"go-actor/library/mlog"
+	"go-actor/server/gate/internal/player"
 	"net/http"
-	"poker_server/common/pb"
-	"poker_server/framework/actor"
-	"poker_server/library/async"
-	"poker_server/library/mlog"
-	"poker_server/server/gate/internal/player"
 	"reflect"
 	"sync/atomic"
 

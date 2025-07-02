@@ -3,10 +3,10 @@ package main
 import (
 	"bytes"
 	"flag"
-	"poker_server/tools/pbtool/domain"
-	"poker_server/tools/pbtool/internal/base"
-	"poker_server/tools/pbtool/internal/parse"
-	"poker_server/tools/pbtool/service"
+	"go-actor/tools/pbtool/domain"
+	"go-actor/tools/pbtool/internal/base"
+	"go-actor/tools/pbtool/internal/parse"
+	"go-actor/tools/pbtool/service"
 )
 
 // pbtool工具用于生成dao/repository/redis/目录下的代码

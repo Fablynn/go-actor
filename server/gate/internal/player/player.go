@@ -1,13 +1,13 @@
 package player
 
 import (
-	"poker_server/common/pb"
-	"poker_server/framework"
-	"poker_server/framework/actor"
-	"poker_server/framework/domain"
-	"poker_server/framework/network"
-	"poker_server/framework/token"
-	"poker_server/library/mlog"
+	"go-actor/common/pb"
+	"go-actor/framework"
+	"go-actor/framework/actor"
+	"go-actor/framework/domain"
+	"go-actor/framework/network"
+	"go-actor/framework/token"
+	"go-actor/library/mlog"
 	"sync/atomic"
 	"time"
 

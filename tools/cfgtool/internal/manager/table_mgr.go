@@ -1,8 +1,8 @@
 package manager
 
 import (
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
 	"strings"
 )
 

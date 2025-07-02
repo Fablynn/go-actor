@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"poker_server/common/pb"
+	"go-actor/common/pb"
 	"time"
 
 	"github.com/golang/protobuf/proto"

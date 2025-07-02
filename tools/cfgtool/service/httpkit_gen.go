@@ -2,11 +2,11 @@ package service
 
 import (
 	"bytes"
+	"go-actor/tools/cfgtool/domain"
+	"go-actor/tools/cfgtool/internal/base"
+	"go-actor/tools/cfgtool/internal/manager"
+	"go-actor/tools/cfgtool/internal/templ"
 	"path/filepath"
-	"poker_server/tools/cfgtool/domain"
-	"poker_server/tools/cfgtool/internal/base"
-	"poker_server/tools/cfgtool/internal/manager"
-	"poker_server/tools/cfgtool/internal/templ"
 )
 
 type HttpKit struct {
