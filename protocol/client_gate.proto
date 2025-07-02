@@ -1,0 +1,39 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "packet.proto";
+import "player_data.proto";
+
+// 登录协议
+message GateLoginRequest {
+  string     token       = 1;  // token
+  PlayerData player_data = 2;  // 玩家数据
+}
+
+message GateLoginResponse {
+  RspHead head = 1;  // 协议头
+}
+
+// 登出协议
+message LogoutRequest {
+  uint64 uid = 1;  // 玩家ID
+}
+
+message LogoutResopnse {
+  RspHead head = 1;  // 协议头
+}
+
+// 心跳协议
+message GateHeartRequest {
+  int64 utc        = 1;  // UTC时区
+  int64 begin_time = 2;  // 请求时间
+}
+
+message GateHeartResponse {
+  RspHead head       = 1;  // 协议头
+  int64   utc        = 2;  // UTC时区
+  int64   begin_time = 3;  // 请求时间
+  int64   end_time   = 4;  // 响应时间
+}

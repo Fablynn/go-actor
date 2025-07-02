@@ -1,0 +1,57 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "global_enum_cfg.proto";
+
+// 道具配置
+message PbItem {
+  uint32 prop_id = 1;  // 道具id
+  int64  count   = 2;  // 数量
+}
+
+message PlayerInfo {
+  uint64 uid       = 1;  // 玩家ID
+  string nick_name = 2;  // 玩家名称
+  string avatar    = 3;  // 玩家头像
+}
+
+message PlayerLoginInfo {
+  uint32 last_login_time  = 1;  // 上次登录时间
+  uint32 last_logout_time = 2;  // 上次登出时间
+  int32  now_login_time   = 3;  // 当前登录时间
+}
+
+message PlayerRoomInfo {
+  GameType game_type = 1;  // 游戏类型
+  uint64   room_id   = 2;  // 房间ID
+}
+
+// 玩家信息
+message PlayerDataBase {
+  PlayerInfo      player_info = 1;  // 玩家信息
+  int64           create_time = 2;  // 创建时间
+  PlayerLoginInfo login_info  = 3;  // 登录信息
+  PlayerRoomInfo  room_info   = 4;  // 房间信息
+}
+
+// 背包模块
+message PlayerDataBag {
+  map<uint32, PbItem> items = 1;  // 道具列表，key为道具id，value为道具信息
+}
+
+// 玩家所有模块数据
+message PlayerData {
+  uint64         id      = 1;  // @inject_tag: xorm:"bigint autoincr pk"
+  uint64         uid     = 2;  // @inject_tag: xorm:"bigint index notnull comment('玩家ID')"
+  uint64         version = 3;  // @inject_tag: xorm:"version"
+  PlayerDataBase base    = 7;  // @inject_tag: xorm:"blob comment('玩家信息')"
+  PlayerDataBag  bag     = 8;  // @inject_tag: xorm:"blob comment('背包系统')"
+}
+
+enum PlayerDataType {
+  PLAYER_DATA_NONE = 0;  // 无效数据
+  PLAYER_DATA_BASE = 1;  // 玩家基础数据
+  PLAYER_DATA_BAG  = 2;  // 玩家背包数据
+}

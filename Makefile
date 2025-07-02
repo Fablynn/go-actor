@@ -46,7 +46,7 @@ $(BUILD): %_build: %
 #=================================proto转go代码========================================
 config:
 	@echo "gen enum config code..."
-	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH}/router.xlsx -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
+	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
 	@echo "gen config code..."
 	@rm -rf ${CFG_CODE_PATH}
 	@make pb
