@@ -219,8 +219,8 @@ func NewMatchRouter(id uint64, fs ...string) *pb.NodeRouter {
 	}
 }
 
-func NewHead(dst *pb.NodeRouter, rt pb.RouterType, id uint64, fs ...string) *pb.Head {
-	return &pb.Head{Dst: dst, Src: NewSrcRouter(rt, id, fs...)}
+func NewHead(dst *pb.NodeRouter, uid uint64, rt pb.RouterType, id uint64, fs ...string) *pb.Head {
+	return &pb.Head{Dst: dst, Src: NewSrcRouter(rt, id, fs...), Uid: uid}
 }
 
 func SwapToDb(head *pb.Head, id uint64, fs ...string) *pb.Head {

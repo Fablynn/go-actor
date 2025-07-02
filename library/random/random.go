@@ -1,11 +1,17 @@
 package random
 
 import (
+	crand "crypto/rand"
+	"encoding/binary"
+	"math/big"
 	"math/rand"
 	"time"
 )
 
-var randObj = rand.New(rand.NewSource(time.Now().UnixNano()))
+var (
+	randObj = rand.New(rand.NewSource(time.Now().UnixNano()))
+	//rng     = NewSecureRNG()
+)
 
 // [0,n)
 func Intn(n int) int {
@@ -13,36 +19,32 @@ func Intn(n int) int {
 }
 
 // [0,n)
-func Uint32n(n uint32) uint32 {
-	return uint32(Intn(int(n)))
-}
-
-// [0,n)
 func Int32n(n int32) int32 {
 	return int32(Intn(int(n)))
 }
 
-// [0,n)
-func Int64n(n int64) int64 {
-	return randObj.Int63n(n)
+// SecureRNG 密码学安全 性能较差
+type SecureRNG struct{}
+
+func NewSecureRNG() *SecureRNG {
+	return &SecureRNG{}
 }
 
-// 取一个范围的随机数
-// [2, 5]
-func Uint32Part(min, max uint32) uint32 {
-	// [2, 5]
-	n := max - min + 1
-	return uint32(randObj.Int31n(int32(n))) + min
+// Uint64 made [0, 2^64-1) rand number
+func (r *SecureRNG) Uint64() (uint64, error) {
+	buf := make([]byte, 8)
+	if _, err := crand.Read(buf); err != nil {
+		return 0, err
+	}
+	return binary.BigEndian.Uint64(buf), nil
 }
 
-func Int64Part(min, max int64) int64 {
-	// [2, 5]
-	n := max - min + 1
-	return randObj.Int63n(n) + min
-}
-
-func Int32Part(min, max int32) int32 {
-	// [2, 5]
-	n := max - min + 1
-	return randObj.Int31n(n) + min
+// Range made [min, max) rand number
+func (r *SecureRNG) Range(max int64) (int64, error) {
+	bigMax := big.NewInt(max)
+	n, err := crand.Int(crand.Reader, bigMax)
+	if err != nil {
+		return 0, err
+	}
+	return n.Int64(), nil
 }

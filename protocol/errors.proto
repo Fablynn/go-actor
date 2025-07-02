@@ -46,4 +46,16 @@ enum ErrorCode {
 
   // db错误码
   DB_TEXAS_GAME_DATA_NOT_FOUND = 2000;  // 数据不存在
+
+  // 德州扑克错误码
+  TEXAS_ROOM_NOT_FOUND           = 10000;  // 德州房间未找到
+  TEXAS_PLAYER_NOT_IN_ROOM       = 10001;  // 德州玩家未找到
+  TEXAS_PLAYER_IN_GAME           = 10002;  // 德州玩家已在游戏中
+  TEXAS_ROOM_IS_FULL             = 10003;  // 德州房间已满
+  TEXAS_CHIPS_NOT_ENOUGH         = 10004;  // 德州筹码不足
+  TEXAS_PLAYER_SIT_DOWN_REPEATED = 10005;  // 德州玩家已坐下
+  TEXAS_CHAIR_HAS_OCCUPIED       = 10006;  // 德州座位已被占用
+  TEXAS_PLAYER_HAS_STAND_UP      = 10007;  // 德州玩家未坐下
+  TEXAS_PLAYER_HAS_ALL_IN        = 10008;  // 德州玩家已全下
+  TEXAS_PLAYER_HAS_FOLD          = 10009;  // 德州玩家已弃牌
 }

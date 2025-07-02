@@ -1,6 +1,24 @@
 # go-actor
 
-**这是一款分布式的golang游戏服务器框架 基于golang + actor model技术构建 它具备高性能、可伸缩、分布式、协程分组管理等特点。并且上手简单、易学**
+**这是一款分布式的golang游戏服务器框架**
+
+特性：
+
+- [x] 高性能
+
+- [x] 协程安全
+
+- [x] 跨服务同步、异步无感通信
+
+- [x] 毫秒级时间轮
+
+- [x] 多节点、uuid
+
+- [x] websocket协议和protobuf编码
+
+- [x] 高性能日志库mlog
+
+- [ ] 德州扑克游戏案例
 
 框架示意图：
 
@@ -44,8 +62,6 @@ make docker_run && make config && make start_all
 快速终止所有服务:
 make stop_all && make docker_stop
 ```
-
-
 
 ### 服务相关
 
