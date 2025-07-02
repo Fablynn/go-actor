@@ -8,6 +8,47 @@
 
 ## **快速开始**
 
+### 安装启动
+
+```
+安装最新protoc
+download for https://github.com/protocolbuffers/protobuf/releases
+protoc --version
+libprotoc 31.0
+
+安装golang语言 1.24.3+:
+https://go.dev/dl/
+
+安装protoc-gen-go
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+
+安装protoc-go-inject-tag
+go install github.com/favadi/protoc-go-inject-tag@latest
+
+cd go-actor/tools/protoc-gen-xorm
+go install
+
+查看安装：
+ls $(go env GOPATH)/bin
+protoc-gen-go  protoc-gen-xorm  protoc-go-inject-tag
+
+临时添加环境:
+export PATH=$PATH:$(go env GOPATH)/bin
+
+安装docker-composer: 
+
+以上准备完毕后:
+快速启动所有服务: 
+make docker_run && make config && make start_all
+
+快速终止所有服务:
+make stop_all && make docker_stop
+```
+
+
+
+### 服务相关
+
 新建一个非网关服务
 
 ```
@@ -113,8 +154,6 @@ ret.Start()
 actor.Register(ret)
 ```
 
-
-
 ## **扩展工具**
 
 ### pbtool:
@@ -137,9 +176,10 @@ actor.Register(ret)
 ### cfgtool:
 
 解析文件table对象为指定pb文件
+
 ```
 枚举类型说明：
-E|道具类型-金币|PropertType|Coin|1	
+E|道具类型-金币|PropertType|Coin|1    
 
 配置规则说明：
 @config|sheet@结构名|map:字段名[,字段名]:别名|group:字段名[,字段名]:别名
@@ -150,25 +190,25 @@ example:
 
 result make file content :
 func MGetCmd(Cmd uint32) *pb.RouterConfig {
-	obj, ok := obj.Load().(*RouterConfigData)
-	if !ok {
-		return nil
-	}
-	if val, ok := obj._Cmd[Cmd]; ok {
-		return val
-	}
-	return nil
+    obj, ok := obj.Load().(*RouterConfigData)
+    if !ok {
+        return nil
+    }
+    if val, ok := obj._Cmd[Cmd]; ok {
+        return val
+    }
+    return nil
 }
 
 func MGetNodeTypeActorNameFuncName(NodeType pb.NodeType, ActorName string, FuncName string) *pb.RouterConfig {
-	obj, ok := obj.Load().(*RouterConfigData)
-	if !ok {
-		return nil
-	}
-	if val, ok := obj._NodeTypeActorNameFuncName[pb.Index3[pb.NodeType, string, string]{NodeType, ActorName, FuncName}]; ok {
-		return val
-	}
-	return nil
+    obj, ok := obj.Load().(*RouterConfigData)
+    if !ok {
+        return nil
+    }
+    if val, ok := obj._NodeTypeActorNameFuncName[pb.Index3[pb.NodeType, string, string]{NodeType, ActorName, FuncName}]; ok {
+        return val
+    }
+    return nil
 }
 
 @struct|sheet@结构名
