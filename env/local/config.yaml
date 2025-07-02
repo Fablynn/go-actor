@@ -1,6 +1,6 @@
 mysql:
   1:
-    dbname: poker
+    dbname: goactor
     user: root
     password: 123456
     host: localhost:13306
@@ -8,7 +8,7 @@ mysql:
 
 redis:
   1:
-    dbname: poker
+    dbname: goactor
     db: 1
     user: default
     password: 123456
@@ -16,13 +16,13 @@ redis:
 
 mongodb:
   1:
-    dbname: poker
+    dbname: goactor
     user: root
     password: 123456
     host: localhost:17017
     slave:
       1:
-        dbname: poker
+        dbname: goactor
         user: root
         password: 123456
         host: localhost:17017
@@ -40,7 +40,7 @@ common:
   env: develop  # develop, beta, release 
   config_is_remote: true
   config_path: ./data
-  config_topic: poker/config
+  config_topic: teaxs/test/config
   router_expire: 90000
   discovery_expire: 20
   secret_key: gH7%kL9!xavd123EQW@xJ0^yT1

@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package go_actor;
+
+option go_package = "./pb";
+
+// 作为db服务唯一的IdType
+enum DataType {
+  DataTypeDataTypeNone = 0;  // 数据类型-无
+  DataTypeGenerator    = 1;  // 数据类型-Generator
+  DataTypeTexasRoom    = 2;  // 数据类型-TexasRoom
+}
+
+// 作为builder服务唯一的IdType
+enum GeneratorType {
+  GeneratorTypeBegin = 0;  // 生成器类型-begin
+  GeneratorTypeTexas = 1;  // 生成器类型-Texas
+  GeneratorTypeEnd   = 100;  // 生成器类型-end
+}
+
+// 游戏状态
+enum GameState {
+  TEXAS_INIT              = 0;    // 初始化状态
+  TEXAS_START             = 1;    // 游戏开始阶段（包含底注和发底牌）
+  TEXAS_PRE_FLOP          = 2;    // 底牌前下注轮（Pre-Flop）
+  TEXAS_FLOP_ROUND        = 3;    // 翻牌圈（三张公共牌）
+  TEXAS_TURN_ROUND        = 4;    // 转牌圈（第四张公共牌）
+  TEXAS_RIVER_ROUND       = 5;    // 河牌圈（第五张公共牌）
+  TEXAS_END               = 6;    // 结算阶段
+}
+
+// 房间状态
+enum RoomStatus {
+  RoomStatusNone     = 0;  // 房间状态-无
+  RoomStatusWait     = 1;  // 房间状态-等待开始
+  RoomStatusPlaying  = 2;  // 房间状态-比赛中
+  RoomStatusFinished = 3;  // 房间状态-已结束
+  RoomStatusPause    = 4;  // 房间状态-暂停
+}
+
+// 玩家状态
+enum PlayerStatus {
+  PlayerStatusNone     = 0;  // 玩家状态-无
+  PlayerStatusJoinRoom = 1;  // 玩家状态-加入房间
+  PlayerStatusJoinGame = 2;  // 玩家状态-加入游戏
+  PlayerStatusQuitGame = 3;  // 玩家状态-退出游戏
+  PlayerStatusQuitRoom = 4;  // 玩家状态-退出房间
+}
+
+// 扑克牌型
+enum CardType {
+  CardTypeNode    = 0;   // 无效牌型
+  HIGH_CARD       = 1;   // 高牌
+  ONE_PAIR        = 2;   // 一对
+  TWO_PAIR        = 3;   // 两对
+  THREE_OF_A_KIND = 4;   // 三条
+  STRAIGHT        = 5;   // 顺子
+  FLUSH           = 6;   // 同花
+  FULL_HOUSE      = 7;   // 葫芦
+  FOUR_OF_A_KIND  = 8;   // 四条
+  STRAIGHT_FLUSH  = 9;   // 同花顺
+  ROYAL_FLUSH     = 10;  // 皇家同花顺
+}
+
+// 操作类型
+enum OperateType {
+  OperateNone     = 0;  // 无效操作
+  BET             = 1;  // 下注
+  CALL            = 2;  // 跟注
+  RAISE           = 3;  // 加注
+  CHECK           = 4;  // 过牌
+  FOLD            = 5;  // 弃牌
+  ALL_IN          = 6;  // 全下
+  BET_SMALL_BLIND = 7;  // 下小盲
+  BET_BIG_BLIND   = 8;  // 下大盲
+}
+
+// 点数
+enum RankType {
+  RANK_0        = 0;  // 无点数
+  RANK_1        = 1;  // A作为1的时候
+  RANK_2        = 2;
+  RANK_3        = 3;
+  RANK_4        = 4;
+  RANK_5        = 5;
+  RANK_6        = 6;
+  RANK_7        = 7;
+  RANK_8        = 8;
+  RANK_9        = 9;
+  RANK_10       = 10;
+  RANK_J        = 11;
+  RANK_Q        = 12;
+  RANK_K        = 13;
+  RANK_A        = 14;
+  RANK_JOKER    = 15;
+  RANK_BIGJOKER = 16;  // 大王
+}
+
+enum ColorType {
+  ColorTypeNone = 0;  // 花色类型-无
+  Diamond       = 1;  // 花色类型-方块
+  Club          = 2;  // 花色类型-梅花
+  Heart         = 4;  // 花色类型-红桃
+  Spade         = 8;  // 花色类型-黑桃
+}
+
+enum TexasEventType {
+  EVENT_NONE            = 0;   // 缺省通知
+  EVENT_BET             = 1;   // 下注
+  EVENT_CALL            = 2;   // 跟注
+  EVENT_RAISE           = 3;   // 加注
+  EVENT_CHECK           = 4;   // 看牌
+  EVENT_FOLD            = 5;   // 弃牌
+  EVENT_BET_BIG_BLIND   = 6;   // 下大盲
+  EVENT_BET_SMALL_BLIND = 7;   // 下小盲
+  EVENT_BET_PRE_FOLP    = 8;   // 翻牌下前注
+  EVENT_DEAL            = 9;   // 发牌
+  EVENT_SIT_DOWN        = 10;  // 坐下
+  EVENT_STAND_UP        = 11;  // 站起
+  EVENT_LEAVE           = 12;  // 离开
+  EVENT_READY           = 13;  // 准备
+  EVENT_CANCEL_READY    = 14;  // 取消准备
+  EVENT_GAME_START      = 15;  // 游戏开始
+  EVENT_GAME_END        = 16;  // 游戏结束
+  EVENT_GAME_PAUSE      = 17;  // 游戏暂停
+  EVENT_GAME_RESUME     = 18;  // 游戏恢复
+  EVENT_GAME_RESET      = 19;  // 游戏重置
+  EVENT_BLIND           = 20;  // 涨盲
+  EVENT_RANK            = 21;  // 排名
+  EVENT_FLOP_CARD       = 24;  // 翻牌，翻转牌，翻和牌
+}
+
+// 发牌类型
+enum DealType {
+  DealTypeNone = 0;  // 无效发牌
+  HAND         = 1;  // 发手牌
+  FLOP         = 2;  // 发翻牌
+  TURN         = 3;  // 发转牌
+  RIVER        = 4;  // 发河牌
+}
