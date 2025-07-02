@@ -2,9 +2,9 @@ package manager
 
 import (
 	"bytes"
-	"go-actor/library/uerror"
 	"go-actor/tools/cfgtool/domain"
 	"go-actor/tools/cfgtool/internal/base"
+	"go-actor/tools/library/uerror"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"

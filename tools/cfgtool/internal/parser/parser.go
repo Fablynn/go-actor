@@ -2,10 +2,10 @@ package parser
 
 import (
 	"fmt"
-	"go-actor/library/uerror"
 	"go-actor/tools/cfgtool/domain"
 	"go-actor/tools/cfgtool/internal/base"
 	"go-actor/tools/cfgtool/internal/manager"
+	"go-actor/tools/library/uerror"
 	"path"
 	"strings"
 

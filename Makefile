@@ -15,7 +15,6 @@ OUTPUT=./output
 TARGET_ENV=local develop release pre
 TARGET=gate db builder match room game gm #client
 STOP_TARGET=gate gm builder match room game db
-#TARGET=db builder match game room
 LINUX=$(TARGET:%=%_linux)
 BUILD=$(TARGET:%=%_build)
 START=$(TARGET:%=%_start)
@@ -46,6 +45,8 @@ $(BUILD): %_build: %
 
 #=================================proto转go代码========================================
 config:
+	@echo "gen enum config code..."
+	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH}/router.xlsx -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
 	@echo "gen config code..."
 	@rm -rf ${CFG_CODE_PATH}
 	@make pb

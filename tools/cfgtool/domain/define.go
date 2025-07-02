@@ -15,14 +15,14 @@ const (
 )
 
 var (
-	ProtoPkgName = "poker" // proto包名
-	PkgName      = ""      // 包名
-	XlsxPath     = ""      // 解析文件路径
-	ProtoPath    = ""      // proto文件路径
-	PbPath       = ""      // proto生成路径
-	CodePath     = ""      // 代码生成路径
-	JsonPath     = ""      // 数据文件路径
-	BytesPath    = ""      // 数据文件路径
-	TextPath     = ""      // 数据文件路径
-	ClientPath   = ""      // 客户端代码生成路径
+	ProtoPkgName = "go_actor" // proto包名
+	PkgName      = ""         // 包名
+	XlsxPath     = ""         // 解析文件路径
+	ProtoPath    = ""         // proto文件路径
+	PbPath       = ""         // proto生成路径
+	CodePath     = ""         // 代码生成路径
+	JsonPath     = ""         // 数据文件路径
+	BytesPath    = ""         // 数据文件路径
+	TextPath     = ""         // 数据文件路径
+	ClientPath   = ""         // 客户端代码生成路径
 )

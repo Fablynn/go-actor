@@ -6,7 +6,7 @@ import (
 	"go-actor/tools/cfgtool/internal/manager"
 	"strings"
 
-	"go-actor/library/uerror"
+	"go-actor/tools/library/uerror"
 
 	"github.com/golang/protobuf/jsonpb"
 )

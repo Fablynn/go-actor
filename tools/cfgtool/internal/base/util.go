@@ -1,7 +1,7 @@
 package base
 
 import (
-	"go-actor/library/uerror"
+	"go-actor/tools/library/uerror"
 	"go/format"
 	"io/ioutil"
 	"os"
