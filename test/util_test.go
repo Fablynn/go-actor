@@ -25,6 +25,36 @@ func TestCheck(t *testing.T) {
 		ret := getSubarrayBeauty([]int{1, -1, -3, -2, 3}, 3, 2)
 		t.Logf("getSubarrayBeauty: %v", ret)
 	})
+
+	t.Run("minFlips", func(t *testing.T) {
+		ret := minFlips(`111000`)
+		t.Logf("minFlips: %v", ret)
+	})
+}
+
+// 环形字符数组 使二进制字符串字符交替的最少反转次数
+func minFlips(s string) (ans int) {
+	// s 111000
+	// loop s => 11100011100
+	// window size
+	n := len(s)
+	ans = n
+	cnt := 0
+	for i := range 2*n - 1 {
+		if int(s[i%n]%2) == i%2 {
+			cnt++
+		}
+		left := i - n + 1
+		if left < 0 {
+			continue
+		}
+		ans = min(ans, cnt, n-cnt) //正向和反向
+		if int(s[left]%2) == left%2 {
+			cnt--
+		}
+	}
+
+	return
 }
 
 // 求美丽值 滑动窗口 计数排序
