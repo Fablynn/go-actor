@@ -126,7 +126,7 @@ actor.Register(ret)
 // 示例注释规则 @pbtool 表示protobuf对象参与注释解析 redis工具模板
 // [string|hash] 表示protobuf对象序列化存储的两种模板
 // db_name 指定存储db
-// fieldName1:fieldType1,fieldName2:fieldType2 索引字段类型
+// fieldName1:fieldType1[,fieldName2:fieldType2] 索引字段类型
 // #备注 标签
 
 @pbtool:string|poker|generator|#房间id生成器
@@ -137,3 +137,40 @@ actor.Register(ret)
 ### cfgtool:
 
 解析文件table对象为指定pb文件
+```
+枚举类型说明：
+E|道具类型-金币|PropertType|Coin|1	
+
+配置规则说明：
+@config|sheet@结构名|map:字段名[,字段名]:别名|group:字段名[,字段名]:别名
+map: 工具类依据字段名筛选配置数据 多个字段名符复合筛选
+
+example:
+@config:table_cfg|网关接口路由表:RouterConfig|map:Cmd|map:NodeType,ActorName,FuncName
+
+result make file content :
+func MGetCmd(Cmd uint32) *pb.RouterConfig {
+	obj, ok := obj.Load().(*RouterConfigData)
+	if !ok {
+		return nil
+	}
+	if val, ok := obj._Cmd[Cmd]; ok {
+		return val
+	}
+	return nil
+}
+
+func MGetNodeTypeActorNameFuncName(NodeType pb.NodeType, ActorName string, FuncName string) *pb.RouterConfig {
+	obj, ok := obj.Load().(*RouterConfigData)
+	if !ok {
+		return nil
+	}
+	if val, ok := obj._NodeTypeActorNameFuncName[pb.Index3[pb.NodeType, string, string]{NodeType, ActorName, FuncName}]; ok {
+		return val
+	}
+	return nil
+}
+
+@struct|sheet@结构名
+@enum|sheet
+```
