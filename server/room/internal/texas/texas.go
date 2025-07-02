@@ -59,7 +59,10 @@ func NewTexasGame(data *pb.TexasRoomData) *TexasGame {
 
 	// 启动定时器
 	head := &pb.Head{SendType: pb.SendType_POINT, ActorName: "TexasGame", FuncName: "OnTick"}
-	ret.RegisterTimer(head, 50*time.Millisecond, -1)
+	err := ret.RegisterTimer(head, 50*time.Millisecond, -1)
+	if err != nil {
+		mlog.Infof("register timer err:%v", err)
+	}
 	return ret
 }
 
@@ -100,7 +103,10 @@ func (d *TexasGame) OnTick() {
 	d.Save()
 
 	if d.isFinish {
-		actor.SendMsg(&pb.Head{ActorName: "TexasGameMgr", FuncName: "Remove"}, d.GetId())
+		err := actor.SendMsg(&pb.Head{ActorName: "TexasGameMgr", FuncName: "Remove"}, d.GetId())
+		if err != nil {
+			mlog.Errorf("Texas Game Room Remove Err : %v", err)
+		}
 	}
 }
 
@@ -272,7 +278,7 @@ func (d *TexasGame) Operate(usr *pb.TexasPlayerData, opr pb.OperateType, val int
 	}
 }
 
-// 获取下一个状态
+// GetNextState 获取下一个状态
 func (d *TexasGame) GetNextState() pb.GameState {
 	switch d.machine.GetCurState() {
 	case pb.GameState_TEXAS_INIT:
@@ -319,7 +325,7 @@ func (d *TexasGame) Deal(count uint32, f func(uint32, uint32)) {
 }
 
 func (d *TexasGame) UpdateBest(usr *pb.TexasPlayerData) {
-	tmps := []uint32{}
+	tmps := make([]uint32, 0, len(d.Table.GameData.PublicCardList)+len(usr.GameInfo.HandCardList))
 	tmps = append(tmps, d.Table.GameData.PublicCardList...)
 	tmps = append(tmps, usr.GameInfo.HandCardList...)
 
@@ -331,7 +337,7 @@ func (d *TexasGame) UpdateBest(usr *pb.TexasPlayerData) {
 	usr.GameInfo.BestCardList = list
 }
 
-// 更新边池
+// UpdateSide 更新边池
 func (d *TexasGame) UpdateSide(users ...*pb.TexasPlayerData) {
 	count := len(users)
 	prevBetChips := int64(0)
@@ -339,7 +345,7 @@ func (d *TexasGame) UpdateSide(users ...*pb.TexasPlayerData) {
 	for i, usr := range users {
 		switch usr.GameInfo.Operate {
 		case pb.OperateType_FOLD:
-			game.PotPool.BetChips += (usr.GameInfo.BetChips - prevBetChips)
+			game.PotPool.BetChips += usr.GameInfo.BetChips - prevBetChips
 		case pb.OperateType_ALL_IN:
 			add := int64(count-i) * (usr.GameInfo.BetChips - prevBetChips)
 			if add > 0 {
@@ -352,7 +358,7 @@ func (d *TexasGame) UpdateSide(users ...*pb.TexasPlayerData) {
 			}
 			prevBetChips = usr.GameInfo.BetChips
 		default:
-			game.PotPool.BetChips += (usr.GameInfo.BetChips - prevBetChips)
+			game.PotPool.BetChips += usr.GameInfo.BetChips - prevBetChips
 		}
 		usr.GameInfo.BetChips = 0
 	}
@@ -401,7 +407,7 @@ func (d *TexasGame) getWinners(pot *pb.TexasPotData) (users []*pb.TexasPlayerDat
 	return
 }
 
-// 计算获胜者筹码
+// Reward 计算获胜者筹码
 func (d *TexasGame) Reward(wins map[uint64]int64, chips map[uint64]int64, srvs map[uint64]int64) (total int64) {
 	rate, maxLimit, isNoFlopNoDrop := int64(0), int64(0), true
 	if cfg := texas_config.MGetID(d.GameId); cfg != nil {
@@ -500,7 +506,7 @@ func (d *TexasGame) JoinRoomReq(head *pb.Head, req *pb.TexasJoinRoomReq, rsp *pb
 		MaxBuyIn:       texasCfg.MaxBuyIn,
 		SmallBlind:     texasCfg.SmallBlind,
 		BigBlind:       texasCfg.BigBlind,
-		MaxPlayerCount: int32(texasCfg.MaxPlayerCount),
+		MaxPlayerCount: texasCfg.MaxPlayerCount,
 		PlayerCount:    int32(len(d.Table.Players)),
 	}
 	return nil
@@ -603,7 +609,7 @@ func NewTexasEventNotify(evenType pb.TexasEventType, event proto.Message) *pb.Te
 	}
 }
 
-// 站起请求
+// StandUpReq 站起请求
 func (d *TexasGame) StandUpReq(head *pb.Head, req *pb.TexasStandUpReq, rsp *pb.TexasStandUpRsp) error {
 	usr, ok := d.Table.Players[head.Uid]
 	if !ok || usr == nil {
@@ -640,7 +646,7 @@ func (d *TexasGame) StandUpReq(head *pb.Head, req *pb.TexasStandUpReq, rsp *pb.T
 	return nil
 }
 
-// 买入请求
+// BuyInReq 买入请求
 func (d *TexasGame) BuyInReq(head *pb.Head, req *pb.TexasBuyInReq, rsp *pb.TexasBuyInRsp) error {
 	usr, ok := d.Table.Players[head.Uid]
 	if !ok || usr == nil {
@@ -658,11 +664,11 @@ func (d *TexasGame) BuyInReq(head *pb.Head, req *pb.TexasBuyInReq, rsp *pb.Texas
 
 	rsp.RoomId = d.RoomId
 	rsp.CoinType = int32(texasCfg.CoinType)
-	rsp.Chip = (usr.Chips)
+	rsp.Chip = usr.Chips
 	return nil
 }
 
-// 下注请求
+// DoBetReq 下注请求
 func (d *TexasGame) DoBetReq(head *pb.Head, req *pb.TexasDoBetReq, rsp *pb.TexasDoBetRsp) error {
 	usr := d.GetCursor()
 	if usr == nil {
@@ -695,7 +701,7 @@ func (d *TexasGame) DoBetReq(head *pb.Head, req *pb.TexasDoBetReq, rsp *pb.Texas
 			} else if req.Chip > d.Table.GameData.MaxBetChips-usr.GameInfo.BetChips {
 				req.OperateType = int32(pb.OperateType_RAISE)
 			} else if req.Chip == d.Table.GameData.MaxBetChips-usr.GameInfo.BetChips {
-				req.OperateType = (int32(pb.OperateType_CALL))
+				req.OperateType = int32(pb.OperateType_CALL)
 			}
 		}
 	}
@@ -725,12 +731,12 @@ func (d *TexasGame) DoBetReq(head *pb.Head, req *pb.TexasDoBetReq, rsp *pb.Texas
 	d.Change()
 
 	// 返回客户端
-	rsp.Round = (d.Table.Round)
+	rsp.Round = d.Table.Round
 	rsp.ChairId = req.ChairId
 	rsp.OpType = req.OperateType
 	rsp.Chip = req.Chip
-	rsp.BankRoll = (usr.Chips)
+	rsp.BankRoll = usr.Chips
 	rsp.TotalBet = usr.GameInfo.BetChips
-	rsp.RoomId = (d.RoomId)
+	rsp.RoomId = d.RoomId
 	return nil
 }
