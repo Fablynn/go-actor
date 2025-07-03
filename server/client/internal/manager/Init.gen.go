@@ -34,4 +34,6 @@ func init() {
 	cmds[67108881] = func() proto.Message { return &pb.TexasBuyInRsp{} }
 	cmds[67108882] = func() proto.Message { return &pb.TexasDoBetReq{} }
 	cmds[67108883] = func() proto.Message { return &pb.TexasDoBetRsp{} }
+	cmds[67108890] = func() proto.Message { return &pb.TexasChangeRoomReq{} }
+	cmds[67108891] = func() proto.Message { return &pb.TexasChangeRoomRsp{} }
 }

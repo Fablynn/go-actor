@@ -11,7 +11,7 @@ import (
 	"go-actor/library/async"
 	"go-actor/library/mlog"
 	"go-actor/library/signal"
-	"go-actor/server/room/internal/manager"
+	"go-actor/server/builder/internal"
 )
 
 func main() {
@@ -22,11 +22,11 @@ func main() {
 	flag.Parse()
 
 	// 加载游戏配置
-	yamlcfg, node, err := yaml.LoadConfig(cfg, pb.NodeType_NodeTypeRoom, int32(nodeId))
+	yamlcfg, node, err := yaml.LoadConfig(cfg, pb.NodeType_NodeTypeBuilder, int32(nodeId))
 	if err != nil {
 		panic(fmt.Sprintf("游戏配置加载失败: %v", err))
 	}
-	nodeCfg := yamlcfg.Room[node.Id]
+	nodeCfg := yamlcfg.Builder[node.Id]
 
 	// 初始化日志库
 	if err := mlog.Init(yamlcfg.Common.Env, nodeCfg.LogLevel, nodeCfg.LogFile); err != nil {
@@ -53,13 +53,13 @@ func main() {
 	}
 
 	// 功能模块初始化
-	if err := manager.Init(); err != nil {
+	if err := internal.Init(); err != nil {
 		panic(fmt.Sprintf("功能模块初始化失败: %v", err))
 	}
 
 	// 服务退出
 	signal.SignalNotify(func() {
-		manager.Close()
+		internal.Close()
 		framework.Close()
 		mlog.Close()
 	})

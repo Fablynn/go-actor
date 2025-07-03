@@ -1,0 +1,45 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "packet.proto";
+import "global_enum.proto";
+import "global_enum_cfg.proto";
+import "database.proto";
+
+message GenRoomIdReq {
+  GeneratorType generator_type = 1;  // 生成器类型
+  MatchType     match_type     = 2;  // 赛事类型
+  GameType      game_type      = 3;  // 游戏类型
+  CoinType      coin_type      = 4;  // 货币类型
+  int32         count          = 5;  // 生成数量
+}
+
+message GenRoomIdRsp {
+  RspHead         head         = 1;  // 响应头
+  repeated uint64 room_id_list = 2;  // 房间ID
+}
+
+// 默认房间id组成规则
+message DefaultRoomId {
+  MatchType match_type = 1;  // 赛事类型
+  GameType  game_type  = 2;  // 游戏类型
+  CoinType  coin_type  = 3;  // 货币类型
+  uint32    incr       = 4;  // 房间自增序列号
+}
+
+
+message UpdateGeneratorDataNotify {
+  DataType               data_type = 1;  // 数据类型
+  repeated GeneratorInfo list      = 2;  // 房间id生成器
+}
+
+message GetGeneratorDataReq {
+  DataType data_type = 1;  // 数据类型
+}
+
+message GetGeneratorDataRsp {
+  RspHead                head = 1;  // 响应头
+  repeated GeneratorInfo list = 2;  // 房间id生成器
+}

@@ -1,6 +1,6 @@
 mysql:
   1:
-    dbname: goactor
+    dbname: poker
     user: root
     password: 123456
     host: localhost:13306
@@ -8,7 +8,7 @@ mysql:
 
 redis:
   1:
-    dbname: goactor
+    dbname: poker
     db: 1
     user: default
     password: 123456
@@ -16,34 +16,34 @@ redis:
 
 mongodb:
   1:
-    dbname: goactor
+    dbname: poker
     user: root
     password: 123456
     host: localhost:17017
     slave:
       1:
-        dbname: goactor
+        dbname: poker
         user: root
         password: 123456
         host: localhost:17017
 
 etcd:
-  topic: go-actor/etcd
+  topic: poker_server/etcd
   endpoints:
     - http://localhost:12379
 
 nats:
-  topic: go-actor/nats
+  topic: poker_server/nats
   endpoints: localhost:14222
 
 common:
-  env: develop  # develop, beta, release 
-  config_is_remote: true
-  config_path: ./data
-  config_topic: teaxs/test/config
+  env: develop  # develop, beta, release
+  config_is_remote: false
+  config_path: ./gameconf/data
+  config_topic: poker/config
   router_expire: 90000
   discovery_expire: 20
-  secret_key: gH7%kL9!xavd123EQW@xJ0^yT1
+  secret_key: gH7%kL9!qNGsmdq1*FpV6&nZ8@xJ0^yT1
 
 client:
   1:
@@ -63,7 +63,7 @@ gate:
 
 room:
   1:
-    log_level: debug # info, debug, warn, error, fatal
+    log_level: warn # info, debug, warn, error, fatal
     log_file: ./log/room1.log
     ip: localhost
     port: 10201
@@ -75,14 +75,12 @@ match:
     ip: localhost
     port: 10301
 
-
 db:
   1:
     log_level: debug # info, debug, warn, error, fatal
     log_file: ./log/db1.log
     ip: localhost
     port: 10401
-
 builder:
   1:
     log_level: debug # info, debug, warn, error, fatal
@@ -103,3 +101,4 @@ gm:
     log_file: ./log/gm1.log
     ip: localhost
     port: 10701
+

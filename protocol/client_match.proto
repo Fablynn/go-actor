@@ -5,6 +5,22 @@ option go_package = "./pb";
 
 import "packet.proto";
 import "client_room.proto";
+import "database.proto";
+import "global_enum.proto";
+
+message UpdateTexasRoomDataNotify {
+  DataType               data_type = 2;  // 数据类型
+  repeated TexasRoomData list      = 3;  // 德州房间列表
+}
+
+message GetTexasRoomDataReq {
+  DataType data_type = 1;  // 数据类型
+}
+
+message GetTexasRoomDataRsp {
+  RspHead                head = 1;  // 响应头
+  repeated TexasRoomData list = 2;  // 德州房间列表
+}
 
 // 获取房间列表请求
 message TexasRoomListReq {

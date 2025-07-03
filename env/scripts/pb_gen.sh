@@ -11,7 +11,7 @@ if [ "${SYSTEM}" == "windows" ]; then
     protoc.exe --plugin=protoc-gen-xorm.exe -I${PROTO_PATH} ${PROTO_PATH}/*.proto --go_opt paths=source_relative --go_out=${PB_GO_PATH} --xorm_out=${PB_GO_PATH}
     protoc-go-inject-tag.exe -input=${PB_GO_PATH}/*.pb.go -XXX_skip="state,sizeCache,unknownFields"
 else
-	protoc --plugin=${GO_BIN}/protoc-gen-xorm.exe -I${PROTO_PATH} ${PROTO_PATH}/*.proto --go_opt paths=source_relative --go_out=${PB_GO_PATH} --xorm_out=${PB_GO_PATH}
+	  protoc --plugin=${GO_BIN}/protoc-gen-xorm.exe -I${PROTO_PATH} ${PROTO_PATH}/*.proto --go_opt paths=source_relative --go_out=${PB_GO_PATH} --xorm_out=${PB_GO_PATH}
     protoc-go-inject-tag -input=${PB_GO_PATH}/*.pb.go -XXX_skip="state,sizeCache,unknownFields"
 fi
 
