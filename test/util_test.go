@@ -30,6 +30,102 @@ func TestCheck(t *testing.T) {
 		ret := minFlips(`111000`)
 		t.Logf("minFlips: %v", ret)
 	})
+
+	t.Run("checkInclusion", func(t *testing.T) {
+		ret := checkInclusion("ab", "eidbaooo")
+		t.Logf("minFlips: %v", ret)
+	})
+
+	t.Run("findAnagrams", func(t *testing.T) {
+		ret := findAnagrams("baa", "aa")
+		t.Logf("minFlips: %v", ret)
+	})
+
+	t.Run("findSubstring", func(t *testing.T) {
+		ret := findSubstring("wordgoodgoodgoodbestword", []string{"word", "good", "best", "good"})
+		t.Logf("minFlips: %v", ret)
+	})
+}
+
+func findSubstring(s string, words []string) (ans []int) {
+	ls, m, n := len(s), len(words), len(words[0])
+	for i := 0; i < n && i+m*n <= ls; i++ {
+		differ := map[string]int{}
+		for j := 0; j < m; j++ {
+			differ[s[i+j*n:i+(j+1)*n]]++
+		}
+		for _, word := range words {
+			differ[word]--
+			if differ[word] == 0 {
+				delete(differ, word)
+			}
+		}
+		for start := i; start < ls-m*n+1; start += n {
+			if start != i {
+				word := s[start+(m-1)*n : start+m*n]
+				differ[word]++
+				if differ[word] == 0 {
+					delete(differ, word)
+				}
+				word = s[start-n : start]
+				differ[word]--
+				if differ[word] == 0 {
+					delete(differ, word)
+				}
+			}
+			if len(differ) == 0 {
+				ans = append(ans, start)
+			}
+		}
+	}
+	return
+}
+
+func findAnagrams(s string, p string) (ans []int) {
+	n, m := len(p), len(s)
+	if n > m {
+		return
+	}
+	var cnt1, cnt2 [26]int
+	for i, ch := range p {
+		cnt1[ch-'a']++
+		cnt2[s[i]-'a']++
+	}
+	if cnt1 == cnt2 {
+		ans = append(ans, 0)
+	}
+
+	for i := n; i < m; i++ {
+		cnt2[s[i]-'a']++
+		cnt2[s[i-n]-'a']--
+		if cnt1 == cnt2 {
+			ans = append(ans, i-n+1)
+		}
+	}
+	return
+}
+
+func checkInclusion(s1, s2 string) bool {
+	n, m := len(s1), len(s2)
+	if n > m {
+		return false
+	}
+	var cnt1, cnt2 [26]int
+	for i, ch := range s1 {
+		cnt1[ch-'a']++
+		cnt2[s2[i]-'a']++
+	}
+	if cnt1 == cnt2 {
+		return true
+	}
+	for i := n; i < m; i++ {
+		cnt2[s2[i]-'a']++
+		cnt2[s2[i-n]-'a']--
+		if cnt1 == cnt2 {
+			return true
+		}
+	}
+	return false
 }
 
 // 环形字符数组 使二进制字符串字符交替的最少反转次数
