@@ -1,4 +1,4 @@
-# go-actor
+# go-actor [Golang德州扑克游戏案例]
 
 **这是一款分布式的golang游戏服务器框架**
 
@@ -12,13 +12,15 @@
 
 - [x] 毫秒级时间轮
 
-- [x] 多节点、uuid
+- [x] 游戏状态机管理
+
+- [x] 多节点snowflask uuid
 
 - [x] websocket协议和protobuf编码
 
 - [x] 高性能日志库mlog
 
-- [ ] 德州扑克游戏案例
+- [x] 德州扑克游戏案例
 
 框架示意图：
 
@@ -62,6 +64,27 @@ make docker_run && make config && make start_all
 快速终止所有服务:
 make stop_all && make docker_stop
 ```
+
+### 德州扑克案例
+
+游戏日志:
+
+```
+Texas deal hard cards notify per user : 145 hardcards: 2♥,10♦
+Texas deal hard cards notify per user : 146 hardcards: 2♣,J♣
+Texas deal hard cards notify per user : 144 hardcards: A♣,J♦
+flop_state show public cards : 9♦,3♥,4♦
+turn_state show public cards : 9♦,3♥,4♦,6♦
+river_state show public cards : 9♦,3♥,4♦,6♦,8♦
+texas_end_state show users uid:144 best cards: J♦,9♦,8♦,6♦,4♦ FLUSH
+texas_end_state show users uid:145 best cards: 10♦,9♦,8♦,6♦,4♦ FLUSH
+texas_end_state show users uid:146 best cards: J♣,9♦,8♦,6♦,4♦ HIGH_CARD
+texas_end_state chips:map[144:-100000 145:-100000 146:-100000], srvs:map[144:200], winners:map[144:299800 145:0 146:0]
+```
+
+
+
+
 
 ### 服务相关
 

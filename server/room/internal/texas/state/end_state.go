@@ -2,6 +2,7 @@ package state
 
 import (
 	"encoding/json"
+	"go-actor/common/card"
 	"go-actor/common/config/repository/machine_config"
 	"go-actor/common/config/repository/texas_config"
 	"go-actor/common/pb"
@@ -30,6 +31,7 @@ func (d *EndState) getUsers(room *texas.TexasGame, tmps map[uint64]*pb.TexasGame
 			CardType: int32(usr.GameInfo.BestCardType),
 			Bests:    usr.GameInfo.BestCardList,
 		}
+		mlog.Infof("texas_end_state show users uid:%v best cards: %v %v", usr.Uid, card.CardList(usr.GameInfo.BestCardList), usr.GameInfo.BestCardType)
 		if (table.GameData.IsCompare && usr.GameInfo.Operate != pb.OperateType_FOLD) ||
 			(usr.GameInfo.GameState == pb.GameState_TEXAS_RIVER_ROUND && usr.GameInfo.Operate != pb.OperateType_FOLD) {
 			tmps[usr.Uid].Hands = usr.GameInfo.HandCardList
@@ -75,7 +77,7 @@ func (d *EndState) OnEnter(nowMs int64, curState pb.GameState, extra interface{}
 		endInfo.WinChips = winVal + chips[uid]
 		endInfo.Chips = usr.Chips
 	}
-	mlog.Debugf("texas_end_state chips:%v, srvs:%v, winners:%v", chips, srvs, winners)
+	mlog.Infof("texas_end_state chips:%v, srvs:%v, winners:%v", chips, srvs, winners)
 
 	// 发送通知
 	uids := room.GetPlayerUidList()

@@ -67,7 +67,7 @@ func (d *StartState) OnTick(nowMs int64, curState pb.GameState, extra interface{
 		Src: framework.NewSrcRouter(pb.RouterType_RouterTypeRoomId, room.RoomId),
 		Cmd: uint32(pb.CMD_TEXAS_EVENT_NOTIFY),
 	}
-	framework.NotifyToClient(uids, newHead, texas.NewTexasEventNotify(pb.TexasEventType_EVENT_GAME_START, &pb.TexasGameEventNotify{
+	ntf := &pb.TexasGameEventNotify{
 		RoomId:        room.RoomId,
 		Round:         room.Table.Round,
 		BigChair:      room.Table.GameData.BigChairId,
@@ -78,7 +78,9 @@ func (d *StartState) OnTick(nowMs int64, curState pb.GameState, extra interface{
 		CurBetChairId: room.GetCursor().ChairId,
 		PotPool:       room.Table.GameData.PotPool,
 		Duration:      room.GetMachine().GetCurStateStartTime() + tutil.GetCurStateTTL(machineCfg, curState) - nowMs,
-	}))
+	}
+	framework.NotifyToClient(uids, newHead, texas.NewTexasEventNotify(pb.TexasEventType_EVENT_GAME_START, ntf))
+	mlog.Infof("Texas game start notify users curber userid : %v ntf: %v", room.GetCursor().Uid, ntf)
 
 	// 添加游戏日志
 	smallPlayer, bigPlayer := room.GetSmall(), room.GetBig()

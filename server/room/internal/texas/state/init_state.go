@@ -65,6 +65,6 @@ func (d *InitState) OnExit(nowMs int64, curState pb.GameState, extra interface{}
 	defer func() {
 		room := extra.(*texas.TexasGame)
 		buf, _ := json.Marshal(room.TexasRoomData)
-		mlog.Debugf("roomId:%d,round:%d,Init OnExit: %s", room.RoomId, room.Table.Round, string(buf))
+		mlog.Infof("roomId:%d,round:%d,Init OnExit: %s", room.RoomId, room.Table.Round, string(buf))
 	}()
 }

@@ -56,7 +56,7 @@ func (p *Player) CheckToken() error {
 	p.Actor.SetId(tt.Uid)
 	p.createTime = now
 
-	head := framework.SwapToGame(pack.Head, tt.Uid, "PlayerDataMgr", "Login")
+	head := framework.SwapToGame(pack.Head, tt.Uid, "PlayerMgr", "Login")
 	head.Src = framework.NewSrcRouter(pb.RouterType_RouterTypeUid, tt.Uid)
 	head.Dst.RouterType = pb.RouterType_RouterTypeUid
 	return framework.Send(head, req)

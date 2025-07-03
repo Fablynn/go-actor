@@ -88,6 +88,7 @@ func (d *FlopState) OnEnter(nowMs int64, curState pb.GameState, extra interface{
 		Src: framework.NewSrcRouter(pb.RouterType_RouterTypeRoomId, room.RoomId),
 		Cmd: uint32(pb.CMD_TEXAS_EVENT_NOTIFY),
 	}
+	mlog.Infof("flop_state show public cards : %v", card.CardList(table.GameData.PublicCardList))
 	framework.NotifyToClient(room.GetPlayerUidList(), newHead, texas.NewTexasEventNotify(pb.TexasEventType_EVENT_FLOP_CARD, event))
 	room.Change()
 }

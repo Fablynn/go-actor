@@ -12,6 +12,7 @@ import (
 func Init(cfg *yaml.ServerConfig) error {
 	api := http.NewServeMux()
 	api.HandleFunc("/api/room/token", genToken)
+	api.HandleFunc("/api/room/list", texasRoomList)
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.HttpPort), api)
 }
 

@@ -1,10 +1,11 @@
 package texas
 
 import (
+	"go-actor/common/dao/repository/redis/generator_data"
 	"go-actor/common/pb"
 	"go-actor/common/room_util"
 	"go-actor/framework/actor"
-	"go-actor/library/timer"
+	"go-actor/library/mlog"
 	"go-actor/library/uerror"
 	"reflect"
 	"time"
@@ -29,7 +30,18 @@ func NewBuilderTexasGenerator() *BuilderTexasGenerator {
 
 func (g *BuilderTexasGenerator) Load() error {
 	g.loadFlag = 1
-	return timer.Register(&g.loadFlag, func() { g.SendMsg(&pb.Head{FuncName: "LoadRequest"}) }, 5*time.Second, -1)
+
+	if data, _, err := generator_data.Get(); err != nil {
+		return err
+	} else {
+		g.datas = make(map[pb.GeneratorType]uint32)
+		for _, item := range data.List {
+			g.datas[item.Id] = item.Incr
+		}
+	}
+	mlog.Debugf("BuilderTexasGenerator: load data:%v", g.datas)
+	return nil
+	//return timer.Register(&g.loadFlag, func() { g.SendMsg(&pb.Head{FuncName: "LoadRequest"}) }, 5*time.Second, -1)
 }
 
 func (g *BuilderTexasGenerator) LoadRequest() error {

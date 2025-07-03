@@ -77,7 +77,7 @@ func (d *PreflopState) OnEnter(nowMs int64, curState pb.GameState, extra interfa
 				Cursor:   cursor,
 			})
 			usr.GameInfo.HandCardList = append(usr.GameInfo.HandCardList, cardVal)
-
+			mlog.Infof("Texas deal hard cards notify per user : %v hardcards: %v", usr.Uid, card.CardList(usr.GameInfo.HandCardList))
 			// 发送广播
 			framework.NotifyToClient([]uint64{usr.Uid}, newHead, texas.NewTexasEventNotify(pb.TexasEventType_EVENT_DEAL, &pb.TexasDealEventNotify{
 				RoomId:        room.RoomId,

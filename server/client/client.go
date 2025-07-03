@@ -29,7 +29,7 @@ func main() {
 	flag.IntVar(&id, "id", 1, " 节点id")
 	flag.IntVar(&port, "port", 22345, " 节点端口")
 	flag.Int64Var(&begin, "begin", 144, "起始uid")
-	flag.Int64Var(&end, "end", 145, "终止uid")
+	flag.Int64Var(&end, "end", 146, "终止uid")
 	flag.Parse()
 
 	// 加载游戏配置
