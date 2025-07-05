@@ -82,11 +82,47 @@ texas_end_state show users uid:146 best cards: J♣,9♦,8♦,6♦,4♦ HIGH_CAR
 texas_end_state chips:map[144:-100000 145:-100000 146:-100000], srvs:map[144:200], winners:map[144:299800 145:0 146:0]
 ```
 
-
-
-
-
 ### 服务相关
+
+状态机注册
+
+```
+// 注册方法
+machine.RegisterState(pb.GameState_DEMO_STAGE_INIT, &demo.Initstate{})
+
+// 启动方法
+// onTick()
+machine.NewMachine(nowMs, pb.GameState_DEMO_STAGE_INIT, game.(*unsafe.Pointer))
+
+// 状态实例
+type Initstate struct {
+	BaseState
+}
+
+
+func (d *Initstate) OnEnter(nowMs int64, curState pb.GameState, extra interface{}) {
+	game := extra.(*demo.DemoGame)
+
+	// 重置房间状态
+	game.Data.Stage = curState
+
+	// init 初始化游戏
+	if game.Data.Common.GameFinish {
+		game.Reset() //重置房间
+	}
+}
+
+func (d *Initstate) OnTick(nowMs int64, curState pb.GameState, extra interface{}) pb.GameState {
+	return moveToState.(pb.GameState)
+}
+
+func (d *Initstate) OnExit(nowMs int64, curState pb.GameState, extra interface{}) {
+    // log
+}
+
+```
+
+
 
 新建一个非网关服务
 
