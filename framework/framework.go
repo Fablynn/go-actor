@@ -1,6 +1,8 @@
 package framework
 
 import (
+	"github.com/golang/protobuf/proto"
+	"github.com/sony/sonyflake"
 	"go-actor/common/pb"
 	"go-actor/common/yaml"
 	"go-actor/framework/actor"
@@ -9,12 +11,12 @@ import (
 	"go-actor/library/uerror"
 	"go-actor/library/util"
 	"sync/atomic"
-
-	"github.com/golang/protobuf/proto"
+	"time"
 )
 
 var (
-	core *service.Service
+	core  *service.Service
+	idGen *sonyflake.Sonyflake
 )
 
 func Init(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (err error) {
@@ -22,8 +24,13 @@ func Init(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (err error
 	if err != nil {
 		return
 	}
+
 	actor.Init(node, SendResponse)
 	return
+}
+
+func GetUUid() (uint64, error) {
+	return idGen.NextID()
 }
 
 func InitDefault(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (err error) {
@@ -31,6 +38,7 @@ func InitDefault(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (er
 	if err != nil {
 		return
 	}
+	InitUUid(node)
 	actor.Init(node, SendResponse)
 	core.RegisterBroadcastHandler(DefaultBroadcastHandler)
 	core.RegisterSendHandler(DefaultSendHandler)
@@ -71,7 +79,25 @@ func Response(head *pb.Head, msg interface{}) error {
 
 // 发送到客户端
 func SendToClient(head *pb.Head, msg proto.Message) error {
+	mlog.Debug(head, "SendToClient head:%v, rsp:%v", head, msg)
 	return core.SendToClient(head, msg)
+}
+
+// 初始化uuid
+func InitUUid(node *pb.Node) {
+	if node.Type > 255 || node.Id > 255 {
+		panic("node id|type should be between 0 and 255")
+		return
+	}
+
+	idGen = sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+		MachineID: func() (uint16, error) {
+			MachineID := uint16(node.Type)<<8 | uint16(node.Id)
+			return MachineID, nil
+		},
+		CheckMachineID: nil,
+	})
 }
 
 // 通知客户端
@@ -125,6 +151,7 @@ func DefaultBroadcastHandler(head *pb.Head, buf []byte) {
 }
 
 func SendResponse(head *pb.Head, rsp proto.Message) error {
+	mlog.Debug(head, "SendResponse head:%v, rsp:%v", head, rsp)
 	// 同步请求
 	if len(head.Reply) > 0 {
 		return Response(head, rsp)
