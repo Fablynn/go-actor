@@ -200,7 +200,22 @@ framework.Send(newHead , req)
 携带自动返回的异步通讯
 
 ```
-head := framework.NewHead(dst, pb.RouterType, uint64(actorId), actorName, FuncName)
+// demoActMgr
+dst := framework.NewDemoRouter(uint64(demo.id), "targetMgr", "targetFunc")
+head := framework.NewHead(dst, pb.RouterType, uint64(actorId), demoActMgr, FuncName)
+
+// 异步请求方法
+func (m *targetMgr) targetFunc(head *pb.Head, req *pb.GetTargetFuncReq, rsp *pb.GetTargetFuncRsp) error {
+    // about get rsp ....
+    rsp.data = m.data
+	return nil
+}
+
+// 异步返回处理
+func (d *demoActMgr) FuncName(head *pb.Head, rsp *pb.GetTargetFuncRsp) error{
+    // get rsp data todo ...
+	return nil
+}
 ```
 
 同服务异步通讯
