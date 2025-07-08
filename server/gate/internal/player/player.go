@@ -26,8 +26,7 @@ type Player struct {
 func NewPlayer(conn *websocket.Conn, fr domain.IFrame) *Player {
 	p := &Player{}
 	p.Actor.Register(p)
-	p.inet = network.NewSocket(conn, 1024*1024)
-	p.inet.Register(fr)
+	p.inet = network.NewSocket(conn, fr)
 	return p
 }
 
@@ -73,8 +72,10 @@ func (p *Player) Start() {
 }
 
 func (p *Player) Stop() {
+	uid := p.GetId()
 	p.inet.Close()
 	p.Actor.Stop()
+	mlog.Infof("关闭玩家actor(%d)", uid)
 }
 
 // 向客户端发送数据

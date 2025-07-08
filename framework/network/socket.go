@@ -5,52 +5,51 @@ import (
 	"go-actor/common/pb"
 	"go-actor/framework/domain"
 	"go-actor/library/uerror"
+	"go-actor/library/util"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-// frame组成部分说明： len(四个字节表示包长) | cmd（4byte） | uid(8byte) | routeId(8byte) | seq(4byte) |version(4byte) | extra(4byte) | body(数据包体)
-// frame组成： 4+head+body    第一个4字节存储 head+body的总长度长度
+const (
+	CLIENT_MAX_PACKET = 10 * 1024 // 10kb
+)
+
+var (
+	pools = util.PoolSlice[byte](CLIENT_MAX_PACKET)
+)
+
+func get() []byte {
+	return pools.Get().([]byte)
+}
+
+func put(buf []byte) {
+	pools.Put(buf)
+}
+
 type Socket struct {
 	frame   domain.IFrame   // 帧协议
 	maxSize int             // 最大包长限制
 	conn    *websocket.Conn // 通信
-	rbytes  []byte          // 接受缓存
-	sbytes  []byte          // 接受缓存
+	wbytes  []byte          // 接受缓存
 }
 
-func NewSocket(conn *websocket.Conn, maxSize int) *Socket {
+func NewSocket(conn *websocket.Conn, frame domain.IFrame) *Socket {
 	return &Socket{
-		maxSize: maxSize,
+		frame:   frame,
+		maxSize: CLIENT_MAX_PACKET,
 		conn:    conn,
-		rbytes:  make([]byte, maxSize/2),
-		sbytes:  make([]byte, maxSize/2),
+		wbytes:  get(),
 	}
-}
-
-func (d *Socket) Register(frame domain.IFrame) {
-	d.frame = frame
 }
 
 func (d *Socket) Close() error {
+	defer put(d.wbytes)
 	return d.conn.Close()
 }
 
-func (d *Socket) newRead(size int) (ret []byte) {
-	if cap(d.sbytes) < size {
-		d.sbytes = make([]byte, size)
-	}
-	ret = d.sbytes[:size]
-	return
-}
-
-func (d *Socket) newSend(size int) (ret []byte) {
-	if cap(d.rbytes) < size {
-		d.rbytes = make([]byte, size)
-	}
-	ret = d.rbytes[:size]
-	return
+func (d *Socket) newWrite(size int) []byte {
+	return d.wbytes[:size]
 }
 
 // 设置接受超时时间，避免阻塞
@@ -74,12 +73,12 @@ func (d *Socket) SetWriteExpire(expire int64) {
 func (d *Socket) Write(pack *pb.Packet) error {
 	// 获取数据帧长度
 	ll := d.frame.GetSize(pack)
-	if ll > d.maxSize {
+	if ll+4 > d.maxSize {
 		return uerror.New(1, pb.ErrorCode_MAX_SIZE_LIMIT, "超过最大包长限制: %d", d.maxSize)
 	}
 
 	// 组包
-	buf := d.newSend(ll + 4)
+	buf := d.newWrite(ll + 4)
 	binary.BigEndian.PutUint32(buf, uint32(ll))
 	if err := d.frame.Encode(pack, buf[4:]); err != nil {
 		return err

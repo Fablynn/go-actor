@@ -81,7 +81,6 @@ type IFrame interface {
 
 // (前后端)网络接口
 type INet interface {
-	Register(IFrame)        // 设置数据帧
 	SetReadExpire(int64)    // 设置读超时
 	SetWriteExpire(int64)   // 设置写超时
 	Write(*pb.Packet) error // 发送数据包

@@ -70,8 +70,7 @@ func (p *ClientPlayer) Login() error {
 		actor.SendMsg(head, p.uid)
 		return err
 	}
-	p.conn = network.NewSocket(ws, 1024*1024)
-	p.conn.Register(&Frame{node: p.node})
+	p.conn = network.NewSocket(ws, &Frame{node: p.node})
 
 	// 设置 session
 	tok, err := token.GenToken(&token.Token{Uid: p.uid})
