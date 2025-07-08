@@ -103,6 +103,7 @@ func (p *Player) Dispatcher() {
 		pack := &pb.Packet{}
 		if err := p.inet.Read(pack); err != nil {
 			mlog.Errorf("读取数据包失败, websocket异常中断: %v", err)
+			actor.SendMsg(&pb.Head{ActorName: "GatePlayerMgr", FuncName: "Kick", Uid: p.GetId()})
 			return
 		}
 
