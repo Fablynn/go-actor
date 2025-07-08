@@ -63,8 +63,8 @@ func (n *Nats) replyChannel(t pb.NodeType, id int32) string {
 func (n *Nats) SetBroadcastHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 	if _, err := n.client.Subscribe(n.broadcastChannel(node.Type), func(msg *nats.Msg) {
 		// 接受 nats消息
-		pack := &pb.Packet{}
-		if err := proto.Unmarshal(msg.Data, pack); err != nil {
+		pack := pb.Packet{}
+		if err := proto.Unmarshal(msg.Data, &pack); err != nil {
 			mlog.Errorf("nats解析packet包失败: %v", err)
 			return
 		}
@@ -82,8 +82,8 @@ func (n *Nats) SetBroadcastHandler(node *pb.Node, ff func(*pb.Head, []byte)) err
 func (n *Nats) SetSendHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 	if _, err := n.client.Subscribe(n.sendChannel(node.Type, node.Id), func(msg *nats.Msg) {
 		// 接受 nats消息
-		pack := &pb.Packet{}
-		if err := proto.Unmarshal(msg.Data, pack); err != nil {
+		pack := pb.Packet{}
+		if err := proto.Unmarshal(msg.Data, &pack); err != nil {
 			mlog.Errorf("nats解析packet包失败: %v", err)
 			return
 		}
@@ -109,8 +109,8 @@ func (n *Nats) SetSendHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 func (n *Nats) SetReplyHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 	if _, err := n.client.Subscribe(n.replyChannel(node.Type, node.Id), func(msg *nats.Msg) {
 		// 接受 nats消息
-		pack := &pb.Packet{}
-		if err := proto.Unmarshal(msg.Data, pack); err != nil {
+		pack := pb.Packet{}
+		if err := proto.Unmarshal(msg.Data, &pack); err != nil {
 			mlog.Errorf("nats解析packet包失败: %v", err)
 			return
 		}
