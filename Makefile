@@ -40,7 +40,7 @@ $(LINUX): %_linux: %
 
 $(BUILD): %_build: %
 	@echo "Building $*"
-	go build ${GCFLAGS} -o ${OUTPUT}/$* ${SERVER_PATH}/$*
+	go build ${GCFLAGS} -race -o ${OUTPUT}/$* ${SERVER_PATH}/$*
 
 
 #=================================proto转go代码========================================

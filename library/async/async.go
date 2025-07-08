@@ -16,10 +16,11 @@ type Async struct {
 
 func NewAsync() *Async {
 	return &Async{
-		status: 0,
-		queue:  NewQueue[func()](),
-		notify: make(chan struct{}, 1),
-		exit:   make(chan struct{}, 1),
+		WaitGroup: sync.WaitGroup{},
+		status:    0,
+		queue:     NewQueue[func()](),
+		notify:    make(chan struct{}, 1),
+		exit:      make(chan struct{}, 1),
 	}
 }
 
@@ -53,7 +54,7 @@ func (d *Async) Stop() {
 	atomic.StoreInt32(&d.status, 0)
 	d.id = 0
 	// 等待停止
-	d.exit <- struct{}{}
+	close(d.exit)
 	d.Wait()
 }
 
@@ -61,6 +62,7 @@ func (d *Async) Start() {
 	if atomic.LoadInt32(&d.status) > 0 {
 		return
 	}
+	d.Add(1)
 	atomic.AddInt32(&d.status, 1)
 	SafeGo(nil, d.run)
 }
@@ -72,7 +74,6 @@ func (d *Async) run() {
 		}
 		d.Done()
 	}()
-	d.Add(1)
 
 	for {
 		select {

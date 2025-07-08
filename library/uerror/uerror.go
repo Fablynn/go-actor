@@ -16,7 +16,7 @@ type UError struct {
 }
 
 func NEW(code pb.ErrorCode, head *pb.Head, format string, args ...interface{}) *UError {
-	str := fmt.Sprintf("head:%v, %s", head, format)
+	str := fmt.Sprintf("SendType:%s, Src:%v, Dst:%v, Uid:%d, Seq:%d, Cmd:%d, Reply:%s", head.SendType, head.Src, head.Dst, head.Uid, head.Seq, head.Cmd, head.Reply, format)
 	return &UError{
 		code: code,
 		msg:  fmt.Sprintf(str, args...),

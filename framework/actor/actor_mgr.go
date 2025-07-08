@@ -30,7 +30,6 @@ func (d *ActorMgr) GetActor(id uint64) domain.IActor {
 	if ok {
 		return actor
 	}
-	mlog.Infof("actors :%+v id:[%v] actor[%v] ok[%v] \n", d.actors, id, actor, ok)
 	return nil
 }
 

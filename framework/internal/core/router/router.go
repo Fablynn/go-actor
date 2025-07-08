@@ -12,7 +12,15 @@ type Router struct {
 }
 
 func (d *Router) GetData() *pb.Router {
-	return d.Router
+	return &pb.Router{
+		Gate:    atomic.LoadInt32(&d.Gate),
+		Game:    atomic.LoadInt32(&d.Game),
+		Room:    atomic.LoadInt32(&d.Room),
+		Match:   atomic.LoadInt32(&d.Match),
+		Db:      atomic.LoadInt32(&d.Db),
+		Builder: atomic.LoadInt32(&d.Builder),
+		Gm:      atomic.LoadInt32(&d.Gm),
+	}
 }
 
 func (d *Router) IsExpire(now, ttl int64) bool {
@@ -38,47 +46,30 @@ func (d *Router) Get(nodeType pb.NodeType) int32 {
 }
 
 func (d *Router) Set(nodeType pb.NodeType, nodeId int32) {
-	flag := false
-	switch nodeType {
-	case pb.NodeType_NodeTypeGate:
-		if !atomic.CompareAndSwapInt32(&d.Gate, nodeId, nodeId) {
+	if nodeId > 0 {
+		switch nodeType {
+		case pb.NodeType_NodeTypeGate:
 			atomic.StoreInt32(&d.Gate, nodeId)
-			flag = true
-		}
-	case pb.NodeType_NodeTypeRoom:
-		if !atomic.CompareAndSwapInt32(&d.Room, nodeId, nodeId) {
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
+		case pb.NodeType_NodeTypeRoom:
 			atomic.StoreInt32(&d.Room, nodeId)
-			flag = true
-		}
-	case pb.NodeType_NodeTypeMatch:
-		if !atomic.CompareAndSwapInt32(&d.Match, nodeId, nodeId) {
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
+		case pb.NodeType_NodeTypeMatch:
 			atomic.StoreInt32(&d.Match, nodeId)
-			flag = true
-		}
-	case pb.NodeType_NodeTypeDb:
-		if !atomic.CompareAndSwapInt32(&d.Db, nodeId, nodeId) {
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
+		case pb.NodeType_NodeTypeDb:
 			atomic.StoreInt32(&d.Db, nodeId)
-			flag = true
-		}
-	case pb.NodeType_NodeTypeBuilder:
-		if !atomic.CompareAndSwapInt32(&d.Builder, nodeId, nodeId) {
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
+		case pb.NodeType_NodeTypeBuilder:
 			atomic.StoreInt32(&d.Builder, nodeId)
-			flag = true
-		}
-	case pb.NodeType_NodeTypeGm:
-		if !atomic.CompareAndSwapInt32(&d.Gm, nodeId, nodeId) {
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
+		case pb.NodeType_NodeTypeGm:
 			atomic.StoreInt32(&d.Gm, nodeId)
-			flag = true
-		}
-	case pb.NodeType_NodeTypeGame:
-		if !atomic.CompareAndSwapInt32(&d.Game, nodeId, nodeId) {
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
+		case pb.NodeType_NodeTypeGame:
 			atomic.StoreInt32(&d.Game, nodeId)
-			flag = true
+			atomic.StoreInt64(&d.updateTime, time.Now().Unix())
 		}
-
-	}
-	if flag {
-		atomic.StoreInt64(&d.updateTime, time.Now().Unix())
 	}
 }
 
