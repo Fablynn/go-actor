@@ -41,6 +41,8 @@ func (d *Router) Get(nodeType pb.NodeType) int32 {
 		return atomic.LoadInt32(&d.Builder)
 	case pb.NodeType_NodeTypeGm:
 		return atomic.LoadInt32(&d.Gm)
+	case pb.NodeType_NodeTypeGame:
+		return atomic.LoadInt32(&d.Game)
 	}
 	return d.Gate
 }
@@ -74,28 +76,13 @@ func (d *Router) Set(nodeType pb.NodeType, nodeId int32) {
 }
 
 func (d *Router) SetData(info *pb.Router) {
-	if info == nil {
-		return
-	}
-	if info.Gate > 0 {
+	if info != nil {
 		d.Set(pb.NodeType_NodeTypeGate, info.Gate)
-	}
-	if info.Room > 0 {
 		d.Set(pb.NodeType_NodeTypeRoom, info.Room)
-	}
-	if info.Match > 0 {
 		d.Set(pb.NodeType_NodeTypeMatch, info.Match)
-	}
-	if info.Db > 0 {
 		d.Set(pb.NodeType_NodeTypeDb, info.Db)
-	}
-	if info.Builder > 0 {
 		d.Set(pb.NodeType_NodeTypeBuilder, info.Builder)
-	}
-	if info.Gm > 0 {
 		d.Set(pb.NodeType_NodeTypeGm, info.Gm)
-	}
-	if info.Gate > 0 {
-		d.Set(pb.NodeType_NodeTypeGame, info.Gate)
+		d.Set(pb.NodeType_NodeTypeGame, info.Game)
 	}
 }

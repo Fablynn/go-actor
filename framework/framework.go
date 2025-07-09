@@ -252,6 +252,7 @@ func NewHead(dst *pb.NodeRouter, uid uint64, rt pb.RouterType, id uint64, fs ...
 
 func SwapToDb(head *pb.Head, id uint64, fs ...string) *pb.Head {
 	head.Dst, head.Src = head.Src, head.Dst
+	head.Dst.NodeId = 0
 	head.Dst.NodeType = pb.NodeType_NodeTypeDb
 	head.Dst.RouterType = pb.RouterType_RouterTypeDataType
 	head.Dst.ActorId = id
@@ -262,6 +263,7 @@ func SwapToDb(head *pb.Head, id uint64, fs ...string) *pb.Head {
 
 func SwapToGame(head *pb.Head, id uint64, fs ...string) *pb.Head {
 	head.Dst, head.Src = head.Src, head.Dst
+	head.Dst.NodeId = 0
 	head.Dst.NodeType = pb.NodeType_NodeTypeGame
 	head.Dst.RouterType = pb.RouterType_RouterTypeUid
 	head.Dst.ActorId = id
@@ -272,6 +274,7 @@ func SwapToGame(head *pb.Head, id uint64, fs ...string) *pb.Head {
 
 func SwapToRoom(head *pb.Head, id uint64, fs ...string) *pb.Head {
 	head.Dst, head.Src = head.Src, head.Dst
+	head.Dst.NodeId = 0
 	head.Dst.NodeType = pb.NodeType_NodeTypeRoom
 	head.Dst.RouterType = pb.RouterType_RouterTypeRoomId
 	head.Dst.ActorId = id
@@ -282,6 +285,7 @@ func SwapToRoom(head *pb.Head, id uint64, fs ...string) *pb.Head {
 
 func SwapToGate(head *pb.Head, id uint64, fs ...string) *pb.Head {
 	head.Dst, head.Src = head.Src, head.Dst
+	head.Dst.NodeId = 0
 	head.Dst.NodeType = pb.NodeType_NodeTypeGate
 	head.Dst.RouterType = pb.RouterType_RouterTypeUid
 	head.Dst.ActorId = id
@@ -292,6 +296,7 @@ func SwapToGate(head *pb.Head, id uint64, fs ...string) *pb.Head {
 
 func SwapToMatch(head *pb.Head, id uint64, fs ...string) *pb.Head {
 	head.Dst, head.Src = head.Src, head.Dst
+	head.Dst.NodeId = 0
 	head.Dst.NodeType = pb.NodeType_NodeTypeMatch
 	head.Dst.RouterType = pb.RouterType_RouterTypeDataType
 	head.Dst.ActorId = id

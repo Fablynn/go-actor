@@ -49,7 +49,6 @@ type ICluster interface {
 	Get(pb.NodeType, int32) *pb.Node     // 获取节点
 	Del(pb.NodeType, int32) bool         // 删除节点
 	Add(*pb.Node) bool                   // 添加节点
-	List(pb.NodeType) []*pb.Node         // 获取节点列表
 	Random(pb.NodeType, uint64) *pb.Node // 随机节点
 }
 
