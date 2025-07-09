@@ -109,7 +109,7 @@ func (d *Service) Broadcast(head *pb.Head, args ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	return d.busObj.Broadcast(head, buf)
+	return d.busObj.Broadcast(*head, buf)
 }
 
 func (d *Service) Send(head *pb.Head, args ...interface{}) error {
@@ -138,7 +138,7 @@ func (d *Service) Send(head *pb.Head, args ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	return d.busObj.Send(head, buf)
+	return d.busObj.Send(*head, buf)
 }
 
 func (d *Service) Request(head *pb.Head, msg interface{}, reply proto.Message) error {
@@ -168,7 +168,7 @@ func (d *Service) Request(head *pb.Head, msg interface{}, reply proto.Message) e
 	if err != nil {
 		return err
 	}
-	return d.busObj.Request(head, buf, reply)
+	return d.busObj.Request(*head, buf, reply)
 }
 
 func (d *Service) Response(head *pb.Head, msg interface{}) error {
@@ -182,7 +182,7 @@ func (d *Service) Response(head *pb.Head, msg interface{}) error {
 	if err != nil {
 		return err
 	}
-	return d.busObj.Response(head, buf)
+	return d.busObj.Response(*head, buf)
 }
 
 func (d *Service) SendToClient(head *pb.Head, msg proto.Message) error {
@@ -285,7 +285,7 @@ func (d *Service) sendToClient(head *pb.Head, buf []byte) error {
 		}
 	}
 	mlog.Debug(head, "发送消息到客户端: %d -> %v", len(buf), buf)
-	return d.busObj.Send(head, buf)
+	return d.busObj.Send(*head, buf)
 }
 
 func (d *Service) checkDst(head *pb.Head) error {

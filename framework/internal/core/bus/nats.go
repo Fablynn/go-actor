@@ -134,9 +134,9 @@ func (n *Nats) SetReplyHandler(node *pb.Node, ff func(*pb.Head, []byte)) error {
 }
 
 // 发送广播
-func (d *Nats) Broadcast(head *pb.Head, msg []byte) error {
-	reset(head, pb.SendType_BROADCAST)
-	msgBuf, err := proto.Marshal(&pb.Packet{Head: head, Body: msg})
+func (d *Nats) Broadcast(head pb.Head, msg []byte) error {
+	reset(&head, pb.SendType_BROADCAST)
+	msgBuf, err := proto.Marshal(&pb.Packet{Head: &head, Body: msg})
 	if err != nil {
 		return uerror.New(1, pb.ErrorCode_MARSHAL_FAILED, "nats待发送的msg序列化失败: %v", err)
 	}
@@ -144,9 +144,9 @@ func (d *Nats) Broadcast(head *pb.Head, msg []byte) error {
 }
 
 // 发送请求
-func (d *Nats) Send(head *pb.Head, msg []byte) error {
-	reset(head, pb.SendType_POINT)
-	msgBuf, err := proto.Marshal(&pb.Packet{Head: head, Body: msg})
+func (d *Nats) Send(head pb.Head, msg []byte) error {
+	reset(&head, pb.SendType_POINT)
+	msgBuf, err := proto.Marshal(&pb.Packet{Head: &head, Body: msg})
 	if err != nil {
 		return uerror.New(1, pb.ErrorCode_MARSHAL_FAILED, "nats待发送的msg序列化失败: %v", err)
 	}
@@ -154,17 +154,17 @@ func (d *Nats) Send(head *pb.Head, msg []byte) error {
 }
 
 // 发送同步请求
-func (d *Nats) Request(head *pb.Head, req []byte, rsp proto.Message) error {
-	reset(head, pb.SendType_POINT)
-	msgBuf, err := proto.Marshal(&pb.Packet{Head: head, Body: req})
+func (d *Nats) Request(head pb.Head, req []byte, rsp proto.Message) error {
+	reset(&head, pb.SendType_POINT)
+	msgBuf, err := proto.Marshal(&pb.Packet{Head: &head, Body: req})
 	if err != nil {
-		return uerror.New(1, pb.ErrorCode_MARSHAL_FAILED, "nats.Request序列化失败: %v %v", head, err)
+		return uerror.New(1, pb.ErrorCode_MARSHAL_FAILED, "nats.Request序列化失败: %v", err)
 	}
 
 	// 发送不同请求
 	resp, err := d.client.Request(d.replyChannel(head.Dst.NodeType, head.Dst.NodeId), msgBuf, 3000*time.Millisecond)
 	if err != nil {
-		return uerror.New(1, pb.ErrorCode_REQUEST_FAIELD, "nats.Request发送请求失败: %v %v", head, err)
+		return uerror.New(1, pb.ErrorCode_REQUEST_FAIELD, "nats.Request发送请求失败: %v", err)
 	}
 
 	if err := proto.Unmarshal(resp.Data, rsp); err != nil {
@@ -174,8 +174,8 @@ func (d *Nats) Request(head *pb.Head, req []byte, rsp proto.Message) error {
 }
 
 // 发送同步应答
-func (d *Nats) Response(head *pb.Head, msg []byte) error {
-	reset(head, pb.SendType_POINT)
+func (d *Nats) Response(head pb.Head, msg []byte) error {
+	reset(&head, pb.SendType_POINT)
 	return d.client.Publish(head.Reply, msg)
 }
 

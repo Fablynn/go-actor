@@ -65,10 +65,10 @@ type IBus interface {
 	SetBroadcastHandler(*pb.Node, func(*pb.Head, []byte)) error // 监听消息
 	SetSendHandler(*pb.Node, func(*pb.Head, []byte)) error      // 监听消息
 	SetReplyHandler(*pb.Node, func(*pb.Head, []byte)) error     // 监听消息
-	Broadcast(*pb.Head, []byte) error                           // 广播消息
-	Send(*pb.Head, []byte) error                                // 发送消息
-	Request(*pb.Head, []byte, proto.Message) error              // 请求应答消息
-	Response(*pb.Head, []byte) error                            // 响应消息
+	Broadcast(pb.Head, []byte) error                            // 广播消息
+	Send(pb.Head, []byte) error                                 // 发送消息
+	Request(pb.Head, []byte, proto.Message) error               // 请求应答消息
+	Response(pb.Head, []byte) error                             // 响应消息
 	Close()                                                     // 关闭网络
 }
 
