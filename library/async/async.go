@@ -52,10 +52,9 @@ func (d *Async) Stop() {
 		return
 	}
 	atomic.StoreInt32(&d.status, 0)
-	d.id = 0
-	// 等待停止
 	close(d.exit)
 	d.Wait()
+	d.id = 0
 }
 
 func (d *Async) Start() {
