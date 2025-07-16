@@ -3,6 +3,7 @@ package filter
 import (
 	"fmt"
 	"go-actor/common/pb"
+	"strings"
 )
 
 var (
@@ -37,5 +38,13 @@ func Filter(head *pb.Head, format string) string {
 	if _, ok := filters[head.FuncName]; ok {
 		return format
 	}
-	return fmt.Sprintf("SendType:%s, Src:%v, Dst:%v, Uid:%d, Seq:%d, Cmd:%d, Reply:%s", head.SendType, head.Src, head.Dst, head.Uid, head.Seq, head.Cmd, head.Reply, format)
+	return fmt.Sprintf("%s->%s, SendType:%s, Uid:%d, Seq:%d, Cmd:%d, Reply:%s | %s", ToString(head.Src), ToString(head.Dst), head.SendType, head.Uid, head.Seq, head.Cmd, head.Reply, format)
+}
+
+func ToString(nn *pb.NodeRouter) string {
+	if nn == nil {
+		return ""
+	}
+	nodeType := strings.TrimPrefix(nn.NodeType.String(), "NodeType")
+	return fmt.Sprintf("%s%d(%d).%s.%s(%d)", nodeType, nn.NodeId, nn.RouterType, nn.ActorName, nn.FuncName, nn.ActorId)
 }
