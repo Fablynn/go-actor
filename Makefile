@@ -3,6 +3,7 @@ SYSTEM=$(shell go env GOOS)
 
 CONFIG_PATH=./gameconf
 XLSX_PATH=${CONFIG_PATH}/xlsx
+RPG_PATH=${CONFIG_PATH}/rpg
 PROTO_PATH=./protocol
 CFG_CODE_PATH=./common/config/repository
 PB_GO_PATH=./common/pb
@@ -50,6 +51,7 @@ config:
 	@echo "gen config code..."
 	@rm -rf ${CFG_CODE_PATH}
 	@make pb
+	@go run ./tools/cfgtool/main.go -xlsx=${RPG_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
 	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
 	@make pbtool
 
