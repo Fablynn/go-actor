@@ -10,6 +10,7 @@ import (
 	"go-actor/framework/internal/core/router"
 	"go-actor/library/encode"
 	"go-actor/library/mlog"
+	"go-actor/library/pprof"
 	"go-actor/library/uerror"
 	"strings"
 	"sync/atomic"
@@ -38,6 +39,7 @@ func NewService(node *pb.Node, server *yaml.ServerConfig, cfg *yaml.Config) (*Se
 	case "release":
 		envType = pb.EnvType_EnvTypeRelease
 	}
+	pprof.Init("", server.Port+10000)
 
 	// 服务发现
 	dis, err := discovery.NewEtcd(cfg.Etcd)
