@@ -1,0 +1,14 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "packet.proto";
+
+message GenRoomIdReq {
+
+}
+
+message GenRoomIdRsp {
+  RspHead head  = 1;  // 响应头
+}

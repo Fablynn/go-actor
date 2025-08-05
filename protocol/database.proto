@@ -1,0 +1,13 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "global_enum.proto";
+
+// ----------------------------builder生成器数据--------------------------
+//@pbtool:hash|go_actor|generator|id@pb.GeneratorType|#房间id生成器
+message GeneratorData {
+  GeneratorType id   = 1;  // 生成器ID
+  uint32        incr = 2;  // 增量
+}

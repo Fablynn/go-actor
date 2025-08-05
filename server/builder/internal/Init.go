@@ -1,18 +1,16 @@
 package internal
 
 import (
-	"go-actor/server/builder/internal/texas"
+	"go-actor/library/util"
+	"go-actor/server/builder/internal/gen"
 )
 
 var (
-	genMgr = texas.NewBuilderTexasGenerator()
+	genMgr = gen.NewGenerator()
 )
 
-func Init() error {
-	if err := genMgr.Load(); err != nil {
-		return err
-	}
-	return nil
+func Init() {
+	util.Must(genMgr.Init())
 }
 
 func Close() {

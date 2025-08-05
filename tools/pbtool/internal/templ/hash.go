@@ -16,7 +16,7 @@ package {{$pkg}}
 
 import (
 	"fmt"
-	"go-actor/common/dao/internal/manager"
+	"go-actor/common/redis/internal/manager"
 	"go-actor/common/pb"
 	"go-actor/library/mlog"
 	"go-actor/library/uerror"
@@ -40,7 +40,7 @@ func HGetAll({{.Kargs}}) (ret map[string]*pb.{{$pb}}, err error) {
 	// 获取redis连接
 	client := manager.GetRedis(DBNAME)
 	if client == nil {
-		err = uerror.New(1, pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
+		err = uerror.New( pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
 		return
 	}
 	key := GetKey({{.Kvalues}})
@@ -74,7 +74,7 @@ func HMGet({{.Kargs}} {{if .Keys}},{{end}} fields ...string) (map[string]*pb.{{$
 	// 获取redis连接
 	client := manager.GetRedis(DBNAME)
 	if client == nil {
-		return nil, uerror.New(1, pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
+		return nil, uerror.New( pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
 	}
 	key := GetKey({{.Kvalues}})
 
@@ -106,7 +106,7 @@ func HMSet({{.Kargs}} {{if .Keys}},{{end}} data map[string]*pb.{{$pb}}) error {
 	// 获取redis连接
 	client := manager.GetRedis(DBNAME)
 	if client == nil {
-		return uerror.New(1, pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
+		return uerror.New( pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
 	}
 	key := GetKey({{.Kvalues}})
 
@@ -126,7 +126,7 @@ func HGet({{.Args}}) (*pb.{{$pb}}, bool, error) {
 	// 获取redis连接
 	client := manager.GetRedis(DBNAME)
 	if client == nil {
-		return nil, false, uerror.New(1, pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
+		return nil, false, uerror.New( pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
 	}
 	key := GetKey({{.Kvalues}})
 	field := GetField({{.Fvalues}})
@@ -149,7 +149,7 @@ func HSet({{.Args}}, data *pb.{{$pb}}) error {
 	// 获取redis连接
 	client := manager.GetRedis(DBNAME)
 	if client == nil {
-		return uerror.New(1, pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
+		return uerror.New( pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
 	}
 	key := GetKey({{.Kvalues}})
 	field := GetField({{.Fvalues}})
@@ -165,10 +165,13 @@ func HSet({{.Args}}, data *pb.{{$pb}}) error {
 }
 
 func HDel({{.Kargs}} {{if .Keys}},{{end}} fields ...string) error {
+	if len(fields) <= 0 {
+		return nil	
+	}
 	// 获取redis连接
 	client := manager.GetRedis(DBNAME)
 	if client == nil {
-		return uerror.New(1, pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
+		return uerror.New( pb.ErrorCode_CLIENT_NOT_FOUND, "redis数据库不存在: %s", DBNAME)
 	}
 	key := GetKey({{.Kvalues}})
 	return client.HDel(key, fields...)

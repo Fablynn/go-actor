@@ -6,13 +6,13 @@ XLSX_PATH=${CONFIG_PATH}/rpg
 PROTO_PATH=./protocol
 CFG_CODE_PATH=./common/config/repository
 PB_GO_PATH=./common/pb
-REDIS_CODE_PATH=./common/dao/repository/redis
+REDIS_CODE_PATH=./common/redis/repository/
 SERVER_PATH=./server
 OUTPUT=./output
 
 ## 需要编译的服务
 TARGET_ENV=local
-TARGET=gate client game
+TARGET=gate client game builder
 LINUX=$(TARGET:%=%_linux)
 BUILD=$(TARGET:%=%_build)
 START=$(TARGET:%=%_start)
