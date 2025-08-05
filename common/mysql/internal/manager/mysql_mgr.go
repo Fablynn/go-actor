@@ -1,11 +1,11 @@
 package manager
 
 import (
-	"go-actor/common/dao/internal/mysql"
+	"go-actor/common/mysql/internal/client"
 	"go-actor/common/pb"
 	"go-actor/common/yaml"
-	"go-actor/library/async"
 	"go-actor/library/mlog"
+	"go-actor/library/safe"
 	"go-actor/library/uerror"
 	"sync"
 	"time"
@@ -13,14 +13,14 @@ import (
 
 var (
 	mysqlPool = &MysqlPool{
-		pool:   make(map[string]*mysql.OrmSql),
+		pool:   make(map[string]*client.OrmSql),
 		tables: make(map[string][]interface{}),
 	}
 )
 
 type MysqlPool struct {
 	mutex  sync.RWMutex
-	pool   map[string]*mysql.OrmSql
+	pool   map[string]*client.OrmSql
 	tables map[string][]interface{}
 }
 
@@ -34,21 +34,21 @@ func RegisterTable(dbname string, tables ...interface{}) {
 
 func InitMysql(cfgs map[int32]*yaml.DbConfig) error {
 	if len(cfgs) <= 0 {
-		return uerror.New(1, pb.ErrorCode_CONFIG_NOT_FOUND, "mysql配置为空")
+		return uerror.New(pb.ErrorCode_CONFIG_NOT_FOUND, "mysql配置为空")
 	}
 	// 初始化
 	for _, cfg := range cfgs {
-		client := mysql.NewOrmSql(cfg)
+		client := client.NewOrmSql(cfg)
 		if err := client.Connect(mysqlPool.tables[cfg.DbName]...); err != nil {
-			return uerror.New(1, pb.ErrorCode_CONNECT_FAILED, "mysql连接失败, cfg:%v, error:%v", cfg, err)
+			return uerror.New(pb.ErrorCode_CONNECT_FAILED, "mysql连接失败, cfg:%v, error:%v", cfg, err)
 		}
 		mysqlPool.pool[cfg.DbName] = client
 	}
-	async.SafeGo(mlog.Fatalf, checkMysql)
+	safe.Go(checkMysql)
 	return nil
 }
 
-func GetMysql(dbname string) *mysql.OrmSql {
+func GetMysql(dbname string) *client.OrmSql {
 	mysqlPool.mutex.RLock()
 	client, ok := mysqlPool.pool[dbname]
 	mysqlPool.mutex.RUnlock()
@@ -65,7 +65,7 @@ func checkMysql() {
 	for {
 		<-tt.C
 		// 获取所有连接
-		tmps := []*mysql.OrmSql{}
+		tmps := []*client.OrmSql{}
 		mysqlPool.mutex.RLock()
 		for _, client := range mysqlPool.pool {
 			tmps = append(tmps, client)

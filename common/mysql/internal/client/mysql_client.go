@@ -1,4 +1,4 @@
-package mysql
+package client
 
 import (
 	"fmt"
@@ -36,7 +36,7 @@ func (o *OrmSql) Connect(tables ...interface{}) error {
 	// 创建数据库引擎组
 	eng, err := xorm.NewEngineGroup("mysql", o.dsn)
 	if err != nil {
-		return uerror.New(1, pb.ErrorCode_CONNECT_FAILED, "mysql连接失败:%v", err)
+		return uerror.New(pb.ErrorCode_CONNECT_FAILED, "mysql连接失败:%v", err)
 	}
 	eng.SetMaxIdleConns(10)
 	eng.SetMaxOpenConns(200)
@@ -47,7 +47,7 @@ func (o *OrmSql) Connect(tables ...interface{}) error {
 	// 查看连接是否联通
 	if err := eng.Ping(); err != nil {
 		eng.Close()
-		return uerror.New(1, pb.ErrorCode_PING_FAILED, "mysql连接失败:%v", err)
+		return uerror.New(pb.ErrorCode_PING_FAILED, "mysql连接失败:%v", err)
 	}
 	if o.engine != nil {
 		o.engine.Close()
