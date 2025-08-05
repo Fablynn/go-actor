@@ -70,7 +70,7 @@ func (p *Player) CheckToken() error {
 	p.createTime = now
 	p.version = pack.Head.Version
 	p.extra = pack.Head.Extra
-	return cluster.SendToDb(pack.Head, "PlayerDataMgr.Login", req)
+	return cluster.SendToGame(pack.Head, "PlayerDataMgr.Login", req)
 }
 
 func (p *Player) Kick(extra uint32) {

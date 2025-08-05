@@ -3,7 +3,7 @@ mysql:
     dbname: poker
     user: root
     password: 123456
-    host: localhost:13306
+    host: 127.0.0.1:13306
     slave:
 
 redis:
@@ -12,38 +12,42 @@ redis:
     db: 1
     user: default
     password: 123456
-    host: localhost:16379
+    host: 127.0.0.1:16379
 
 mongodb:
   1:
     dbname: poker
     user: root
     password: 123456
-    host: localhost:17017
+    host: 127.0.0.1:17017
     slave:
       1:
         dbname: poker
         user: root
         password: 123456
-        host: localhost:17017
+        host: 127.0.0.1:17017
 
 etcd:
-  topic: poker_server/etcd
+  topic: poker_server/local/etcd
   endpoints:
-    - http://localhost:12379
+    - http://127.0.0.1:12379
+
 
 nats:
-  topic: poker_server/nats
-  endpoints: localhost:14222
+  topic: poker_server/local/nats
+  endpoints: 127.0.0.1:14222
+
+data:
+  is_remote: false
+  path: ./data
+  topic: poker/config
+  endpoints:
+    - http://127.0.0.1:12379
 
 common:
+  pprof: false # 是否开启pprof功能
   env: develop  # develop, beta, release
-  config_is_remote: false
-  config_path: ./gameconf/data
-  config_topic: poker/config
-  router_expire: 90000
-  discovery_expire: 20
-  secret_key: gH7%kL9!qNGsmdq1*FpV6&nZ8@xJ0^yT1
+  secret_key: gH7%kL9!qW2#3xs*FpAX&nZ8@xJ0^yT1
 
 client:
   1:
@@ -51,7 +55,7 @@ client:
     discovery_ttl: 20
     log_level: trace # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10101
     http_port: 22345
 
@@ -59,9 +63,9 @@ gate:
   1:
     router_ttl: 1800
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10101
     http_port: 10001
 
@@ -69,53 +73,87 @@ room:
   1:
     router_ttl: 1800
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10201
+  2:
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace  # info, debug, warn, error, fatal
+    log_path: ./log
+    ip: 127.0.0.1
+    port: 10202
 
 match:
   1:
     router_ttl: 1800
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10301
+  2:
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace  # info, debug, warn, error, fatal
+    log_path: ./log
+    ip: 127.0.0.1
+    port: 10302
 
 db:
   1:
-    router_ttl: 1800
+    router_ttl: 90000
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10401
-    
+  2:
+    router_ttl: 90000
+    discovery_ttl: 20
+    log_level: trace  # info, debug, warn, error, fatal
+    log_path: ./log
+    ip: 127.0.0.1
+    port: 10402
+
 builder:
   1:
-    router_ttl: 1800
+    router_ttl: 90000
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10501
+  2:
+    router_ttl: 90000
+    discovery_ttl: 20
+    log_level: trace  # info, debug, warn, error, fatal
+    log_path: ./log
+    ip: 127.0.0.1
+    port: 10502
 
 game:
   1:
     router_ttl: 1800
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10601
+  2:
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace  # info, debug, warn, error, fatal
+    log_path: ./log
+    ip: 127.0.0.1
+    port: 10602
 
 gm:
   1:
     router_ttl: 1800
     discovery_ttl: 20
-    log_level: trace # info, debug, warn, error, fatal
+    log_level: trace  # info, debug, warn, error, fatal
     log_path: ./log
-    ip: localhost
+    ip: 127.0.0.1
     port: 10701
-
