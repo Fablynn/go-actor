@@ -5,6 +5,9 @@ option go_package = "./pb";
 
 import "packet.proto";
 import "player_data.proto";
+// 剔除通知
+message KickPlayerNotify {
+}
 
 // 登录协议
 message GateLoginRequest {

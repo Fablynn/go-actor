@@ -2,12 +2,13 @@ package actor
 
 import (
 	"go-actor/common/pb"
-	"go-actor/framework/domain"
+	"go-actor/framework/define"
+	"go-actor/framework/internal/method"
 	"go-actor/library/mlog"
-	"go-actor/library/timer"
 	"go-actor/library/uerror"
 	"reflect"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -15,15 +16,15 @@ type ActorMgr struct {
 	id     uint64
 	name   string
 	mutex  sync.RWMutex
-	actors map[uint64]domain.IActor
-	funcs  map[string]*FuncInfo
+	actors map[uint64]define.IActor
+	funcs  map[string]*method.Method
 }
 
 func (d *ActorMgr) GetCount() int {
 	return len(d.actors)
 }
 
-func (d *ActorMgr) GetActor(id uint64) domain.IActor {
+func (d *ActorMgr) GetActor(id uint64) define.IActor {
 	d.mutex.RLock()
 	actor, ok := d.actors[id]
 	d.mutex.RUnlock()
@@ -39,7 +40,7 @@ func (d *ActorMgr) DelActor(id uint64) {
 	d.mutex.Unlock()
 }
 
-func (d *ActorMgr) AddActor(act domain.IActor) {
+func (d *ActorMgr) AddActor(act define.IActor) {
 	act.ParseFunc(d.funcs)
 	id := act.GetId()
 	d.mutex.Lock()
@@ -47,12 +48,16 @@ func (d *ActorMgr) AddActor(act domain.IActor) {
 	d.mutex.Unlock()
 }
 
+func (d *ActorMgr) GetIdPointer() *uint64 {
+	return &d.id
+}
+
 func (d *ActorMgr) GetId() uint64 {
-	return d.id
+	return atomic.LoadUint64(&d.id)
 }
 
 func (d *ActorMgr) SetId(id uint64) {
-	d.id = id
+	atomic.StoreUint64(&d.id, id)
 }
 
 func (d *ActorMgr) Start() {
@@ -64,7 +69,7 @@ func (d *ActorMgr) Start() {
 }
 
 func (d *ActorMgr) Stop() {
-	d.id = 0
+	atomic.StoreUint64(&d.id, 0)
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	for _, act := range d.actors {
@@ -76,21 +81,24 @@ func (d *ActorMgr) GetActorName() string {
 	return d.name
 }
 
-func (d *ActorMgr) Register(ac domain.IActor, _ ...int) {
+func (d *ActorMgr) Register(ac define.IActor, _ ...int) {
 	rtype := reflect.TypeOf(ac)
 	d.name = parseName(rtype)
-	d.actors = make(map[uint64]domain.IActor)
+	d.actors = make(map[uint64]define.IActor)
+	d.SetId(GenActorId())
 }
 
 func (d *ActorMgr) ParseFunc(rr interface{}) {
 	switch vv := rr.(type) {
-	case map[string]*FuncInfo:
+	case map[string]*method.Method:
 		d.funcs = vv
 	case reflect.Type:
-		d.funcs = make(map[string]*FuncInfo)
+		d.funcs = make(map[string]*method.Method)
 		for i := 0; i < vv.NumMethod(); i++ {
 			m := vv.Method(i)
-			d.funcs[m.Name] = parseFuncInfo(m)
+			if ff := method.NewMethod(m); ff != nil {
+				d.funcs[m.Name] = ff
+			}
 		}
 	default:
 		panic("注册参数错误，必须是方法列表或reflect.Type")
@@ -99,56 +107,56 @@ func (d *ActorMgr) ParseFunc(rr interface{}) {
 
 func (d *ActorMgr) SendMsg(h *pb.Head, args ...interface{}) error {
 	if _, ok := d.funcs[h.FuncName]; !ok {
-		return uerror.New(1, pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
+		return uerror.New(pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
 	}
 	switch h.SendType {
 	case pb.SendType_POINT:
 		if act := d.GetActor(h.ActorId); act != nil {
 			return act.SendMsg(h, args...)
 		} else {
-			return uerror.New(1, pb.ErrorCode_ACTOR_ID_NOT_FOUND, "Actor不存在: %v", h)
+			return uerror.New(pb.ErrorCode_ACTOR_ID_NOT_FOUND, "Actor不存在: %v", h)
 		}
 	case pb.SendType_BROADCAST:
 		d.mutex.RLock()
+		defer d.mutex.RUnlock()
 		for _, act := range d.actors {
 			if err := act.SendMsg(h, args...); err != nil {
 				mlog.Errorf("ActorMgr.Broadcast err: %v", err)
 			}
 		}
-		d.mutex.RUnlock()
 	default:
-		return uerror.New(1, pb.ErrorCode_SEND_TYPE_NOT_SUPPORTED, "未知的发送类型: %v", h.SendType)
+		return uerror.New(pb.ErrorCode_SEND_TYPE_NOT_SUPPORTED, "未知的发送类型: %v", h.SendType)
 	}
 	return nil
 }
 
 func (d *ActorMgr) Send(h *pb.Head, buf []byte) error {
 	if _, ok := d.funcs[h.FuncName]; !ok {
-		return uerror.New(1, pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
+		return uerror.New(pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
 	}
 	switch h.SendType {
 	case pb.SendType_POINT:
 		if act := d.GetActor(h.ActorId); act != nil {
 			return act.Send(h, buf)
 		} else {
-			return uerror.New(1, pb.ErrorCode_ACTOR_ID_NOT_FOUND, "Actor不存在: %v", h)
+			return uerror.New(pb.ErrorCode_ACTOR_ID_NOT_FOUND, "Actor不存在: %v", h)
 		}
 	case pb.SendType_BROADCAST:
 		d.mutex.RLock()
+		defer d.mutex.RUnlock()
 		for _, act := range d.actors {
 			if err := act.Send(h, buf); err != nil {
 				mlog.Errorf("ActorMgr.Broadcast err: %v", err)
 			}
 		}
-		d.mutex.RUnlock()
 	default:
-		return uerror.New(1, pb.ErrorCode_SEND_TYPE_NOT_SUPPORTED, "未知的发送类型: %v", h.SendType)
+		return uerror.New(pb.ErrorCode_SEND_TYPE_NOT_SUPPORTED, "未知的发送类型: %v", h.SendType)
 	}
 	return nil
 }
 
 func (d *ActorMgr) RegisterTimer(h *pb.Head, ttl time.Duration, times int32) error {
-	return timer.Register(&d.id, func() {
+	return t.Register(&d.id, func() {
 		if err := d.SendMsg(h); err != nil {
 			mlog.Errorf("定时器发送消息失败: head:%v, error:%v", h, err)
 		}

@@ -2,9 +2,9 @@ package manager
 
 import (
 	"bytes"
+	"go-actor/library/uerror"
 	"go-actor/tools/cfgtool/domain"
 	"go-actor/tools/cfgtool/internal/base"
-	"go-actor/tools/library/uerror"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
@@ -61,7 +61,7 @@ func ParseProto() error {
 	paser := protoparse.Parser{Accessor: protoparse.FileContentsFromMap(protoMgr)}
 	descs, err := paser.ParseFiles(protoList...)
 	if err != nil {
-		return uerror.New(1, -1, "parse proto file error: %v", err)
+		return uerror.New(-1, "parse proto file error: %v", err)
 	}
 	for i := range protoList {
 		descMap[protoList[i]] = descs[i]

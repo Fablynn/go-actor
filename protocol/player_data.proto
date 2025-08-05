@@ -3,7 +3,7 @@ package go_actor;
 
 option go_package = "./pb";
 
-import "global_enum_cfg.proto";
+import "global_enum.proto";
 
 // 道具配置
 message PbItem {
@@ -18,17 +18,18 @@ message PlayerInfo {
 }
 
 message PlayerLoginInfo {
-  uint32 last_login_time  = 1;  // 上次登录时间
-  uint32 last_logout_time = 2;  // 上次登出时间
-  int32  now_login_time   = 3;  // 当前登录时间
+  int64 last_login_time    = 1;  // 上次登录时间
+  int64 last_logout_time   = 2;  // 上次登出时间
+  int64 current_login_time = 3;  // 当前登录时间
 }
 
 message PlayerRoomInfo {
   GameType game_type = 1;  // 游戏类型
   uint64   room_id   = 2;  // 房间ID
+  uint32   table_id  = 3;  // 游戏配置id
+  int64    match_time = 4; // 匹配超时时间
 }
 
-// 玩家信息
 message PlayerDataBase {
   PlayerInfo      player_info = 1;  // 玩家信息
   int64           create_time = 2;  // 创建时间
@@ -52,6 +53,7 @@ message PlayerData {
 
 enum PlayerDataType {
   PLAYER_DATA_NONE = 0;  // 无效数据
-  PLAYER_DATA_BASE = 1;  // 玩家基础数据
-  PLAYER_DATA_BAG  = 2;  // 玩家背包数据
+  PLAYER_DATA_INFO = 1;  // 玩家基础数据
+  PLAYER_DATA_ROOM = 2;  // 房间基础数据
+  PLAYER_DATA_BAG  = 3;  // 玩家背包数据
 }

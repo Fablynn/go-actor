@@ -2,21 +2,42 @@ syntax = "proto3";
 package go_actor;
 
 option go_package = "./pb";
-import "global_enum_cfg.proto";
+
+// -------框架核心协议，请勿修改-------
 
 // 发送类型
 enum SendType {
-  SendTypeNode = 0;  // 发送类型-无
-  POINT        = 1;  // 发送类型-点对点
-  BROADCAST    = 2;  // 发送类型-广播
+  POINT     = 0;  // 发送类型-点对点
+  BROADCAST = 1;  // 发送类型-广播
+  ROUTER    = 2;  // 发送类型-路由同步
+}
+
+enum RouterType {
+  UID       = 0;  // UID路由
+  ROOM_ID   = 1;  // 房间id路由
+  RANDOM_ID = 2;  // 随机id路由
+}
+
+enum NodeType {
+  NodeTypeBegin   = 0;  // 节点类型-begin
+  NodeTypeGate    = 1;  // 节点类型-Gate
+  NodeTypeMatch   = 2;  // 节点类型-Match
+  NodeTypeRoom    = 3;  // 节点类型-Room
+  NodeTypeDb      = 4;  // 节点类型-Db
+  NodeTypeBuilder = 5;  // 节点类型-Builder
+  NodeTypeGm      = 6;  // 节点类型-Gm
+  NodeTypeGame    = 7;  // 节点类型-Game
+  NodeTypeEnd     = 8;  // 节点类型-End
+  NodeTypeClient  = 9;  // 节点类型-Client
 }
 
 // 节点信息
 message Node {
   string   name = 1;  // 节点名称
-  string   addr = 2;  // 节点地址
-  NodeType type = 3;  // 节点类型
-  int32    id   = 4;  // 节点ID
+  string   ip   = 2;  // 节点地址
+  int32    port = 3;  // 节点地址
+  NodeType type = 4;  // 节点类型
+  int32    id   = 5;  // 节点ID
 }
 
 // 玩家路由信息
@@ -33,10 +54,10 @@ message Router {
 message NodeRouter {
   NodeType   node_type   = 1;  // 节点类型
   int32      node_id     = 2;  // 节点ID
-  string     actor_name  = 3;  // 路由ID类型
-  string     func_name   = 4;  // 消息来源Actor函数名称
-  uint64     actor_id    = 5;  // 路由ID 结合类型打到不同节点
-  RouterType router_type = 6;  // 路由类型
+  RouterType router_type = 3;  // 路由类型
+  uint64     router_id   = 4;  // 路由类型
+  string     actor_func  = 5;  // 路由ID类型
+  uint64     actor_id    = 6;  // 路由ID
   Router     router      = 7;  // 路由信息
 }
 
@@ -51,8 +72,11 @@ message Head {
   uint64     uid        = 7;   // 玩家ID
   uint32     seq        = 8;   // 消息序列号
   uint32     cmd        = 9;   // 消息命令
-  string     reply      = 10;  // 消息回复Actor名称
-  int32      reference  = 11;  // 消息引用计数
+  uint32     version    = 10;  // 版本号
+  uint32     extra      = 11;  // 设备id
+  string     reply      = 12;  // 消息回复Actor名称
+  uint32     reference  = 13;  // 消息引用计数
+  uint32     depth      = 14;  // actor调用深度
 }
 
 // 内网包协议
@@ -72,4 +96,9 @@ message Reward {
   uint32 prop_id = 1;  // 道具ID
   int64  incr    = 2;  // 增加数量
   int64  total   = 3;  // 总数量
+}
+
+// 同步路由通知
+message RouterNotify {
+  repeated NodeRouter list = 1;
 }

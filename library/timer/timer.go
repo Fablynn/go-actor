@@ -2,8 +2,8 @@ package timer
 
 import (
 	"go-actor/common/pb"
-	"go-actor/library/async"
-	"go-actor/library/mlog"
+	"go-actor/library/queue"
+	"go-actor/library/safe"
 	"go-actor/library/uerror"
 	"sort"
 	"sync/atomic"
@@ -32,7 +32,7 @@ type Timer struct {
 	head      *Wheel              // 头部时间轮
 	tail      *Wheel              // 尾部时间轮
 	wheels    []*Wheel            // 时间轮
-	tasks     *async.Queue[*Task] // 待插入定时任务队列
+	tasks     *queue.Queue[*Task] // 待插入定时任务队列
 	exit      chan struct{}       // 定时器退出通知
 }
 
@@ -48,12 +48,12 @@ func NewTimer(tick int64) *Timer {
 			{mask: (1 << 5) - 1, shift: tick + 22, cursor: now, buckets: make([]*Task, 1<<5)},
 			{mask: (1 << 5) - 1, shift: tick + 27, cursor: now, buckets: make([]*Task, 1<<5)},
 		},
-		tasks: async.NewQueue[*Task](),
+		tasks: queue.NewQueue[*Task](),
 		exit:  make(chan struct{}),
 	}
 	ret.head = ret.wheels[0]
 	ret.tail = ret.wheels[len(ret.wheels)-1]
-	async.SafeGo(mlog.Fatalf, ret.run)
+	safe.Go(ret.run)
 	return ret
 }
 
@@ -61,10 +61,10 @@ func NewTimer(tick int64) *Timer {
 func (d *Timer) Register(taskId *uint64, f func(), ttl time.Duration, times int32) error {
 	tt := int64(ttl / time.Millisecond)
 	if tt>>d.head.shift <= 0 {
-		return uerror.New(1, pb.ErrorCode_MIN_SIZE_LIMIT, "小于定时器最小时间间隔:%dms", 1<<d.head.shift)
+		return uerror.New(pb.ErrorCode_MIN_SIZE_LIMIT, "小于定时器最小时间间隔:%dms", 1<<d.head.shift)
 	}
 	if (tt >> d.tail.shift) > d.tail.mask {
-		return uerror.New(1, pb.ErrorCode_MAX_SIZE_LIMIT, "定时器超出最大时间范围:%dms", d.tail.shift)
+		return uerror.New(pb.ErrorCode_MAX_SIZE_LIMIT, "定时器超出最大时间范围:%dms", d.tail.shift)
 	}
 	d.tasks.Push(&Task{
 		taskId: taskId,
@@ -186,7 +186,7 @@ func (w *Wheel) Get(now int64) *Task {
 }
 
 func (tt *Task) handle(now int64) *Task {
-	if *tt.taskId <= 0 || tt.times == 0 {
+	if atomic.LoadUint64(tt.taskId) <= 0 || tt.times == 0 {
 		return nil
 	}
 	tt.task()
@@ -198,12 +198,4 @@ func (tt *Task) handle(now int64) *Task {
 	}
 	tt.expire = now + tt.ttl
 	return tt
-}
-
-var (
-	tt = NewTimer(4)
-)
-
-func Register(taskId *uint64, f func(), ttl time.Duration, times int32) error {
-	return tt.Register(taskId, f, ttl, times)
 }

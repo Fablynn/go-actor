@@ -47,58 +47,75 @@ common:
 
 client:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/client.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10101
     http_port: 22345
 
 gate:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/gate1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10101
     http_port: 10001
 
 room:
   1:
-    log_level: warn # info, debug, warn, error, fatal
-    log_file: ./log/room1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10201
 
 match:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/match1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10301
 
 db:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/db1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10401
+    
 builder:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/builder1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10501
 
 game:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/game1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10601
 
 gm:
   1:
-    log_level: debug # info, debug, warn, error, fatal
-    log_file: ./log/gm1.log
+    router_ttl: 1800
+    discovery_ttl: 20
+    log_level: trace # info, debug, warn, error, fatal
+    log_path: ./log
     ip: localhost
     port: 10701
 

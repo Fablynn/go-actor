@@ -15,17 +15,24 @@ type UError struct {
 	msg      string       // 错误
 }
 
-func NEW(code pb.ErrorCode, head *pb.Head, format string, args ...interface{}) *UError {
-	str := fmt.Sprintf("SendType:%s, Src:%v, Dst:%v, Uid:%d, Seq:%d, Cmd:%d, Reply:%s", head.SendType, head.Src, head.Dst, head.Uid, head.Seq, head.Cmd, head.Reply, format)
+func Err(code pb.ErrorCode, err error) *UError {
+	if uerr, ok := err.(*UError); ok && uerr != nil {
+		return uerr
+	}
+	pc, file, line, _ := runtime.Caller(1)
+	funcName := runtime.FuncForPC(pc).Name()
 	return &UError{
-		code: code,
-		msg:  fmt.Sprintf(str, args...),
+		filename: file,
+		line:     line,
+		funcname: path.Base(funcName),
+		code:     code,
+		msg:      err.Error(),
 	}
 }
 
-func New(depth int, code pb.ErrorCode, format string, args ...interface{}) *UError {
+func New(code pb.ErrorCode, format string, args ...interface{}) *UError {
 	// 获取调用堆栈
-	pc, file, line, _ := runtime.Caller(depth)
+	pc, file, line, _ := runtime.Caller(1)
 	funcName := runtime.FuncForPC(pc).Name()
 	// 返回错误
 	return &UError{
@@ -64,7 +71,7 @@ func (e *UError) GetMsg() string {
 
 func (e *UError) Error() string {
 	if len(e.filename) > 0 {
-		return fmt.Sprintf("[%s]%s:%d\t%s\t%s", e.code.String(), e.filename, e.line, e.funcname, e.msg)
+		return fmt.Sprintf("[%s] %s:%d %s\t%s", e.code.String(), e.filename, e.line, e.funcname, e.msg)
 	}
-	return fmt.Sprintf("[%s]\t%s", e.code.String(), e.msg)
+	return fmt.Sprintf("[%s] %s", e.code.String(), e.msg)
 }

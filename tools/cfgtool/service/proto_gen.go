@@ -2,11 +2,11 @@ package service
 
 import (
 	"bytes"
+	"go-actor/library/uerror"
 	"go-actor/tools/cfgtool/domain"
 	"go-actor/tools/cfgtool/internal/base"
 	"go-actor/tools/cfgtool/internal/manager"
 	"go-actor/tools/cfgtool/internal/templ"
-	"go-actor/tools/library/uerror"
 	"sort"
 )
 
@@ -49,7 +49,7 @@ func GenProto(buf *bytes.Buffer) error {
 		buf.Reset()
 		data.RefList = manager.GetRefList(fileName)
 		if err := templ.ProtoTpl.Execute(buf, data); err != nil {
-			return uerror.New(1, -1, "gen proto file error: %s", err.Error())
+			return uerror.New(1, "gen proto file error: %s", err.Error())
 		}
 		manager.AddProto(fileName, buf)
 	}

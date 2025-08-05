@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"go-actor/common/pb"
 	"go-actor/library/uerror"
 	"go-actor/tools/pbtool/domain"
 	"go-actor/tools/pbtool/internal/base"
@@ -25,7 +24,7 @@ func ParseFiles(v ast.Visitor, files ...string) error {
 		// 解析语法树
 		fs, err := parser.ParseFile(fset, filename, nil, parser.ParseComments)
 		if err != nil {
-			return uerror.New(1, pb.ErrorCode_PARSE_FAILED, "filename: %v, error: %v", filename, err)
+			return uerror.New(1, "filename: %v, error: %v", filename, err)
 		}
 		// 遍历语法树
 		ast.Walk(v, fs)

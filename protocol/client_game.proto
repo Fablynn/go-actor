@@ -5,7 +5,6 @@ option go_package = "./pb";
 
 import "packet.proto";
 import "player_data.proto";
-import "global_enum_cfg.proto";
 
 message GetBagReq {
 }
@@ -50,8 +49,4 @@ message QueryPlayerDataReq {
 message QueryPlayerDataRsp {
   RspHead        head       = 1;  //请求结果信息
   PlayerDataBase data       = 2;
-  MatchType      match_type = 3;
-  GameType       game_type  = 4;
-  RoomType       room_type  = 5;
-  CoinType       coin_type  = 6;
 }

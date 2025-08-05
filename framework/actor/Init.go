@@ -2,24 +2,26 @@ package actor
 
 import (
 	"go-actor/common/pb"
-	"go-actor/framework/domain"
+	"go-actor/framework/define"
+	"go-actor/library/timer"
 	"go-actor/library/uerror"
-
-	"github.com/golang/protobuf/proto"
+	"reflect"
+	"strings"
+	"sync/atomic"
+	"time"
 )
 
 var (
-	node        *pb.Node
-	actors      = make(map[string]domain.IActor)
-	sendRspFunc func(*pb.Head, proto.Message) error
+	actors = make(map[string]define.IActor)
+	t      = timer.NewTimer(4)
+	uuid   = uint64(0)
 )
 
-func Init(nn *pb.Node, f func(*pb.Head, proto.Message) error) {
-	node = nn
-	sendRspFunc = f
+func GenActorId() uint64 {
+	return atomic.AddUint64(&uuid, 1)
 }
 
-func Register(ac domain.IActor) {
+func Register(ac define.IActor) {
 	actors[ac.GetActorName()] = ac
 }
 
@@ -27,12 +29,24 @@ func SendMsg(head *pb.Head, args ...interface{}) error {
 	if act, ok := actors[head.ActorName]; ok {
 		return act.SendMsg(head, args...)
 	}
-	return uerror.New(1, pb.ErrorCode_ACTOR_NOT_SUPPORTED, "Actor(%s)不存在", head.ActorName)
+	return uerror.New(pb.ErrorCode_ACTOR_NOT_SUPPORTED, "Actor(%s)不存在", head.ActorName)
 }
 
 func Send(head *pb.Head, body []byte) error {
 	if act, ok := actors[head.ActorName]; ok {
 		return act.Send(head, body)
 	}
-	return uerror.New(1, pb.ErrorCode_ACTOR_NOT_SUPPORTED, "Actor%s不存在", head.ActorName)
+	return uerror.New(pb.ErrorCode_ACTOR_NOT_SUPPORTED, "Actor(%s)不存在", head.ActorName)
+}
+
+func RegisterTimer(id *uint64, f func(), ttl time.Duration, times int32) error {
+	return t.Register(id, f, ttl, times)
+}
+
+func parseName(rr reflect.Type) string {
+	name := rr.String()
+	if index := strings.Index(name, "."); index > -1 {
+		name = name[index+1:]
+	}
+	return name
 }

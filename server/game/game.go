@@ -4,13 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"go-actor/common/config"
-	"go-actor/common/dao"
 	"go-actor/common/pb"
+	"go-actor/common/redis"
 	"go-actor/common/yaml"
 	"go-actor/framework"
-	"go-actor/library/async"
+	"go-actor/framework/cluster"
+	"go-actor/framework/recycle"
 	"go-actor/library/mlog"
 	"go-actor/library/signal"
+	"go-actor/library/util"
+	"go-actor/message"
 	"go-actor/server/game/internal"
 )
 
@@ -29,38 +32,29 @@ func main() {
 	nodeCfg := yamlcfg.Game[node.Id]
 
 	// 初始化日志库
-	if err := mlog.Init(yamlcfg.Common.Env, nodeCfg.LogLevel, nodeCfg.LogFile); err != nil {
-		panic(fmt.Sprintf("日志库初始化失败: %v", err))
-	}
-	async.Init(mlog.Errorf)
+	mlog.Init(node.Name, node.Id, nodeCfg.LogLevel, nodeCfg.LogPath)
 
 	// 初始化游戏配置
 	mlog.Infof("初始化游戏配置")
-	if err := config.Init(yamlcfg.Etcd, yamlcfg.Common); err != nil {
-		panic(err)
-	}
+	util.Must(config.Init(yamlcfg.Etcd, yamlcfg.Data))
 
 	// 初始化redis
 	mlog.Infof("初始化redis配置")
-	if err := dao.InitRedis(yamlcfg.Redis); err != nil {
-		panic(fmt.Sprintf("redis初始化失败: %v", err))
-	}
+	util.Must(redis.Init(yamlcfg.Redis))
 
 	// 初始化框架
-	mlog.Infof("启动框架服务: %v", node)
-	if err := framework.InitDefault(node, nodeCfg, yamlcfg); err != nil {
-		panic(fmt.Sprintf("框架初始化失败: %v", err))
-	}
+	mlog.Infof("启动框架服务")
+	util.Must(framework.InitDefault(node, nodeCfg, yamlcfg))
 
 	// 功能模块初始化 todo
-	if err := internal.Init(); err != nil {
-		panic(fmt.Sprintf("游戏模块初始化失败: %v", err))
-	}
+	mlog.Infof("初始化功能模块")
+	message.Init()
 
 	// 服务退出
 	signal.SignalNotify(func() {
-		internal.GetPlayerMgr().Close()
-		framework.Close()
+		recycle.Close()
+		internal.Close()
+		cluster.Close()
 		mlog.Close()
 	})
 }

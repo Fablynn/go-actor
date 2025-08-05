@@ -2,9 +2,9 @@ package service
 
 import (
 	"bytes"
+	"go-actor/library/uerror"
 	"go-actor/tools/cfgtool/internal/manager"
 	"go-actor/tools/cfgtool/internal/templ"
-	"go-actor/tools/library/uerror"
 
 	"sort"
 
@@ -30,7 +30,7 @@ func genIndex(buf *bytes.Buffer) error {
 
 		buf.Reset()
 		if err := templ.IndexTpl.Execute(buf, indexs); err != nil {
-			return uerror.New(1, -1, "gen index file error: %s", err.Error())
+			return uerror.New(-1, "gen index file error: %s", err.Error())
 		}
 		return base.SaveGo(domain.PbPath, "index.gen.go", buf.Bytes())
 	}

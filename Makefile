@@ -2,24 +2,21 @@ GCFLAGS=-gcflags "all=-N -l"
 SYSTEM=$(shell go env GOOS)
 
 CONFIG_PATH=./gameconf
-XLSX_PATH=${CONFIG_PATH}/xlsx
-RPG_PATH=${CONFIG_PATH}/rpg
+XLSX_PATH=${CONFIG_PATH}/rpg
 PROTO_PATH=./protocol
 CFG_CODE_PATH=./common/config/repository
 PB_GO_PATH=./common/pb
 REDIS_CODE_PATH=./common/dao/repository/redis
-CLIENT_GO_PATH=./server/client/internal/manager
 SERVER_PATH=./server
 OUTPUT=./output
 
 ## 需要编译的服务
-TARGET_ENV=local develop release pre
-TARGET=gate room client builder match  game  # db  gm
-STOP_TARGET=gate gm builder match room game db
+TARGET_ENV=local
+TARGET=gate client game
 LINUX=$(TARGET:%=%_linux)
 BUILD=$(TARGET:%=%_build)
 START=$(TARGET:%=%_start)
-STOP=$(STOP_TARGET:%=%_stop)
+STOP=$(TARGET:%=%_stop)
 
 .PHONY: all build linux clean ${TARGET} config pb pbtool docker_run docker_stop ${TARGET_ENV}
 
@@ -41,18 +38,15 @@ $(LINUX): %_linux: %
 
 $(BUILD): %_build: %
 	@echo "Building $*"
-	go build ${GCFLAGS} -race -o ${OUTPUT}/$* ${SERVER_PATH}/$*
+	go build ${GCFLAGS} -o ${OUTPUT}/$* ${SERVER_PATH}/$*
 
 
 #=================================proto转go代码========================================
 config:
-	@echo "gen enum config code..."
-	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
 	@echo "gen config code..."
 	@rm -rf ${CFG_CODE_PATH}
 	@make pb
-	@go run ./tools/cfgtool/main.go -xlsx=${RPG_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
-	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH} -client=${CLIENT_GO_PATH}
+	@go run ./tools/cfgtool/main.go -xlsx=${XLSX_PATH} -proto=${PROTO_PATH} -code=${CFG_CODE_PATH} -text=${CONFIG_PATH}/data -pb=${PB_GO_PATH}
 	@make pbtool
 
 pb:
@@ -64,33 +58,36 @@ pbtool:
 	@go run ./tools/pbtool/main.go -pb=${PB_GO_PATH} -redis=${REDIS_CODE_PATH}
 
 #=================================打包选项========================================
-${TARGET_ENV}: %: %
+${TARGET_ENV}: %:
 	@echo "Building $*"
-	@cp -rf ${CONFIG_PATH}/data ./env/$*/*  ${OUTPUT}
+	@cp -rf ${CONFIG_PATH}/data ./env/$*/* ./env/scripts/*.sh  ${OUTPUT}
 
 #=================================服务启动，停止========================================
-startall: ${START}
+startall:
+	-cd ./output && ./server.sh startall
 
-stopall: $(STOP)
+stopall:
+	-cd ./output && ./server.sh stopall
+
+starthch:
+	-cd ./output && ./server.sh starthch
+
+stophch:
+	-cd ./output && ./server.sh stophch
+
+
 
 $(START): %_start: %
-	@echo "running $*"
-	sleep 3
-	-cd ./output && nohup ./$* -config=./config.yaml -id=1 >./log/$*_monitor.log 2>&1 &
+	-cd ./output && ./start.sh $* 1
 
 $(STOP): %_stop: %
-	@echo "stopping $*"
-ifeq (${SYSTEM}, darwin)
-	-kill -9 $$(ps -ef | grep $* | grep -v grep | grep "config.yaml" | awk '{print $$2}')
-else # linux darwin(mac)
-	-kill -9 $$(ps -ef | grep $* | grep -v grep | awk '{print $$2}')
-endif
+	-cd ./output && ./stop.sh $*
 
 docker_stop:
 	@echo "停止docker环境"
-	docker-compose -f ./env/local/docker_compose.yaml down
+	-cd ./output && docker-compose -f docker_compose.yaml down
 
 docker_run:
 	@echo "启动docker环境"
-	docker-compose -f ./env/local/docker_compose.yaml up -d
+	-cd ./output && docker-compose -f docker_compose.yaml up -d
 

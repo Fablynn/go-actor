@@ -4,8 +4,8 @@ import (
 	"context"
 	"go-actor/common/pb"
 	"go-actor/common/yaml"
-	"go-actor/library/async"
 	"go-actor/library/mlog"
+	"go-actor/library/safe"
 	"go-actor/library/uerror"
 	"go-actor/library/util"
 	"path"
@@ -24,7 +24,7 @@ type Watcher struct {
 	exit   chan struct{}
 }
 
-func NewWatcher(cfg *yaml.EtcdConfig, ccfg *yaml.CommonConfig) (*Watcher, error) {
+func NewWatcher(cfg *yaml.EtcdConfig, ccfg *yaml.DataConfig) (*Watcher, error) {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:            cfg.Endpoints,
 		DialTimeout:          5 * time.Second,
@@ -33,12 +33,12 @@ func NewWatcher(cfg *yaml.EtcdConfig, ccfg *yaml.CommonConfig) (*Watcher, error)
 		MaxCallSendMsgSize:   10 * 1024 * 1024,
 	})
 	if err != nil {
-		return nil, uerror.New(1, pb.ErrorCode_CONNECT_FAILED, "Etcd连接失败: %v", err)
+		return nil, uerror.New(pb.ErrorCode_CONNECT_FAILED, "Etcd连接失败: %v", err)
 	}
 	return &Watcher{
 		client: cli,
-		topic:  ccfg.ConfigTopic,
-		cpath:  ccfg.ConfigPath,
+		topic:  ccfg.Topic,
+		cpath:  ccfg.Path,
 		exit:   make(chan struct{}),
 	}, nil
 }
@@ -53,14 +53,14 @@ func (d *Watcher) Close() error {
 func (d *Watcher) Load(tmps map[string]struct{}) error {
 	rsp, err := d.client.Get(context.Background(), d.topic, clientv3.WithPrefix())
 	if err != nil {
-		return uerror.New(1, pb.ErrorCode_REQUEST_FAIELD, "获取注册服务节点失败: %v", err)
+		return uerror.New(pb.ErrorCode_REQUEST_FAIELD, "获取注册服务节点失败: %v", err)
 	}
 
 	for _, kv := range rsp.Kvs {
 		sheet := path.Base(string(kv.Key))
 		if f, ok := fileMgr[sheet]; ok {
 			if err := f(string(kv.Value)); err != nil {
-				return uerror.New(1, pb.ErrorCode_PARSE_FAILED, "加载%s配置错误： %v", sheet, err)
+				return uerror.New(pb.ErrorCode_PARSE_FAILED, "加载%s配置错误： %v", sheet, err)
 			}
 			tmps[sheet] = struct{}{}
 
@@ -75,13 +75,13 @@ func (d *Watcher) Load(tmps map[string]struct{}) error {
 func (d *Watcher) Watch(tmps map[string]struct{}) error {
 	watchChan := d.client.Watch(context.Background(), d.topic, clientv3.WithPrefix())
 	if watchChan == nil {
-		return uerror.New(1, pb.ErrorCode_REQUEST_FAIELD, "Config监听服务失败: watchChan is nil")
+		return uerror.New(pb.ErrorCode_REQUEST_FAIELD, "Config监听服务失败: watchChan is nil")
 	}
 
 	wg := &sync.WaitGroup{}
 	wg.Add(len(fileMgr) - len(tmps))
 
-	async.SafeGo(mlog.Errorf, func() {
+	safe.Go(func() {
 		for resp := range watchChan {
 			if resp.Canceled {
 				mlog.Errorf("Config监听被取消，尝试重新连接")

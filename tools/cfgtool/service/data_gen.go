@@ -6,7 +6,7 @@ import (
 	"go-actor/tools/cfgtool/internal/manager"
 	"strings"
 
-	"go-actor/tools/library/uerror"
+	"go-actor/library/uerror"
 
 	"github.com/golang/protobuf/jsonpb"
 )
@@ -16,7 +16,7 @@ func GenData() error {
 		// 反射new一个对象
 		ary := manager.NewProto(cfg.FileName, cfg.Name+"Ary")
 		if ary == nil {
-			return uerror.New(1, -1, "new %sAry is nil, %s", cfg.Name, cfg.FileName)
+			return uerror.New(-1, "new %sAry is nil, %s", cfg.Name, cfg.FileName)
 		}
 		// 加载xlsx数据
 		tab := manager.GetTable(cfg.FileName, cfg.Sheet)
@@ -64,7 +64,7 @@ func configValue(f *base.Config, vals ...string) (interface{}, error) {
 	// 反射new一个对象
 	item := manager.NewProto(f.FileName, f.Name)
 	if item == nil {
-		return nil, uerror.New(1, -1, "new %s is nil", f.Name)
+		return nil, uerror.New(1, "new %s is nil", f.Name)
 	}
 
 	for i, field := range f.FieldList {
@@ -100,7 +100,7 @@ func structValue(f *base.Struct, vals ...string) (rets []interface{}, err error)
 	for _, val := range vals {
 		item := manager.NewProto(f.FileName, f.Name)
 		if item == nil {
-			return nil, uerror.New(1, -1, "new %s is nil", f.Name)
+			return nil, uerror.New(1, "new %s is nil", f.Name)
 		}
 
 		strs := strings.Split(val, ":")
@@ -110,7 +110,7 @@ func structValue(f *base.Struct, vals ...string) (rets []interface{}, err error)
 			}
 		} else {
 			if len(strs) < len(f.Converts[strs[0]]) {
-				return nil, uerror.New(1, -1, "%s:%s配置错误: %s", f.FileName, f.Sheet, val)
+				return nil, uerror.New(1, "%s:%s配置错误: %s", f.FileName, f.Sheet, val)
 			}
 			for i, field := range f.Converts[strs[0]] {
 				item.SetFieldByName(field.Name, fieldValue(field, strs[i]))

@@ -2,11 +2,12 @@ package player
 
 import (
 	"go-actor/common/pb"
+	"go-actor/common/token"
 	"go-actor/framework"
 	"go-actor/framework/actor"
-	"go-actor/framework/domain"
+	"go-actor/framework/cluster"
+	"go-actor/framework/define"
 	"go-actor/framework/network"
-	"go-actor/framework/token"
 	"go-actor/library/mlog"
 	"sync/atomic"
 	"time"
@@ -17,17 +18,30 @@ import (
 
 type Player struct {
 	actor.Actor
-	inet       domain.INet // 网络连接
+	inet       define.INet // 网络连接
 	status     int32       // 玩家登录状态
 	createTime int64       // 创建时间
-	// 加密方式 todo
+	extra      uint32      // 设备唯一 id
+	version    uint32      // 版本号
 }
 
-func NewPlayer(conn *websocket.Conn, fr domain.IFrame) *Player {
+func NewPlayer(conn *websocket.Conn, fr define.IFrame) *Player {
 	p := &Player{}
 	p.Actor.Register(p)
+	p.Actor.Start()
 	p.inet = network.NewSocket(conn, fr)
 	return p
+}
+
+func (p *Player) Close() {
+	uid := p.GetId()
+	p.Actor.Stop()
+	p.inet.Close()
+	mlog.Infof("关闭玩家actor(%d)", uid)
+}
+
+func (p *Player) GetExtra() uint32 {
+	return atomic.LoadUint32(&p.extra)
 }
 
 func (p *Player) CheckToken() error {
@@ -54,28 +68,27 @@ func (p *Player) CheckToken() error {
 	now := time.Now().Unix()
 	p.Actor.SetId(tt.Uid)
 	p.createTime = now
+	p.version = pack.Head.Version
+	p.extra = pack.Head.Extra
+	return cluster.SendToDb(pack.Head, "PlayerDataMgr.Login", req)
+}
 
-	head := framework.SwapToGame(pack.Head, tt.Uid, "PlayerMgr", "Login")
-	head.Src = framework.NewSrcRouter(pb.RouterType_RouterTypeUid, tt.Uid)
-	head.Dst.RouterType = pb.RouterType_RouterTypeUid
-	return framework.Send(head, req)
+func (p *Player) Kick(extra uint32) {
+	// 不是同一设备，发送剔除消息
+	if extra != p.extra {
+		uid := p.GetId()
+		p.SendToClient(&pb.Head{
+			Src: framework.NewSrcRouter(pb.RouterType_UID, uid),
+			Cmd: uint32(pb.CMD_CMDKICK_PLAYER_NTF),
+			Uid: uid,
+		}, &pb.KickPlayerNotify{})
+	}
 }
 
 // 登录成功请求
 func (p *Player) LoginSuccess(head *pb.Head, req *pb.GateLoginRequest, rsp *pb.GateLoginResponse) error {
 	p.status = 1
 	return p.SendToClient(head, rsp)
-}
-
-func (p *Player) Start() {
-	p.Actor.Start()
-}
-
-func (p *Player) Stop() {
-	uid := p.GetId()
-	p.inet.Close()
-	p.Actor.Stop()
-	mlog.Infof("关闭玩家actor(%d)", uid)
 }
 
 // 向客户端发送数据
@@ -93,7 +106,8 @@ func (p *Player) SendToClient(head *pb.Head, msg interface{}) error {
 			head.Seq++
 		}
 	}
-	atomic.AddInt32(&head.Reference, 1)
+	atomic.AddUint32(&head.Reference, 1)
+	mlog.Trace(head, "向客户端发送消息：%v", msg)
 	return p.inet.Write(&pb.Packet{Head: head, Body: buf})
 }
 
@@ -107,6 +121,7 @@ func (p *Player) Dispatcher() {
 			actor.SendMsg(&pb.Head{ActorName: "GatePlayerMgr", FuncName: "Kick", Uid: p.GetId()})
 			return
 		}
+		mlog.Trace(pack.Head, "status(%d)收到客户端数据包: %v", p.status, pack.Body)
 
 		// 为登录成功，任何请求直接丢弃
 		if p.status <= 0 {
@@ -115,32 +130,32 @@ func (p *Player) Dispatcher() {
 
 		// 处理包消息
 		switch pack.Head.Dst.NodeType {
-		case pb.NodeType_NodeTypeGate:
-			pack.Head.ActorName = pack.Head.Dst.ActorName
-			pack.Head.FuncName = pack.Head.Dst.FuncName
-			pack.Head.ActorId = pack.Head.Dst.ActorId
-			mlog.Debug(pack.Head, "收到websocket数据包 pack:%v", pack)
-
-			// gate直接处理
+		case pb.NodeType_NodeTypeGate: //本地调用
+			pack.Head.ActorName, pack.Head.FuncName = framework.ParseActorFunc(pack.Head.Dst.ActorFunc)
+			if pack.Head.Dst.ActorId <= 0 {
+				pack.Head.ActorId = pack.Head.Dst.RouterId
+			} else {
+				pack.Head.ActorId = pack.Head.Dst.ActorId
+			}
 			if err := actor.Send(pack.Head, pack.Body); err != nil {
-				mlog.Error(pack.Head, "gate服务Actor调用: %v", err)
-			}
-
-		case pb.NodeType_NodeTypeGame:
-			pack.Head.Dst.ActorId = pack.Head.Uid
-			pack.Head.Src = framework.NewSrcRouter(pb.RouterType_RouterTypeUid, p.GetId(), "Dispatcher")
-			if err := framework.Send(pack.Head, pack.Body); err != nil {
-				mlog.Error(pack.Head, "转发websocket数据包失败: pack:%v, error:%v", pack, err)
+				mlog.Error(pack.Head, "gate服务Actor调用 error:%v", err)
 			} else {
-				mlog.Debug(pack.Head, "转发websocket数据包 pack:%v", pack)
+				mlog.Trace(pack.Head, "gate服务Actor调用 %v", pack.Body)
 			}
-		default:
-			// 转发到其他服务
-			pack.Head.Src = framework.NewSrcRouter(pb.RouterType_RouterTypeUid, p.GetId(), "Dispatcher")
-			if err := framework.Send(pack.Head, pack.Body); err != nil {
-				mlog.Error(pack.Head, "转发websocket数据包失败: pack:%v, error:%v", pack, err)
+		case pb.NodeType_NodeTypeRoom: //转发战斗服
+			pack.Head.Dst.RouterType = pb.RouterType_ROOM_ID
+			if err := cluster.Send(pack.Head, pack.Body); err != nil {
+				mlog.Error(pack.Head, "转发websocket数据包失败 error:%v", err)
 			} else {
-				mlog.Debug(pack.Head, "转发websocket数据包 pack:%v", pack)
+				mlog.Trace(pack.Head, "gate服务转发到room： %v", pack.Body)
+			}
+		default: //转发其他服务
+			pack.Head.Dst.RouterId = pack.Head.Uid
+			pack.Head.Dst.RouterType = pb.RouterType_UID
+			if err := cluster.Send(pack.Head, pack.Body); err != nil {
+				mlog.Error(pack.Head, "转发websocket数据包失败 error:%v", err)
+			} else {
+				mlog.Trace(pack.Head, "gate服务转发到%s： %v", pack.Head.Dst.NodeType, pack.Body)
 			}
 		}
 	}

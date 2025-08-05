@@ -1,7 +1,6 @@
 package yaml
 
 import (
-	"fmt"
 	"go-actor/common/pb"
 	"go-actor/library/uerror"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// 主从配置
 type SlaveConfig struct {
 	DbName   string `yaml:"dbname"`
 	Db       int    `yaml:"db"`
@@ -18,6 +18,7 @@ type SlaveConfig struct {
 	Host     string `yaml:"host"`
 }
 
+// 数据库配置
 type DbConfig struct {
 	DbName   string                 `yaml:"dbname"`
 	Db       int                    `yaml:"db"`
@@ -27,49 +28,60 @@ type DbConfig struct {
 	Slave    map[int32]*SlaveConfig `yaml:"slave"`
 }
 
+// 服务注册与发现配置
 type EtcdConfig struct {
 	Topic     string   `yaml:"topic"`
 	Endpoints []string `yaml:"endpoints"`
 }
 
+// nats配置
 type NatsConfig struct {
 	Topic     string `yaml:"topic"`
 	Endpoints string `yaml:"endpoints"`
 }
 
+// 通用配置
 type CommonConfig struct {
-	Env             string `yaml:"env"`
-	ConfigIsRemote  bool   `yaml:"config_is_remote"`
-	ConfigPath      string `yaml:"config_path"`
-	ConfigTopic     string `yaml:"config_topic"`
-	RouterExpire    int64  `yaml:"router_expire"`
-	DiscoveryExpire int64  `yaml:"discovery_expire"`
-	SecretKey       string `yaml:"secret_key"`
+	Pprof     bool   `yaml:"pprof"`
+	Env       string `yaml:"env"`
+	SecretKey string `yaml:"secret_key"`
 }
 
-type ServerConfig struct {
-	LogLevel string `yaml:"log_level"`
-	LogFile  string `yaml:"log_file"`
-	Ip       string `yaml:"ip"`
-	Port     int    `yaml:"port"`
-	HttpPort int    `yaml:"http_port"`
+// 游戏配置
+type DataConfig struct {
+	IsRemote  bool     `yaml:"is_remote"`
+	Path      string   `yaml:"path"`
+	Topic     string   `yaml:"topic"`
+	Endpoints []string `yaml:"endpoints"`
+}
+
+// 节点配置
+type NodeConfig struct {
+	RouterTTL    int64  `yaml:"router_ttl"`
+	DiscoveryTTL int64  `yaml:"discovery_ttl"`
+	LogLevel     string `yaml:"log_level"`
+	LogPath      string `yaml:"log_path"`
+	Ip           string `yaml:"ip"`
+	Port         int    `yaml:"port"`
+	HttpPort     int    `yaml:"http_port"`
 }
 
 type Config struct {
-	Mysql   map[int32]*DbConfig     `yaml:"mysql"`
-	Redis   map[int32]*DbConfig     `yaml:"redis"`
-	Mongodb map[int32]*DbConfig     `yaml:"mongodb"`
-	Etcd    *EtcdConfig             `yaml:"etcd"`
-	Nats    *NatsConfig             `yaml:"nats"`
-	Common  *CommonConfig           `yaml:"common"`
-	Client  map[int32]*ServerConfig `yaml:"client"`
-	Gate    map[int32]*ServerConfig `yaml:"gate"`
-	Room    map[int32]*ServerConfig `yaml:"room"`
-	Match   map[int32]*ServerConfig `yaml:"match"`
-	Db      map[int32]*ServerConfig `yaml:"db"`
-	Builder map[int32]*ServerConfig `yaml:"builder"`
-	Game    map[int32]*ServerConfig `yaml:"game"`
-	Gm      map[int32]*ServerConfig `yaml:"gm"`
+	Mysql   map[int32]*DbConfig   `yaml:"mysql"`
+	Redis   map[int32]*DbConfig   `yaml:"redis"`
+	Mongodb map[int32]*DbConfig   `yaml:"mongodb"`
+	Etcd    *EtcdConfig           `yaml:"etcd"`
+	Nats    *NatsConfig           `yaml:"nats"`
+	Common  *CommonConfig         `yaml:"common"`
+	Data    *DataConfig           `yaml:"data"`
+	Client  map[int32]*NodeConfig `yaml:"client"`
+	Gate    map[int32]*NodeConfig `yaml:"gate"`
+	Room    map[int32]*NodeConfig `yaml:"room"`
+	Match   map[int32]*NodeConfig `yaml:"match"`
+	Db      map[int32]*NodeConfig `yaml:"db"`
+	Builder map[int32]*NodeConfig `yaml:"builder"`
+	Game    map[int32]*NodeConfig `yaml:"game"`
+	Gm      map[int32]*NodeConfig `yaml:"gm"`
 }
 
 func (c *Config) Unmarshal(buf []byte) error {
@@ -91,10 +103,10 @@ func NewConfig(filename string) (*Config, error) {
 func LoadConfig(filename string, nodeType pb.NodeType, nodeId int32) (*Config, *pb.Node, error) {
 	cfg, err := NewConfig(filename)
 	if err != nil {
-		return nil, nil, uerror.New(1, pb.ErrorCode_PARSE_FAILED, "配置文件加载失败: %v", err)
+		return nil, nil, uerror.New(pb.ErrorCode_PARSE_FAILED, "配置文件加载失败: %v", err)
 	}
 	var ok bool
-	var srvCfg *ServerConfig
+	var srvCfg *NodeConfig
 	switch nodeType {
 	case pb.NodeType_NodeTypeGate:
 		srvCfg, ok = cfg.Gate[nodeId]
@@ -114,12 +126,13 @@ func LoadConfig(filename string, nodeType pb.NodeType, nodeId int32) (*Config, *
 		srvCfg, ok = cfg.Client[nodeId]
 	}
 	if !ok {
-		return nil, nil, uerror.New(1, pb.ErrorCode_CONFIG_NOT_FOUND, "配置文件中未找到节点配置: %s", nodeType.String())
+		return nil, nil, uerror.New(pb.ErrorCode_CONFIG_NOT_FOUND, "配置文件中未找到节点配置: %s", nodeType.String())
 	}
 	return cfg, &pb.Node{
 		Name: strings.TrimPrefix(nodeType.String(), "NodeType"),
 		Type: nodeType,
 		Id:   nodeId,
-		Addr: fmt.Sprintf("%s:%d", srvCfg.Ip, srvCfg.Port),
+		Ip:   srvCfg.Ip,
+		Port: int32(srvCfg.Port),
 	}, nil
 }

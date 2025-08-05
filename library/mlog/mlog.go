@@ -3,122 +3,86 @@ package mlog
 import (
 	"fmt"
 	"go-actor/common/pb"
-	"go-actor/library/mlog/filter"
-	"go-actor/library/mlog/zap"
-	"os"
-	"path"
+	"go-actor/library/mlog/define"
+	"go-actor/library/mlog/internal/filter"
+	"go-actor/library/mlog/internal/logger"
+	"strings"
 )
 
-const (
-	DEBUG = iota
-	WARN
-	INFO
-	ERROR
-	FATAL
-)
+var obj define.ILog = logger.NewLogger(define.LOG_DEBUG, &logger.StdWriter{})
 
-var log ILog
-
-var str2Level = map[string]int32{
-	"debug": DEBUG,
-	"warn":  WARN,
-	"info":  INFO,
-	"error": ERROR,
-	"fatal": FATAL,
-}
-
-type ILog interface {
-	GetLevel() int32
-	Debugf(format string, args ...interface{})
-	Warnf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Errorf(format string, args ...interface{})
-	Fatalf(format string, args ...interface{})
-	Close() error
-}
-
-func InitDefault() {
-	val := zap.NewLogger("develop", 0, "./default.log")
-	switch vv := val.(type) {
-	case error:
-		panic(fmt.Sprintf("日志库初始化失败: %v", vv))
-	case ILog:
-		log = vv
-	}
-}
-
-func Init(env string, level string, logfile string) error {
-	os.MkdirAll(path.Dir(logfile), os.FileMode(0777))
-	switch vv := zap.NewLogger(env, str2Level[level], logfile).(type) {
-	case error:
-		return vv
-	case ILog:
-		log = vv
-	}
-	return nil
+func Init(appname string, id int32, level, logpath string) {
+	obj.Close()
+	logname := fmt.Sprintf("%s%d", strings.ToLower(appname), id)
+	loglevel := define.StringToLevel(level)
+	obj = logger.NewLogger(loglevel, logger.NewLogWriter(logpath, logname, 1024), &logger.StdWriter{})
 }
 
 func Close() error {
-	return log.Close()
+	return obj.Close()
 }
 
-func Debugf(format string, args ...interface{}) {
-	if log.GetLevel() <= DEBUG {
-		log.Debugf(format, args...)
+func SetLevel(level int32) {
+	obj.SetLevel(level)
+}
+
+func Trace(head *pb.Head, format string, args ...interface{}) {
+	if !filter.IsFilter(head) {
+		obj.Trace(1, filter.Filter(head, format), args...)
 	}
 }
 
-func Warnf(format string, args ...interface{}) {
-	if log.GetLevel() <= WARN {
-		log.Warnf(format, args...)
-	}
-}
-
-func Infof(format string, args ...interface{}) {
-	if log.GetLevel() <= INFO {
-		log.Infof(format, args...)
-	}
-}
-
-func Errorf(format string, args ...interface{}) {
-	if log.GetLevel() <= ERROR {
-		log.Errorf(format, args...)
-	}
-}
-
-func Fatalf(format string, args ...interface{}) {
-	if log.GetLevel() <= FATAL {
-		log.Fatalf(format, args...)
-	}
-}
-
-// head日志接口
 func Debug(head *pb.Head, format string, args ...interface{}) {
-	if log.GetLevel() <= DEBUG && !filter.IsFilter(head) {
-		log.Debugf(filter.Filter(head, format), args...)
+	if !filter.IsFilter(head) {
+		obj.Debug(1, filter.Filter(head, format), args...)
 	}
 }
 
 func Warn(head *pb.Head, format string, args ...interface{}) {
-	if log.GetLevel() <= WARN && !filter.IsFilter(head) {
-		log.Warnf(filter.Filter(head, format), args...)
+	if !filter.IsFilter(head) {
+		obj.Warn(1, filter.Filter(head, format), args...)
 	}
 }
 
 func Info(head *pb.Head, format string, args ...interface{}) {
-	if log.GetLevel() <= INFO && !filter.IsFilter(head) {
-		log.Infof(filter.Filter(head, format), args...)
+	if !filter.IsFilter(head) {
+		obj.Info(1, filter.Filter(head, format), args...)
 	}
 }
 
 func Error(head *pb.Head, format string, args ...interface{}) {
-	if log.GetLevel() <= ERROR && !filter.IsFilter(head) {
-		log.Errorf(filter.Filter(head, format), args...)
+	if !filter.IsFilter(head) {
+		obj.Error(-1, filter.Filter(head, format), args...)
 	}
 }
 
 func Fatal(head *pb.Head, format string, args ...interface{}) {
-	if log.GetLevel() <= FATAL && !filter.IsFilter(head) {
-		log.Fatalf(filter.Filter(head, format), args...)
+	if !filter.IsFilter(head) {
+		obj.Fatal(1, filter.Filter(head, format), args...)
 	}
+}
+
+// --------Debugf---------
+func Tracef(format string, args ...interface{}) {
+	obj.Trace(1, format, args...)
+}
+
+func Debugf(format string, args ...interface{}) {
+	obj.Debug(1, format, args...)
+}
+
+func Warnf(format string, args ...interface{}) {
+	obj.Warn(1, format, args...)
+}
+
+func Infof(format string, args ...interface{}) {
+	obj.Info(1, format, args...)
+}
+
+func Errorf(format string, args ...interface{}) {
+	obj.Error(1, format, args...)
+}
+
+func Fatalf(format string, args ...interface{}) {
+	obj.Fatal(1, format, args...)
 }

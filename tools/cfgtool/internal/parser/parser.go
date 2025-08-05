@@ -2,10 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"go-actor/library/uerror"
 	"go-actor/tools/cfgtool/domain"
 	"go-actor/tools/cfgtool/internal/base"
 	"go-actor/tools/cfgtool/internal/manager"
-	"go-actor/tools/library/uerror"
 	"path"
 	"strings"
 
@@ -28,9 +28,11 @@ func ParseFiles(files ...string) error {
 	}
 	for _, item := range manager.GetTableList(domain.TypeOfConfig) {
 		parseConfig(item)
-		if item.Sheet == "网关接口路由表" {
-			parseCmd(item)
-		}
+		/*
+			if item.Sheet == "网关接口路由表" {
+				parseCmd(item)
+			}
+		*/
 	}
 	parseReference()
 	return nil
@@ -39,7 +41,7 @@ func ParseFiles(files ...string) error {
 func parseTable(fileName string) error {
 	fp, err := excelize.OpenFile(fileName)
 	if err != nil {
-		return uerror.New(1, -1, "打开文件失败:%s", err.Error())
+		return uerror.New(-1, "打开文件失败:%s", err.Error())
 	}
 	defer fp.Close()
 
@@ -51,7 +53,7 @@ func parseTable(fileName string) error {
 			return nil
 		}
 		fmt.Printf("获取生成表失败:%s\n", err.Error())
-		return uerror.New(1, -1, "获取生成表失败:%s", err.Error())
+		return uerror.New(-1, "获取生成表失败:%s", err.Error())
 	}
 	file := strings.TrimSuffix(path.Base(fileName), path.Ext(fileName))
 	defaultFile := path.Base(file)
@@ -90,21 +92,21 @@ func parseTable(fileName string) error {
 			case "@enum":
 				data, err := fp.GetRows(strs[1])
 				if err != nil {
-					return uerror.New(1, -1, "%s配置表不存在%s  %v", fileName, strs[0], err.Error())
+					return uerror.New(-1, "%s配置表不存在%s  %v", fileName, strs[0], err.Error())
 				}
 				manager.AddTable(file, strs[1], domain.TypeOfEnum, "", data, nil)
 			case "@struct":
 				pos := strings.Index(strs[1], ":")
 				data, err := fp.GetRows(strs[1][:pos])
 				if err != nil {
-					return uerror.New(1, -1, "%s配置表不存在%s  %v", fileName, strs[0], err.Error())
+					return uerror.New(-1, "%s配置表不存在%s  %v", fileName, strs[0], err.Error())
 				}
 				manager.AddTable(file, strs[1][:pos], domain.TypeOfStruct, strs[1][pos+1:], data, nil)
 			case "@config":
 				pos := strings.Index(strs[1], ":")
 				data, err := fp.GetRows(strs[1][:pos])
 				if err != nil {
-					return uerror.New(1, -1, "%s配置表不存在%s  %v", fileName, strs[0], err.Error())
+					return uerror.New(-1, "%s配置表不存在%s  %v", fileName, strs[0], err.Error())
 				}
 				manager.AddTable(file, strs[1][:pos], domain.TypeOfConfig, strs[1][pos+1:], data, base.Suffix(strs, 2))
 			}

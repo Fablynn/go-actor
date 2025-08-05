@@ -5,31 +5,34 @@ import (
 	"fmt"
 	"go-actor/common/config"
 	"go-actor/common/pb"
+	"go-actor/common/token"
 	"go-actor/common/yaml"
-	"go-actor/framework"
-	"go-actor/framework/token"
-	"go-actor/library/async"
+	"go-actor/framework/cluster"
 	"go-actor/library/mlog"
+	"go-actor/library/safe"
 	"go-actor/library/signal"
-	"go-actor/server/client/internal/manager"
+	"go-actor/library/util"
+	"go-actor/message"
+	"go-actor/server/client/internal/player"
+	"go-actor/server/client/internal/stat"
 	"net/http"
 
 	"github.com/spf13/cast"
 )
 
 var (
-	playerMgr *manager.ClientPlayerMgr
+	playerMgr *player.ClientPlayerMgr
 )
 
 func main() {
 	var filename string
 	var id, port int
 	var begin, end int64
-	flag.StringVar(&filename, "config", "local.yaml", "游戏配置")
+	flag.StringVar(&filename, "config", "config.yaml", "游戏配置")
 	flag.IntVar(&id, "id", 1, " 节点id")
 	flag.IntVar(&port, "port", 22345, " 节点端口")
-	flag.Int64Var(&begin, "begin", 144, "起始uid")
-	flag.Int64Var(&end, "end", 146, "终止uid")
+	flag.Int64Var(&begin, "begin", 1000222, "起始uid")
+	flag.Int64Var(&end, "end", 1000222, "终止uid")
 	flag.Parse()
 
 	// 加载游戏配置
@@ -40,29 +43,26 @@ func main() {
 	nodeCfg := yamlcfg.Client[node.Id]
 
 	// 初始化日志库
-	if err := mlog.Init(yamlcfg.Common.Env, nodeCfg.LogLevel, nodeCfg.LogFile); err != nil {
-		panic(fmt.Sprintf("日志库初始化失败: %v", err))
-	}
-	async.Init(mlog.Errorf)
+	mlog.Init(node.Name, node.Id, nodeCfg.LogLevel, nodeCfg.LogPath)
 	token.Init(yamlcfg.Common.SecretKey)
 
-	// 配置初始化
-	if err := config.Init(yamlcfg.Etcd, yamlcfg.Common); err != nil {
-		panic(fmt.Sprintf("配置初始化失败: %v", err))
-	}
+	mlog.Infof("初始化游戏配置")
+	util.Must(config.Init(yamlcfg.Etcd, yamlcfg.Data))
+	message.Init()
 
 	// 初始化PlayerMgr
-	playerMgr = manager.NewClientPlayerMgr(node, nodeCfg)
+	stat.NewStatistics()
+	playerMgr = player.NewClientPlayerMgr(node, nodeCfg)
 	playerMgr.Login(uint64(begin), uint64(end))
 
 	// 请求 http 服务，接受请求
 	http.HandleFunc("/api", handle)
-	async.SafeGo(mlog.Errorf, func() {
+	safe.Go(func() {
 		http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	})
 
 	signal.SignalNotify(func() {
-		framework.Close()
+		cluster.Close()
 		mlog.Close()
 	})
 }

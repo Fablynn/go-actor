@@ -2,10 +2,10 @@ package actor
 
 import (
 	"go-actor/common/pb"
-	"go-actor/framework/domain"
+	"go-actor/framework/define"
+	"go-actor/framework/internal/method"
 	"go-actor/library/async"
 	"go-actor/library/mlog"
-	"go-actor/library/timer"
 	"go-actor/library/uerror"
 	"reflect"
 	"sync/atomic"
@@ -18,7 +18,11 @@ type ActorPool struct {
 	poolSize int
 	pool     []*async.Async
 	rval     reflect.Value
-	funcs    map[string]*FuncInfo
+	funcs    map[string]*method.Method
+}
+
+func (d *ActorPool) GetIdPointer() *uint64 {
+	return &d.id
 }
 
 func (d *ActorPool) GetId() uint64 {
@@ -46,7 +50,7 @@ func (d *ActorPool) GetActorName() string {
 	return d.name
 }
 
-func (d *ActorPool) Register(ac domain.IActor, sizes ...int) {
+func (d *ActorPool) Register(ac define.IActor, sizes ...int) {
 	if len(sizes) <= 0 {
 		panic("ActorPool注册参数错误，必须指定协程池大小")
 	}
@@ -57,17 +61,20 @@ func (d *ActorPool) Register(ac domain.IActor, sizes ...int) {
 	}
 	d.rval = reflect.ValueOf(ac)
 	d.name = parseName(d.rval.Elem().Type())
+	d.SetId(GenActorId())
 }
 
 func (d *ActorPool) ParseFunc(tt interface{}) {
 	switch vv := tt.(type) {
-	case map[string]*FuncInfo:
+	case map[string]*method.Method:
 		d.funcs = vv
 	case reflect.Type:
-		d.funcs = make(map[string]*FuncInfo)
+		d.funcs = make(map[string]*method.Method)
 		for i := 0; i < vv.NumMethod(); i++ {
 			m := vv.Method(i)
-			d.funcs[m.Name] = parseFuncInfo(m)
+			if ff := method.NewMethod(m); ff != nil {
+				d.funcs[m.Name] = ff
+			}
 		}
 	default:
 		panic("注册参数错误，必须是方法列表或reflect.Type")
@@ -77,39 +84,25 @@ func (d *ActorPool) ParseFunc(tt interface{}) {
 func (d *ActorPool) SendMsg(h *pb.Head, args ...interface{}) error {
 	mm, ok := d.funcs[h.FuncName]
 	if !ok {
-		return uerror.New(1, pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
+		return uerror.New(pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
 	}
 	pos := h.ActorId % uint64(d.poolSize)
-	switch mm.flag {
-	case CMD_HANDLER:
-		d.pool[pos].Push(mm.localCmd(d.rval, h, args...))
-	default:
-		d.pool[pos].Push(mm.localProto(d.rval, h, args...))
-	}
+	d.pool[pos].Push(mm.Call(d.rval, h, args...))
 	return nil
 }
 
 func (d *ActorPool) Send(h *pb.Head, buf []byte) error {
 	mm, ok := d.funcs[h.FuncName]
 	if !ok {
-		return uerror.New(1, pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
+		return uerror.New(pb.ErrorCode_FUNC_NOT_FOUND, "%s.%s未实现", h.ActorName, h.FuncName)
 	}
 	pos := h.ActorId % uint64(d.poolSize)
-	switch mm.flag {
-	case CMD_HANDLER:
-		d.pool[pos].Push(mm.rpcCmd(d.rval, h, buf))
-	case NOTIFY_HANDLER:
-		d.pool[pos].Push(mm.rpcNotify(d.rval, h, buf))
-	case BYTES_HANDLER:
-		d.pool[pos].Push(mm.localProto(d.rval, h, buf))
-	default:
-		d.pool[pos].Push(mm.rpcGob(d.rval, h, buf))
-	}
+	d.pool[pos].Push(mm.Rpc(d.rval, h, buf))
 	return nil
 }
 
 func (d *ActorPool) RegisterTimer(h *pb.Head, ttl time.Duration, times int32) error {
-	return timer.Register(&d.id, func() {
+	return t.Register(&d.id, func() {
 		if err := d.SendMsg(h); err != nil {
 			mlog.Errorf("定时器发送消息失败: head:%v, error:%v", h, err)
 		}

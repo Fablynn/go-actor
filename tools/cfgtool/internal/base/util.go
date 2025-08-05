@@ -1,7 +1,7 @@
 package base
 
 import (
-	"go-actor/tools/library/uerror"
+	"go-actor/library/uerror"
 	"go/format"
 	"io/ioutil"
 	"os"
@@ -47,12 +47,12 @@ func Save(ppath, filename string, buf []byte) error {
 	fileName := path.Join(ppath, filename)
 	// 创建目录
 	if err := os.MkdirAll(path.Dir(fileName), os.FileMode(0777)); err != nil {
-		return uerror.New(1, -1, "filename: %s, error: %v", fileName, err)
+		return uerror.New(-1, "filename: %s, error: %v", fileName, err)
 	}
 
 	// 写入文件
 	if err := ioutil.WriteFile(fileName, buf, os.FileMode(0666)); err != nil {
-		return uerror.New(1, -1, "filename: %s, error: %v", fileName, err)
+		return uerror.New(-1, "filename: %s, error: %v", fileName, err)
 	}
 	return nil
 }
@@ -61,7 +61,7 @@ func SaveGo(path, filename string, buf []byte) error {
 	result, err := format.Source(buf)
 	if err != nil {
 		Save("./", "gen_error.gen.go", buf)
-		return uerror.New(1, -1, "格式化失败: %v", err)
+		return uerror.New(-1, "格式化失败: %v", err)
 	}
 	return Save(path, filename, result)
 }

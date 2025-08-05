@@ -2,13 +2,12 @@ package actor
 
 import (
 	"go-actor/common/pb"
-	"go-actor/framework/domain"
+	"go-actor/framework/define"
+	"go-actor/framework/internal/method"
 	"go-actor/library/async"
 	"go-actor/library/mlog"
-	"go-actor/library/timer"
 	"go-actor/library/uerror"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -16,28 +15,31 @@ type Actor struct {
 	*async.Async
 	name  string
 	rval  reflect.Value
-	funcs map[string]*FuncInfo
+	funcs map[string]*method.Method
 }
 
 func (a *Actor) GetActorName() string {
 	return a.name
 }
 
-func (a *Actor) Register(ac domain.IActor, _ ...int) {
+func (a *Actor) Register(ac define.IActor, _ ...int) {
 	a.Async = async.NewAsync()
 	a.rval = reflect.ValueOf(ac)
 	a.name = parseName(a.rval.Elem().Type())
+	a.SetId(GenActorId())
 }
 
 func (d *Actor) ParseFunc(tt interface{}) {
 	switch vv := tt.(type) {
-	case map[string]*FuncInfo:
+	case map[string]*method.Method:
 		d.funcs = vv
 	case reflect.Type:
-		d.funcs = make(map[string]*FuncInfo)
+		d.funcs = make(map[string]*method.Method)
 		for i := 0; i < vv.NumMethod(); i++ {
 			m := vv.Method(i)
-			d.funcs[m.Name] = parseFuncInfo(m)
+			if ff := method.NewMethod(m); ff != nil {
+				d.funcs[m.Name] = ff
+			}
 		}
 	default:
 		panic("注册参数错误，必须是方法列表或reflect.Type")
@@ -47,48 +49,25 @@ func (d *Actor) ParseFunc(tt interface{}) {
 func (d *Actor) SendMsg(h *pb.Head, args ...interface{}) error {
 	mm, ok := d.funcs[h.FuncName]
 	if !ok {
-		return uerror.New(1, -1, "%s.%s未实现, head:%v", h.ActorName, h.FuncName, h)
+		return uerror.New(-1, "%s.%s未实现, head:%v", h.ActorName, h.FuncName, h)
 	}
-	switch mm.flag {
-	case CMD_HANDLER:
-		d.Push(mm.localCmd(d.rval, h, args...))
-	default:
-		d.Push(mm.localProto(d.rval, h, args...))
-	}
+	d.Push(mm.Call(d.rval, h, args...))
 	return nil
 }
 
 func (d *Actor) Send(h *pb.Head, buf []byte) error {
 	mm, ok := d.funcs[h.FuncName]
 	if !ok {
-		return uerror.New(1, -1, "%s.%s未实现, head:%v", h.ActorName, h.FuncName, h)
+		return uerror.New(-1, "%s.%s未实现, head:%v", h.ActorName, h.FuncName, h)
 	}
-	// 发送事件
-	switch mm.flag {
-	case CMD_HANDLER:
-		d.Push(mm.rpcCmd(d.rval, h, buf))
-	case NOTIFY_HANDLER:
-		d.Push(mm.rpcNotify(d.rval, h, buf))
-	case BYTES_HANDLER, HEAD_BYTES_HANDLER, INTERFACE_HANDLER, HEAD_INTERFACE_HANDLER:
-		d.Push(mm.localProto(d.rval, h, buf))
-	default:
-		d.Push(mm.rpcGob(d.rval, h, buf))
-	}
+	d.Push(mm.Rpc(d.rval, h, buf))
 	return nil
 }
 
 func (d *Actor) RegisterTimer(h *pb.Head, ttl time.Duration, times int32) error {
-	return timer.Register(d.GetIdPointer(), func() {
+	return t.Register(d.GetIdPointer(), func() {
 		if err := d.SendMsg(h); err != nil {
 			mlog.Errorf("定时器发送消息失败: head:%v, error:%v", h, err)
 		}
 	}, ttl, times)
-}
-
-func parseName(rr reflect.Type) string {
-	name := rr.String()
-	if index := strings.Index(name, "."); index > -1 {
-		name = name[index+1:]
-	}
-	return name
 }
