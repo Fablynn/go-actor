@@ -1,0 +1,28 @@
+syntax = "proto3";
+package go_actor;
+
+option go_package = "./pb";
+
+import "packet.proto";
+
+// 战斗场景数据
+message FightData {
+  uint64 fight_id = 1;
+}
+
+message FightShutReq{
+
+}
+
+message FightShutRsp{
+  RspHead head = 1;  // 协议头
+}
+
+message CreateFightReq{
+  uint64 fight_id = 1;
+  FightData data = 2;
+}
+
+message CreateFightRsp{
+  RspHead head = 1;  // 协议头
+}

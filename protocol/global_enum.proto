@@ -30,10 +30,16 @@ enum GeneratorType {
   GeneratorTypeEnd   = 100;  // 生成器类型-end
 }
 
-// 游戏状态
+// 回合制游戏状态
 enum GameState {
-  GAME_INIT              = 0;    // 初始化状态
-  GAME_END               = 4;    // 结算阶段
+  GAME_INIT                 = 0;    // 初始化战斗信息
+  GAME_LOAD                 = 1;    // 加载战斗环境相关 战场效果
+  GAME_PRE                  = 2;    // 战前回合
+  GAME_ACT                  = 3;    // 决策回合
+  GAME_AFTER                = 4;    // 战后回合
+  GAME_ENEMY                = 5;    // 敌人行动回合 -> 结束后 至 战前回合
+  GAME_SETTLE               = 6;    // 游戏结算 奖励阶段
+  GAME_Finish               = 7;    // 结束状态 回收战斗对象
 }
 
 // 玩家状态
