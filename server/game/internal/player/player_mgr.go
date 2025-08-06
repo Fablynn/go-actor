@@ -36,12 +36,12 @@ func (p *PlayerMgr) Close() {
 	mlog.Infof("PlayerMgr关闭成功")
 }
 
-func (p *PlayerMgr) Kick(uid uint64) {
-	act := p.mgr.GetActor(uid)
+func (p *PlayerMgr) Kick(head *pb.Head) {
+	act := p.mgr.GetActor(head.Uid)
 	if act == nil {
 		return
 	}
-	p.mgr.DelActor(uid)
+	p.mgr.DelActor(head.Uid)
 	recycle.Destroy(act.(*Player))
 }
 
