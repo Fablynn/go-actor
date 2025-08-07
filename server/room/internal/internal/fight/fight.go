@@ -1,6 +1,7 @@
 package fight
 
 import (
+	"go-actor/common/config/repository/skill"
 	"go-actor/common/pb"
 	"go-actor/framework/actor"
 	"go-actor/library/mlog"
@@ -11,7 +12,6 @@ import (
 // Fight 游戏内存定义 游戏数据分
 type Fight struct {
 	actor.Actor
-	// 状态机
 	Data     *pb.FightData
 	machine  *machine.Machine //状态机
 	isChange bool             // 是否有数据变更
@@ -20,7 +20,35 @@ type Fight struct {
 
 // NewRummyGame 初始化游戏对象
 func NewFight(data *pb.FightData) *Fight {
-	// todo init nil obj
+	// 初始化 玩家实体集合技能配置
+	data.CharacterSkills = make(map[uint32]*pb.Skills, len(data.Characters))
+	for _, character := range data.Characters {
+		if data.CharacterSkills[character.ID] == nil {
+			data.CharacterSkills[character.ID] = &pb.Skills{
+				Data: make([]*pb.Skill, len(character.SkillIDs)),
+			}
+		}
+
+		for _, skillID := range character.SkillIDs {
+			data.CharacterSkills[character.ID].Data = append(data.CharacterSkills[character.ID].Data, skill.MGetID(skillID))
+		}
+	}
+
+	// 初始化 敌人实体集合技能配置
+	data.EnemyIntents = make(map[uint32]*pb.Intents, len(data.Ememys))
+	for _, ememy := range data.Ememys {
+		if data.EnemyIntents[ememy.ID] == nil {
+			data.EnemyIntents[ememy.ID] = &pb.Intents{
+				Intent: make([]*pb.Skill, len(ememy.Intents)),
+			}
+		}
+
+		for _, intent := range ememy.Intents {
+			emSkill := skill.MGetID(intent.Id)
+			emSkill.SetDamage(uint64(intent.Incr))
+			data.EnemyIntents[ememy.ID].Intent = append(data.EnemyIntents[ememy.ID].Intent, emSkill)
+		}
+	}
 
 	ret := &Fight{Data: data}
 	nowMs := time.Now().UnixMilli()

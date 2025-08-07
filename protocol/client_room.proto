@@ -4,13 +4,29 @@ package go_actor;
 option go_package = "./pb";
 
 import "packet.proto";
+import "character_cfg.proto";
+import "enemy_cfg.proto";
+import "skill_cfg.proto";
 
 // 战斗场景数据
 message FightData {
   uint64 fight_id = 1;
+  repeated Character characters = 2;//  玩家控制实体集合
+  repeated Enemys ememys = 3;       //  对局敌人环境
+  map<uint32, Skills> character_skills = 4;    //玩家实体具备技能
+  map<uint32, Intents> enemy_intents   = 6;    //敌人行动逻辑
 }
 
-message FightShutReq{
+message Intents{
+  repeated Skill intent = 1; //怪物意图
+  uint32 couser = 2;          // 当前意图下标
+}
+
+message Skills{
+  repeated Skill data = 1;
+}
+
+message FightShutReq{ //终止游戏
 
 }
 
