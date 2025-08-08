@@ -145,17 +145,17 @@ func (p *Player) Dispatcher() {
 		case pb.NodeType_NodeTypeRoom: //转发战斗服
 			pack.Head.Dst.RouterType = pb.RouterType_ROOM_ID
 			if err := cluster.Send(pack.Head, pack.Body); err != nil {
-				mlog.Error(pack.Head, "转发websocket数据包失败 error:%v", err)
+				mlog.Error(pack.Head, "[GateSendToRoom] 转发websocket数据包失败 error:%v", err)
 			} else {
-				mlog.Trace(pack.Head, "gate服务转发到room： %v", pack.Body)
+				mlog.Trace(pack.Head, "[GateSendToRoom] gate服务转发到room： %v", pack.Body)
 			}
 		default: //转发其他服务
 			pack.Head.Dst.RouterId = pack.Head.Uid
 			pack.Head.Dst.RouterType = pb.RouterType_UID
 			if err := cluster.Send(pack.Head, pack.Body); err != nil {
-				mlog.Error(pack.Head, "转发websocket数据包失败 error:%v", err)
+				mlog.Error(pack.Head, "[GateSendToDefault] 转发websocket数据包失败 error:%v", err)
 			} else {
-				mlog.Trace(pack.Head, "gate服务转发到%s： %v", pack.Head.Dst.NodeType, pack.Body)
+				mlog.Trace(pack.Head, "[GateSendToDefault] gate服务转发到%s： %v", pack.Head.Dst.NodeType, pack.Body)
 			}
 		}
 	}

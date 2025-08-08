@@ -43,8 +43,6 @@ func (d *Frame) Decode(buf []byte, msg *pb.Packet) error {
 	pack.Body = buf[pos:]
 	msg.Body = pack.Body
 
-	mlog.Tracef("接收到数据包：cmd(%d), uid(%d), routerId(%d), seq(%d), version(%d), extra(%d), body(%v)", pack.Cmd, pack.Uid, pack.RouteId, pack.Seq, pack.Version, pack.Extra, pack.Body)
-
 	msg.Head = &pb.Head{
 		Src:     framework.NewSrcRouter(pb.RouterType_UID, pack.Uid),
 		Dst:     framework.NewCmdRouter(pack.Cmd, pack.RouteId, 0),
@@ -54,6 +52,8 @@ func (d *Frame) Decode(buf []byte, msg *pb.Packet) error {
 		Version: pack.Version,
 		Extra:   pack.Extra,
 	}
+
+	mlog.Tracef("接收到数据包：cmd(%d), uid(%d), routerId(%d), seq(%d), version(%d), extra(%d), body(%v)", pack.Cmd, pack.Uid, pack.RouteId, pack.Seq, pack.Version, pack.Extra, pack.Body)
 	return nil
 }
 
@@ -64,7 +64,7 @@ func (d *Frame) Encode(pack *pb.Packet, buf []byte) error {
 	pos += 4
 	binary.BigEndian.PutUint64(buf[pos:], pack.Head.Uid) // uid
 	pos += 8
-	binary.BigEndian.PutUint64(buf[pos:], pack.Head.Src.ActorId) // router id
+	binary.BigEndian.PutUint64(buf[pos:], 0) // router id
 	pos += 8
 	binary.BigEndian.PutUint32(buf[pos:], pack.Head.Seq) // seq
 	pos += 4

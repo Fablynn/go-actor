@@ -79,7 +79,7 @@ func (p *Player) OnTick() {
 			Src:       framework.NewSrcRouter(pb.RouterType_UID, p.GetId()),
 		}
 		actor.SendMsg(&head)
-		cluster.SendToGate(&head, "PlayerMgr.Kick")
+		cluster.SendToGate(&head, "GatePlayerMgr.Kick")
 	}
 }
 

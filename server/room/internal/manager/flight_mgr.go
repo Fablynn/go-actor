@@ -62,7 +62,7 @@ func (d *FightMgr) Shut(head *pb.Head, req *pb.FightShutReq, rsp *pb.FightShutRs
 	return d.mgr.SendMsg(head)
 }
 
-// 加入房间 玩家历史房间优先 房间不存在则新建房间
+// JoinRoomReq 创建战场
 func (d *FightMgr) JoinRoomReq(head *pb.Head, req *pb.CreateFightReq, rsp *pb.CreateFightRsp) error {
 	if act := d.mgr.GetActor(req.FightId); act != nil {
 		return act.SendMsg(head, req, rsp)
