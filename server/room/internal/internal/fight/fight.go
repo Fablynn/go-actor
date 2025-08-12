@@ -2,6 +2,7 @@ package fight
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"go-actor/common/config/repository/skill"
 	"go-actor/common/pb"
 	"go-actor/framework/actor"
@@ -10,24 +11,26 @@ import (
 	"time"
 )
 
-// Fight 游戏内存定义 游戏数据分
+// Fight 战斗服对象 分正常战斗和快速战斗
 type Fight struct {
 	actor.Actor
 	Data     *pb.FightData
+	enemyCur int              // 怪物意图下标
 	machine  *machine.Machine // 状态机
 	isChange bool             // 是否有数据变更
-	IsFinish bool             // 平滑关闭
+	IsFinish bool             // 战斗结束
+	IsClose  bool             // 强行退出 不保存
 	Timeout  int64
 }
 
-// NewRummyGame 初始化游戏对象
+// NewFight 初始化游戏对象
 func NewFight(data *pb.FightData) *Fight {
 	// 初始化 玩家实体集合技能配置
 	data.CharacterSkills = make(map[uint32]*pb.Skills, len(data.Characters))
 	for _, character := range data.Characters {
 		if data.CharacterSkills[character.ID] == nil {
 			data.CharacterSkills[character.ID] = &pb.Skills{
-				Data: make([]*pb.Skill, len(character.SkillIDs)),
+				Data: make([]*pb.Skill, 0, len(character.SkillIDs)),
 			}
 		}
 
@@ -41,12 +44,12 @@ func NewFight(data *pb.FightData) *Fight {
 	for _, ememy := range data.Ememys {
 		if data.EnemyIntents[ememy.ID] == nil {
 			data.EnemyIntents[ememy.ID] = &pb.Intents{
-				Intent: make([]*pb.Skill, len(ememy.Intents)),
+				Intent: make([]*pb.Skill, 0, len(ememy.Intents)),
 			}
 		}
 
 		for _, intent := range ememy.Intents {
-			emSkill := skill.MGetID(intent.Id)
+			emSkill := proto.Clone(skill.MGetID(intent.Id)).(*pb.Skill)
 			emSkill.SetDamage(uint64(intent.Incr))
 			data.EnemyIntents[ememy.ID].Intent = append(data.EnemyIntents[ememy.ID].Intent, emSkill)
 		}
@@ -78,7 +81,7 @@ func (d *Fight) Init() {
 	}
 }
 
-func (d *Fight) Create() {
+func (d *Fight) Print() {
 	// todo 创建战场环境
 	mlog.Infof("当前对局玩家单位: %v", d.Data.Characters)
 	mlog.Infof("当前对局玩家技能: %v", d.Data.CharacterSkills)
@@ -126,4 +129,11 @@ func (d *Fight) FlushExpireTime(nowMs int64) {
 func (d *Fight) OnTick() {
 	nowMs := time.Now().UnixMilli()
 	d.machine.Handle(nowMs, d)
+}
+
+func (d *Fight) OnExit() {
+	err := actor.SendMsg(&pb.Head{ActorName: "FightMgr", FuncName: "Remove"}, d.GetId())
+	if err != nil {
+		mlog.Infof("Actor remove err:%v", err)
+	}
 }

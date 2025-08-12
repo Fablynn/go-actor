@@ -18,6 +18,10 @@ func Intn(n int) int {
 	return randObj.Intn(n)
 }
 
+func Perm(n int) []int {
+	return randObj.Perm(n)
+}
+
 // [0,n)
 func Int32n(n int32) int32 {
 	return int32(Intn(int(n)))

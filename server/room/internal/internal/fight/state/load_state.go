@@ -2,6 +2,7 @@ package state
 
 import (
 	"go-actor/common/pb"
+	"go-actor/library/mlog"
 	"go-actor/server/room/internal/internal/fight"
 )
 
@@ -16,6 +17,7 @@ type LoadState struct {
 func (d *LoadState) OnEnter(nowMs int64, curState pb.GameState, extra interface{}) {
 	game := extra.(*fight.Fight)
 	game.FlushExpireTime(nowMs)
+	mlog.Infof("加载天气 战场环境---结束")
 }
 
 func (d *LoadState) OnExit(nowMs int64, curState pb.GameState, extra interface{}) {
