@@ -15,11 +15,7 @@ type SettleState struct {
 
 func (d *SettleState) OnEnter(nowMs int64, curState pb.GameState, extra interface{}) {
 	game := extra.(*fight.Fight)
-	game.Create()
-}
-
-func (d *SettleState) OnTick(nowMs int64, curState pb.GameState, extra interface{}) pb.GameState {
-	return curState
+	game.FlushExpireTime(nowMs)
 }
 
 func (d *SettleState) OnExit(nowMs int64, curState pb.GameState, extra interface{}) {

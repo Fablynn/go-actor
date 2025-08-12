@@ -1,6 +1,7 @@
 package fight
 
 import (
+	"fmt"
 	"go-actor/common/config/repository/skill"
 	"go-actor/common/pb"
 	"go-actor/framework/actor"
@@ -13,9 +14,10 @@ import (
 type Fight struct {
 	actor.Actor
 	Data     *pb.FightData
-	machine  *machine.Machine //状态机
+	machine  *machine.Machine // 状态机
 	isChange bool             // 是否有数据变更
 	IsFinish bool             // 平滑关闭
+	Timeout  int64
 }
 
 // NewRummyGame 初始化游戏对象
@@ -53,17 +55,23 @@ func NewFight(data *pb.FightData) *Fight {
 	ret := &Fight{Data: data}
 	nowMs := time.Now().UnixMilli()
 
-	ret.machine = machine.NewMachine(nowMs, pb.GameState_GAME_INIT, ret)
+	ret.machine = machine.NewMachine(nowMs, pb.GameState_GAME_INIT)
 	ret.Actor.Register(ret)
 	ret.Actor.SetId(data.FightId)
 	ret.Start()
-
 	return ret
 }
 
 func (d *Fight) Init() {
+	// 初始化状态机
+	nowMs := time.Now().UnixMilli()
+	handle := d.machine.GetState()
+	if handle == nil {
+		panic(fmt.Sprintf("Machine状态机未注册状态: %d", d.machine.GetCurState()))
+	}
+	handle.OnEnter(nowMs, d.machine.GetCurState(), d)
 	// 启动定时器
-	head := &pb.Head{SendType: pb.SendType_POINT, ActorName: "RummyGame", FuncName: "OnTick"}
+	head := &pb.Head{SendType: pb.SendType_POINT, ActorName: "Fight", FuncName: "OnTick"}
 	err := d.RegisterTimer(head, 50*time.Millisecond, -1)
 	if err != nil {
 		mlog.Debug(head, "register timer err: %v", err)
@@ -71,7 +79,11 @@ func (d *Fight) Init() {
 }
 
 func (d *Fight) Create() {
-	// todo 幂等创建战场环境
+	// todo 创建战场环境
+	mlog.Infof("当前对局玩家单位: %v", d.Data.Characters)
+	mlog.Infof("当前对局玩家技能: %v", d.Data.CharacterSkills)
+	mlog.Infof("当前对局敌人单位: %v", d.Data.Ememys)
+	mlog.Infof("当前对局敌人意图: %v", d.Data.EnemyIntents)
 }
 
 func (d *Fight) GetCurState() pb.GameState {
@@ -96,4 +108,22 @@ func (d *Fight) GetNextState() pb.GameState {
 		return pb.GameState_GAME_Finish
 	}
 	return pb.GameState_GAME_INIT
+}
+
+func (d *Fight) GetCurStateTTL() int64 {
+	switch d.GetCurState() {
+	// todo 后续加入玩家控制
+	default:
+		return 2 * 1000
+	}
+}
+
+func (d *Fight) FlushExpireTime(nowMs int64) {
+	d.Timeout = nowMs + d.GetCurStateTTL()
+	d.machine.SetCurStateStartTime(nowMs)
+}
+
+func (d *Fight) OnTick() {
+	nowMs := time.Now().UnixMilli()
+	d.machine.Handle(nowMs, d)
 }

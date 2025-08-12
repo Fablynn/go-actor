@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go-actor/common/config"
 	"go-actor/common/pb"
-	"go-actor/common/redis"
 	"go-actor/common/yaml"
 	"go-actor/framework"
 	"go-actor/framework/cluster"
@@ -38,10 +37,6 @@ func main() {
 	mlog.Infof("初始化游戏配置")
 	util.Must(config.Init(yamlcfg.Etcd, yamlcfg.Data))
 
-	// 初始化redis
-	mlog.Infof("初始化redis配置")
-	util.Must(redis.Init(yamlcfg.Redis))
-
 	// 初始化框架
 	mlog.Infof("启动框架服务")
 	util.Must(framework.InitDefault(node, nodeCfg, yamlcfg))
@@ -49,6 +44,9 @@ func main() {
 	// 功能模块初始化
 	mlog.Infof("初始化功能模块")
 	message.Init()
+
+	// 启动战斗服测试
+	internal.Load()
 
 	// 服务退出
 	signal.SignalNotify(func() {

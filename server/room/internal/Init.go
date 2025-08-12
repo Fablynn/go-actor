@@ -8,11 +8,15 @@ import (
 )
 
 var (
-	flightMgr = manager.NewFightMgr()
+	fightMgr = manager.NewFightMgr()
 )
 
 func Close() {
-	flightMgr.Stop()
+	fightMgr.Stop()
+}
+
+func Load() {
+	fightMgr.Load()
 }
 
 func init() {

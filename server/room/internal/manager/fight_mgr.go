@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"go-actor/common/config/repository/character"
+	"go-actor/common/config/repository/enemys"
 	"go-actor/common/pb"
 	"go-actor/framework/actor"
 	"go-actor/library/mlog"
@@ -31,6 +33,24 @@ func NewFightMgr() *FightMgr {
 	ret.Actor.Start()
 	actor.Register(ret)
 	return ret
+}
+
+func (d *FightMgr) Load() {
+	data := &pb.FightData{
+		FightId:    1,
+		Characters: character.LGet(),
+		Ememys:     enemys.LGet(),
+	}
+
+	// 创建房间
+	rr := fight.NewFight(data)
+	if rr == nil {
+		mlog.Infof("战斗服异常: %v", data)
+		return
+	}
+
+	d.mgr.AddActor(rr)
+	rr.Init()
 }
 
 // Stop 服务停用

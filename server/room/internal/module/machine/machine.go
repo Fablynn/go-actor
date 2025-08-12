@@ -11,16 +11,13 @@ type Machine struct {
 	curState  pb.GameState
 }
 
-func NewMachine(nowMs int64, state pb.GameState, extra interface{}) *Machine {
-	// 初始化状态
-	handle := GetState(state)
-	if handle == nil {
-		panic(fmt.Sprintf("Machine状态机未注册状态: %d", state))
-	}
-	handle.OnEnter(nowMs, state, extra)
-
+func NewMachine(nowMs int64, state pb.GameState) *Machine {
 	// 创建状态机
 	return &Machine{curState: state, startTime: nowMs}
+}
+
+func (m *Machine) GetState() IState {
+	return GetState(m.curState)
 }
 
 func (m *Machine) GetCurState() pb.GameState {

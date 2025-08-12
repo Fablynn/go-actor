@@ -15,11 +15,7 @@ type FinishState struct {
 
 func (d *FinishState) OnEnter(nowMs int64, curState pb.GameState, extra interface{}) {
 	game := extra.(*fight.Fight)
-	game.Create()
-}
-
-func (d *FinishState) OnTick(nowMs int64, curState pb.GameState, extra interface{}) pb.GameState {
-	return curState
+	game.FlushExpireTime(nowMs)
 }
 
 func (d *FinishState) OnExit(nowMs int64, curState pb.GameState, extra interface{}) {
