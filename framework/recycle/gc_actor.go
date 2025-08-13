@@ -49,13 +49,22 @@ func DestroyActor(acts ...define.IActor) {
 	for _, act := range acts {
 		gc.tasks.Push(&WrapDestroy{IActor: act})
 	}
+
+	select {
+	case gc.notify <- struct{}{}:
+	default:
+	}
 }
 
 func Destroy(fs ...IDestroy) {
 	for _, f := range fs {
 		gc.tasks.Push(f)
 	}
-	gc.notify <- struct{}{}
+
+	select {
+	case gc.notify <- struct{}{}:
+	default:
+	}
 }
 
 func run() {
