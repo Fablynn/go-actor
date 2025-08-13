@@ -35,6 +35,15 @@ func TestRpg(t *testing.T) {
 		s1 := upSlice(s)
 		s1[0] = 1
 		t.Logf("upSlice:%v %v", s, s1)
+
+		// fix bug by 1.22
+		var out []*int
+		for i := 0; i < 3; i++ {
+			// i := i
+			out = append(out, &i)
+		}
+		fmt.Println("值:", *out[0], *out[1], *out[2])
+		fmt.Println("地址:", out[0], out[1], out[2])
 	})
 }
 
