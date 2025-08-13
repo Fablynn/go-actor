@@ -25,6 +25,24 @@ func TestRpg(t *testing.T) {
 		go c()
 		time.Sleep(5 * time.Second)
 	})
+
+	t.Run("bug", func(t *testing.T) {
+		s := make([]int, 4, 4)
+		s[0] = 1
+		s[1] = 2
+		s[2] = 3
+		s[3] = 4
+		s1 := upSlice(s)
+		s1[0] = 1
+		t.Logf("upSlice:%v %v", s, s1)
+	})
+}
+
+func upSlice(tmp []int) []int {
+	tmp[0] = 99
+	tmp = append(tmp, 99)
+	tmp = append(tmp, 100)
+	return tmp
 }
 
 var rw sync.RWMutex
