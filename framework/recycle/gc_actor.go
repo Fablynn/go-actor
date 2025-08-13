@@ -55,6 +55,7 @@ func Destroy(fs ...IDestroy) {
 	for _, f := range fs {
 		gc.tasks.Push(f)
 	}
+	gc.notify <- struct{}{}
 }
 
 func run() {
