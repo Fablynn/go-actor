@@ -1,6 +1,7 @@
-# go-actor [Golang德州扑克游戏案例]
+# go-actor [Golang 游戏服务框架]
 
 **这是一款分布式的golang游戏服务器框架**
+`Todo RPG游戏案例`
 
 特性：
 
@@ -20,7 +21,6 @@
 
 - [x] 高性能日志库mlog
 
-- [x] 德州扑克游戏案例
 
 框架示意图：
 
@@ -65,22 +65,6 @@ make docker_run && make config && make start_all
 make stop_all && make docker_stop
 ```
 
-### 德州扑克案例
-
-游戏日志:
-
-```
-Texas deal hard cards notify per user : 145 hardcards: 2♥,10♦
-Texas deal hard cards notify per user : 146 hardcards: 2♣,J♣
-Texas deal hard cards notify per user : 144 hardcards: A♣,J♦
-flop_state show public cards : 9♦,3♥,4♦
-turn_state show public cards : 9♦,3♥,4♦,6♦
-river_state show public cards : 9♦,3♥,4♦,6♦,8♦
-texas_end_state show users uid:144 best cards: J♦,9♦,8♦,6♦,4♦ FLUSH
-texas_end_state show users uid:145 best cards: 10♦,9♦,8♦,6♦,4♦ FLUSH
-texas_end_state show users uid:146 best cards: J♣,9♦,8♦,6♦,4♦ HIGH_CARD
-texas_end_state chips:map[144:-100000 145:-100000 146:-100000], srvs:map[144:200], winners:map[144:299800 145:0 146:0]
-```
 
 ### 服务相关
 
@@ -128,94 +112,80 @@ func (d *Initstate) OnExit(nowMs int64, curState pb.GameState, extra interface{}
 
 ```
 func main() {
-    var cfg string
-    var nodeId int
-    flag.StringVar(&cfg, "config", "config.yaml", "游戏配置文件")
-    flag.IntVar(&nodeId, "id", 1, "服务ID")
-    flag.Parse()
+	var cfg string
+	var nodeId int
+	flag.StringVar(&cfg, "config", "config.yaml", "游戏配置文件")
+	flag.IntVar(&nodeId, "id", 1, "服务ID")
+	flag.Parse()
 
-    // 加载游戏配置
-    yamlcfg, node, err := yaml.LoadConfig(cfg, pb.NodeType_NodeTypeRoom, int32(nodeId))
-    if err != nil {
-        panic(fmt.Sprintf("游戏配置加载失败: %v", err))
-    }
-    nodeCfg := yamlcfg.Room[node.Id]
+	// 加载游戏配置
+	yamlcfg, node, err := yaml.LoadConfig(cfg, pb.NodeType_NodeTypeRoom, int32(nodeId))
+	if err != nil {
+		panic(fmt.Sprintf("游戏配置加载失败: %v", err))
+	}
+	nodeCfg := yamlcfg.Room[node.Id]
 
-    // 初始化日志库
-    if err := mlog.Init(yamlcfg.Common.Env, nodeCfg.LogLevel, nodeCfg.LogFile); err != nil {
-        panic(fmt.Sprintf("日志库初始化失败: %v", err))
-    }
-    async.Init(mlog.Errorf)
+	// 初始化日志库
+	mlog.Init(node.Name, node.Id, nodeCfg.LogLevel, nodeCfg.LogPath)
 
-    // 初始化游戏配置
-    mlog.Infof("初始化游戏配置")
-    if err := config.Init(yamlcfg.Etcd, yamlcfg.Common); err != nil {
-        panic(err)
-    }
+	// 初始化游戏配置
+	mlog.Infof("初始化游戏配置")
+	util.Must(config.Init(yamlcfg.Etcd, yamlcfg.Data))
 
-    // 初始化redis
-    mlog.Infof("初始化redis配置")
-    if err := dao.InitRedis(yamlcfg.Redis); err != nil {
-        panic(fmt.Sprintf("redis初始化失败: %v", err))
-    }
+	// 初始化框架
+	mlog.Infof("启动框架服务")
+	util.Must(framework.InitDefault(node, nodeCfg, yamlcfg))
 
-    // 初始化框架
-    mlog.Infof("启动框架服务: %v", node)
-    if err := framework.InitDefault(node, nodeCfg, yamlcfg); err != nil {
-        panic(fmt.Sprintf("框架初始化失败: %v", err))
-    }
+	// 功能模块初始化
+	mlog.Infof("初始化功能模块")
+	message.Init()
 
-    // 功能模块初始化 todo
-    if err := manager.Init(); err != nil {
-        panic(fmt.Sprintf("功能模块初始化失败: %v", err))
-    }
+	// 启动战斗服测试
+	internal.Load()
 
-    // 服务退出
-    signal.SignalNotify(func() {
-        manager.Close()
-        framework.Close()
-        mlog.Close()
-    })
+	// 服务退出
+	signal.SignalNotify(func() {
+		recycle.Close()
+		internal.Close()
+		cluster.Close()
+		mlog.Close()
+	})
 }
 ```
 
 跨服务同步通讯 
 
 ```
-dst := framework.NewGameRouter(playerId, "Player", "ConsumeReq")
-newHead := framework.NewHead(dst, pb.RouterType_RouterTypeUid, playerId)
-rsp := &pb.ConsumeRsp{}
-if err := framework.Request(newHead, req, rsp); err != nil {
-    mlog.Infof("Request Error: %v", err)
+err = cluster.RequestToNode(head, actorId, "ActorName.FuncName", joinReq, joinRsp)
+
+// define to target node server
+func RequestToNode(head *pb.Head, actorId uint64, actorFunc string, msg interface{}, rsp proto.Message) error {
+	head.Dst = request.NewNodeRouter(pb.NodeType_NodeTypeXX, pb.RouterType_UID, head.Uid, actorId, actorFunc)
+	return Request(head, msg, rsp)
 }
 ```
 
 跨服务异步通讯
 
 ```
-newHead := framework.NewHead(dst, pb.RouterType_RouterTypeUid, playerId)
-framework.Send(newHead , req)
+head := &pb.Head{
+	Src: framework.NewSrcRouter(pb.RouterType_ROOM_ID, d.GetRoomId()),
+	Dst: framework.NewNodeRouter(pb.NodeType_NodeTypeXX, pb.RouterType_ROOM_ID, d.GetRoomId(), xxsvrId, "ActorName.FuncName"),
+}
+req := &pb.FuncNameReq{RoomId: d.GetRoomId()}
+err := cluster.Send(head, req)
 ```
 
 携带自动返回的异步通讯
 
 ```
-// demoActMgr
-dst := framework.NewDemoRouter(uint64(demo.id), "targetMgr", "targetFunc")
-head := framework.NewHead(dst, pb.RouterType, uint64(actorId), demoActMgr, FuncName)
-
-// 异步请求方法
-func (m *targetMgr) targetFunc(head *pb.Head, req *pb.GetTargetFuncReq, rsp *pb.GetTargetFuncRsp) error {
-    // about get rsp ....
-    rsp.data = m.data
-	return nil
+// [autoRspActorId uint64,autoRspActorFunc string] 自动返回的路由id 和 方法路由
+head := &pb.Head{
+	Src: framework.NewSrcRouter(pb.RouterType_ROOM_ID, d.GetRoomId()[,autoRspActorId uint64,autoRspActorFunc string]),
+	Dst: framework.NewNodeRouter(pb.NodeType_NodeTypeXX, pb.RouterType_ROOM_ID, d.GetRoomId(), xxsvrId, "ActorName.FuncName"),
 }
-
-// 异步返回处理
-func (d *demoActMgr) FuncName(head *pb.Head, rsp *pb.GetTargetFuncRsp) error{
-    // get rsp data todo ...
-	return nil
-}
+req := &pb.FuncNameReq{RoomId: d.GetRoomId()}
+err := cluster.Send(head, req)
 ```
 
 同服务异步通讯
