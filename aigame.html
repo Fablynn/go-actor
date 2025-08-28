@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>包鱼塘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(25, 25, 35, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+        
+        .slots-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            perspective: 1000px;
+        }
+        
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .slot {
+            width: 70px;
+            height: 70px;
+            background: #111;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+            border: 2px solid #333;
+        }
+        
+        .slot-inner {
+            position: absolute;
+            width: 100%;
+            transition: top 3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+        
+        .slot-item {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .spin-btn {
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 153, 0, 0.4);
+        }
+        
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 153, 0, 0.6);
+        }
+        
+        .spin-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .spin-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .bet-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .bet-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid #ffcc00;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bet-btn.active {
+            background: rgba(255, 204, 0, 0.2);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
+        .win-animation {
+            animation: winPulse 0.8s infinite alternate;
+        }
+        
+        @keyframes winPulse {
+            from {
+                box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+                transform: scale(1);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(255, 204, 0, 0.9);
+                transform: scale(1.05);
+            }
+        }
+        
+        .message {
+            margin-top: 20px;
+            min-height: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .win {
+            color: #ffcc00;
+            animation: textPulse 0.5s infinite alternate;
+        }
+        
+        @keyframes textPulse {
+            from {
+                text-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(255, 204, 0, 0.9);
+            }
+        }
+        
+        .paylines {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .payline-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .payline-btn.active {
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.2);
+        }
+        
+        .win-highlight {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 204, 0, 0.2);
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
+            z-index: 5;
+            display: none;
+        }
+        
+        .combo-score {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffcc00;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 700px) {
+            .slot {
+                width: 55px;
+                height: 55px;
+            }
+            
+            .slot-item {
+                height: 55px;
+                font-size: 24px;
+            }
+            
+            .combo-score {
+                top: -20px;
+                font-size: 0.8rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>包鱼塘--启动!!!</h1>
+        
+        <!--
+		<div class="score-board">
+            <div class="score-item">
+                <div>余额</div>
+                <div class="score-value" id="balance">1000</div>
+            </div>
+            <div class="score-item">
+                <div>下注</div>
+                <div class="score-value" id="bet">50</div>
+            </div>
+            <div class="score-item">
+                <div>获胜</div>
+                <div class="score-value" id="win">0</div>
+            </div>
+        </div>
+		-->
+        
+        <div class="slots-container" id="slotsContainer">
+            <!-- 5列将由JS动态生成 -->
+        </div>
+        
+        <div class="combo-score" id="comboScore">+0 金币</div>
+        
+        <div class="controls">
+            <button class="spin-btn" id="spinBtn">开始旋转</button>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 游戏状态
+            const gameState = {
+                balance: 1000,
+                bet: 50,
+                win: 0,
+                spinning: false,
+                symbols: [
+                    '🍒', '🍋', '🍊', '🍇', '🍉', '🍓', '🥝',  '💎', '🔔', '⭐', '🍀', '🎯', '🎰',
+                    '🐯', '🦁', '🐵', '🐸', '🐙', '🦄', '🦋'
+                ],
+                paylines: {
+                    horizontal: true,
+                },
+                symbolValues: {
+                    '🍒': 1,
+                    '🍋': 2,
+                    '🍊': 3,
+                    '🍇': 4,
+                    '🍉': 5,
+                    '🍓': 6,
+                    '🥝': 7,
+                    '💎': 8,
+                    '🔔': 9,
+                    '⭐': 10,
+                    '🍀': 11,
+                    '🎯': 12,
+                    '🎰': 13,
+                    '🐯': 14,
+                    '🦁': 15,
+                    '🐵': 16,
+                    '🐸': 17,
+                    '🐙': 18,
+                    '🦄': 19,
+                    '🦋': 20
+                }
+            };
+            
+            // DOM元素
+            const balanceEl = document.getElementById('balance');
+            const betEl = document.getElementById('bet');
+            const winEl = document.getElementById('win');
+            const messageEl = document.getElementById('message');
+            const spinBtn = document.getElementById('spinBtn');
+            const slotsContainer = document.getElementById('slotsContainer');
+            const comboScoreEl = document.getElementById('comboScore');
+            
+            function initSlots() {
+                slotsContainer.innerHTML = '';
+                
+                for (let col = 0; col < 5; col++) {
+                    const column = document.createElement('div');
+                    column.className = 'column';
+                    column.id = `column-${col}`;
+                    
+                    // 为每列创建5个格子
+                    for (let row = 0; row < 5; row++) {
+                        const slot = document.createElement('div');
+                        slot.className = 'slot';
+                        slot.id = `slot-${col}-${row}`;
+                        const slotInner = document.createElement('div');
+                        slotInner.className = 'slot-inner';
+                        
+                        // 添加额外的符号用于滚动效果
+                        for (let i = 0; i < 20; i++) {
+                            const symbolIndex = i;
+                            const symbol = document.createElement('div');
+                            symbol.className = 'slot-item';
+                            symbol.textContent = gameState.symbols[symbolIndex];
+                            slotInner.appendChild(symbol);
+                        }
+                        
+                        // 添加高亮效果层
+                        const highlight = document.createElement('div');
+                        highlight.className = 'win-highlight';
+                        highlight.id = `highlight-${col}-${row}`;
+                        
+                        slot.appendChild(slotInner);
+                        slot.appendChild(highlight);
+                        column.appendChild(slot);
+                    }
+                    
+                    slotsContainer.appendChild(column);
+                }
+            }
+            
+            // 更新UI显示
+            function updateUI() {
+                //balanceEl.textContent = gameState.balance;
+                //betEl.textContent = gameState.bet;
+                //winEl.textContent = gameState.win;
+            }
+            
+            // 随机生成符号
+            function getRandomSymbol() {
+                const index = Math.floor(Math.random() * gameState.symbols.length);
+                return gameState.symbols[index];
+            }
+            
+            // 计算奖励
+            function calculateWin(results) {
+                let totalWin = 0;
+                const winningLines = [];
+                
+                // 检查水平连线
+                if (gameState.paylines.horizontal) {
+                    for (let row = 0; row < 5; row++) {
+                        for (let startCol = 0; startCol < 3; startCol++) {
+                            const symbol = results[row * 5 + startCol];
+                            let count = 1;
+                            
+                            // 检查连续相同的符号
+                            for (let col = startCol + 1; col < 5; col++) {
+                                if (results[row * 5 + col] === symbol) {
+                                    count++;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            if (count >= 3) {
+                                const winAmount = gameState.bet * gameState.symbolValues[symbol] * (count - 2);
+                                totalWin += winAmount;
+                                
+                                // 记录获胜位置
+                                const positions = [];
+                                for (let i = 0; i < count; i++) {
+                                    positions.push(row * 5 + startCol + i);
+                                }
+                                
+                                winningLines.push({
+                                    type: 'horizontal',
+                                    row: row,
+                                    start: startCol,
+                                    length: count,
+                                    symbol: symbol,
+                                    amount: winAmount,
+                                    positions: positions
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                return { totalWin, winningLines };
+            }
+            
+            // 显示单个组合的高亮和得分
+            function showComboHighlight(combo, index, totalCombos) {
+                return new Promise(resolve => {
+                    // 清除所有高亮
+                    document.querySelectorAll('.win-highlight').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // 显示当前组合的高亮
+                    combo.positions.forEach(pos => {
+                        const col = pos % 5;
+                        const row = Math.floor(pos / 5);
+                        const highlight = document.getElementById(`highlight-${col}-${row}`);
+                        if (highlight) {
+                            highlight.style.display = 'block';
+                        }
+                    });
+                    
+                    // 显示得分
+                    comboScoreEl.textContent = `+${combo.amount} 金币 (${index+1}/${totalCombos})`;
+                    comboScoreEl.style.display = 'block';
+                    
+                    // 800毫秒后隐藏高亮和得分
+                    setTimeout(() => {
+                        // 隐藏高亮
+                        combo.positions.forEach(pos => {
+                            const col = pos % 5;
+                            const row = Math.floor(pos / 5);
+                            const highlight = document.getElementById(`highlight-${col}-${row}`);
+                            if (highlight) {
+                                highlight.style.display = 'none';
+                            }
+                        });
+                        
+                        // 隐藏得分
+                        comboScoreEl.style.display = 'none';
+                        
+                        resolve();
+                    }, 800);
+                });
+            }
+            
+            // 依次显示所有获胜组合
+            async function showAllWinningCombos(winningLines) {
+                for (let i = 0; i < winningLines.length; i++) {
+                    await showComboHighlight(winningLines[i], i, winningLines.length);
+                }
+            }
+            
+            // 旋转老虎机
+            function spinSlots() {
+                if (gameState.spinning) return;
+                
+                // 清理上轮奖励
+                gameState.win = 0;
+                updateUI();
+                
+                // 清除之前的高亮
+                document.querySelectorAll('.win-highlight').forEach(el => {
+                    el.style.display = 'none';
+                });
+                comboScoreEl.style.display = 'none';
+                
+                // 设置旋转状态
+                gameState.spinning = true;
+                spinBtn.disabled = true;
+                messageEl.textContent = "旋转中...";
+                messageEl.classList.remove('win');
+                
+                // todo 生成随机结果 from sockets
+                const results = [];
+                for (let col = 0; col < 5; col++) {
+                    for (let row = 0; row < 5; row++) {
+						const columnSymbol = getRandomSymbol();
+                        results.push(columnSymbol);
+                    }
+                }
+                
+                // 计算每列需要停止的位置
+                const columns = document.querySelectorAll('.column');
+                columns.forEach((column, colIndex) => {
+                    
+                    const slotInners = column.querySelectorAll('.slot-inner');
+                    slotInners.forEach((slotInner,rowIndex) => {
+						const symbol = results[colIndex * 5+rowIndex];
+						const symbolIndex = gameState.symbols.indexOf(symbol);
+						const targetPosition = -symbolIndex * 70;
+                        // 重置位置
+                        slotInner.style.transition = 'none';
+                        slotInner.style.top = -((gameState.symbols.length + 5) * 70) + 'px';
+                        
+                        // 触发重绘
+                        void slotInner.offsetWidth;
+                        
+                        // 开始动画
+                        slotInner.style.transition = 'top 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+                        slotInner.style.top = targetPosition + 'px';
+						
+                    });
+                });
+                
+                // 动画结束后计算奖励
+                setTimeout(async () => {
+                    gameState.spinning = false;
+                    spinBtn.disabled = false;
+                    
+                    // 计算获胜金额
+                    const { totalWin, winningLines } = calculateWin(results);
+                    gameState.win = totalWin;
+                    
+                    if (gameState.win > 0) {
+                        gameState.balance += gameState.win;
+                        messageEl.textContent = `恭喜！赢得 ${gameState.win} 金币！`;
+                        messageEl.classList.add('win');
+                        
+                        // 依次显示所有获胜组合
+                        if (winningLines.length > 0) {
+                            await showAllWinningCombos(winningLines);
+                        }
+                    } else {
+                        messageEl.textContent = "再试一次！";
+                    }
+                    
+                    updateUI();
+                }, 3000);
+            }
+            
+            // 初始化事件监听
+            function initEvents() {
+                // 旋转按钮
+                spinBtn.addEventListener('click', spinSlots);
+                
+            }
+            
+            // 初始化游戏
+            function initGame() {
+                initSlots();
+                initEvents();
+                updateUI();
+            }
+            
+            // 启动游戏
+            initGame();
+        });
+    </script>
+</body>
+</html>
