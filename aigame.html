@@ -492,24 +492,26 @@
         // 隐藏"选择奖励"按钮
         document.getElementById('show-upgrade-button').style.display = 'none';
 
+        // 从 iconData 中随机选择3个不重复的元素
         const selected = [];
         while (selected.length < 3) {
-            const rand = upgrades[Math.floor(Math.random() * upgrades.length)];
-            if (!selected.includes(rand)) {
+            const rand = iconData[Math.floor(Math.random() * iconData.length)];
+            if (!selected.some(item => item.icon === rand.icon)) {
                 selected.push(rand);
             }
         }
 
-        selected.forEach(upg => {
+        selected.forEach(icon => {
             const card = document.createElement('div');
             card.className = 'upgrade-card';
             card.innerHTML = `
-          <div class="icon">${upg.icon}</div>
-          <h3>${upg.name}</h3>
-          <p>${upg.desc}</p>
-        `;
+                <div class="icon">${icon.icon}</div>
+                <h3>获得图标</h3>
+                <p>${icon.tip}</p>
+            `;
             card.onclick = () => {
-                //alert(`你选择了：${upg.name}`);
+                // 将选中的图标添加到 handCards
+                handCards.push(icon);
                 hideUpgradePanel();
                 document.getElementById('show-upgrade-button').style.display = 'none';
             };
@@ -987,7 +989,7 @@
 
         // 点击空白处关闭图鉴
         codexContainer.addEventListener('click', (e) => {
-            if (e.target.className == "codex-grid") {
+            if (e.target.className == 'codex-grid') {
                 codexContainer.style.display = 'none';
             }
         });
