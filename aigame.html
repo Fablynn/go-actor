@@ -844,7 +844,51 @@
         border-width: 5px;
         border-style: solid;
         border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
-    }`;
+    }
+
+    .codex-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .codex-tab {
+        padding: 10px 20px;
+        background: rgba(74, 144, 226, 0.2);
+        border: 2px solid #4a90e2;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .codex-tab.active {
+        background: #4a90e2;
+    }
+
+    .codex-content-section {
+        display: none;
+    }
+
+    .codex-content-section.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    #handcards-section {
+        padding: 20px;
+    }
+
+    .handcards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+    }
+    `;
 
     // 添加 HTML 结构
     const codexHTML = `
@@ -930,13 +974,40 @@
 
         // 渲染图鉴内容
         function renderCodex() {
-            codexContent.innerHTML = '<h1 style="color: white; text-align: center;">图鉴大全</h1>';
+            codexContent.innerHTML = `
+        <h1 style="color: white; text-align: center;">图鉴系统</h1>
+        <div class="codex-tabs">
+            <div class="codex-tab active" data-tab="handcards">当前手牌</div>
+            <div class="codex-tab" data-tab="codex">图鉴大全</div>
+        </div>
+        <div id="handcards-section" class="codex-content-section active">
+            <h2 style="color: white; margin-bottom: 20px;">当前手牌列表</h2>
+            <div class="handcards-grid"></div>
+        </div>
+        <div id="codex-section" class="codex-content-section">
+            <div id="full-codex"></div>
+        </div>
+    `;
 
+            // 渲染手牌列表
+            const handcardsGrid = codexContent.querySelector('.handcards-grid');
+            handCards.forEach(card => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'codex-item';
+                itemDiv.innerHTML = `
+            <div class="codex-icon">${card.icon}</div>
+            <div class="codex-tip">${card.tip}</div>
+        `;
+                handcardsGrid.appendChild(itemDiv);
+            });
+
+            // 渲染完整图鉴
+            const fullCodex = codexContent.querySelector('#full-codex');
             Object.entries(categories).forEach(([category, items]) => {
                 const categoryDiv = document.createElement('div');
                 categoryDiv.className = 'codex-category';
                 categoryDiv.textContent = category;
-                codexContent.appendChild(categoryDiv);
+                fullCodex.appendChild(categoryDiv);
 
                 const grid = document.createElement('div');
                 grid.className = 'codex-grid';
@@ -945,36 +1016,42 @@
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'codex-item';
                     itemDiv.innerHTML = `
-                        <div class="codex-icon">${item.icon}</div>
-                        <div class="codex-tip">${item.tip}</div>
-                    `;
-
-                    // 添加点击事件处理
-                    itemDiv.addEventListener('click', (e) => {
-                        // 先隐藏所有提示
-                        document.querySelectorAll('.codex-tip').forEach(tip => {
-                            tip.style.display = 'none';
-                        });
-
-                        // 显示当前点击项的提示
-                        const tip = itemDiv.querySelector('.codex-tip');
-                        tip.style.display = 'block';
-
-                        // 防止事件冒泡到容器
-                        e.stopPropagation();
-                    });
-
+                <div class="codex-icon">${item.icon}</div>
+                <div class="codex-tip">${item.tip}</div>
+            `;
                     grid.appendChild(itemDiv);
                 });
 
-                // 点击其他区域时隐藏所有提示
-                document.addEventListener('click', () => {
+                fullCodex.appendChild(grid);
+            });
+
+            // 添加 tab 切换事件
+            const tabs = codexContent.querySelectorAll('.codex-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有 active 类
+                    tabs.forEach(t => t.classList.remove('active'));
+                    codexContent.querySelectorAll('.codex-content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+
+                    // 添加 active 类到当前选中的 tab 和对应内容
+                    tab.classList.add('active');
+                    const targetId = `${tab.dataset.tab}-section`;
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            // 添加提示框显示/隐藏逻辑
+            document.querySelectorAll('.codex-item').forEach(item => {
+                item.addEventListener('click', (e) => {
                     document.querySelectorAll('.codex-tip').forEach(tip => {
                         tip.style.display = 'none';
                     });
+                    const tip = item.querySelector('.codex-tip');
+                    tip.style.display = 'block';
+                    e.stopPropagation();
                 });
-
-                codexContent.appendChild(grid);
             });
         }
 
