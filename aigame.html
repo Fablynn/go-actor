@@ -1,593 +1,523 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>包鱼塘</title>
+    <meta charset="UTF-8" />
+    <title>Slots 游戏</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: sans-serif;
+            text-align: center;
+            background: #222;
             color: #fff;
-            min-height: 100vh;
+        }
+
+        #slot-machine {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 40px auto;
+            width: fit-content;
+        }
+
+        #coin-pool {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            color: #fff;
+            z-index: 100;
+        }
+
+        .coin-icon {
+            font-size: 22px;
+            animation: none;
+        }
+
+        #coin-count {
+            font-weight: bold;
+        }
+
+        @keyframes coinBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .coin-highlight {
+            animation: coinBounce 0.5s ease infinite;
+        }
+
+        .flying-coin {
+            position: absolute;
+            font-size: 20px;
+            z-index: 99;
+            pointer-events: none;
+        }
+
+        .column {
+            width: 80px;
+            height: 400px;
+            overflow: hidden;
+            border: 2px solid #555;
+            background: #eee;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            border-radius: 8px;
+            position: relative;
         }
-        
-        .container {
-            background: rgba(25, 25, 35, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+        .slot {
             width: 100%;
-            max-width: 800px;
-            text-align: center;
+            height: 80px;
+            font-size: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: slide 0.3s ease;
+            cursor: pointer;
+            position: relative;
         }
-        
-        h1 {
-            color: #ffcc00;
-            margin-bottom: 20px;
-            font-size: 2.5rem;
-            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+
+        @keyframes slide {
+            from {
+                transform: translateY(-20px);
+                opacity: 0.5;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        
-        .score-board {
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            background: #00bcd4;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0097a7;
+        }
+
+        .slot:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            background: #333;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 14px;
+            transform: translateY(-5px);
+            opacity: 0.9;
+        }
+
+        .highlight {
+            animation: blink 0.6s infinite;
+            background: #ffeb3b;
+            border-radius: 6px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        #upgrade-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .panel-buttons {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.3);
+            margin-top: 15px;
+        }
+
+        .skip-button, .hide-button {
+            padding: 8px 16px;
+            background: #666;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .skip-button:hover, .hide-button:hover {
+            background: #888;
+        }
+
+        #show-upgrade-button {
+            margin-left: 10px;
+            padding: 8px 16px;
+            background: #4a90e2;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        #show-upgrade-button:hover {
+            background: #3a80d2;
+        }
+
+        #upgrade-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .upgrade-card {
+            background: #333;
+            color: #fff;
             padding: 15px;
             border-radius: 10px;
-        }
-        
-        .score-item {
+            width: 150px;
+            cursor: pointer;
+            transition: transform 0.2s;
             text-align: center;
         }
-        
-        .score-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ffcc00;
-        }
-        
-        .slots-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 30px 0;
-            perspective: 1000px;
-        }
-        
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .slot {
-            width: 70px;
-            height: 70px;
-            background: #111;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
-            border: 2px solid #333;
-        }
-        
-        .slot-inner {
-            position: absolute;
-            width: 100%;
-            transition: top 3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-        }
-        
-        .slot-item {
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-        }
-        
-        .controls {
-            margin: 20px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .spin-btn {
-            background: linear-gradient(135deg, #ffcc00, #ff9900);
-            color: #000;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(255, 153, 0, 0.4);
-        }
-        
-        .spin-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 153, 0, 0.6);
-        }
-        
-        .spin-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .spin-btn:disabled {
+
+        .upgrade-card:hover {
+            transform: scale(1.05);
             background: #555;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
-        
-        .bet-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .bet-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid #ffcc00;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .bet-btn.active {
-            background: rgba(255, 204, 0, 0.2);
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-        }
-        
-        .win-animation {
-            animation: winPulse 0.8s infinite alternate;
-        }
-        
-        @keyframes winPulse {
-            from {
-                box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
-                transform: scale(1);
-            }
-            to {
-                box-shadow: 0 0 20px rgba(255, 204, 0, 0.9);
-                transform: scale(1.05);
-            }
-        }
-        
-        .message {
-            margin-top: 20px;
-            min-height: 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        
-        .win {
-            color: #ffcc00;
-            animation: textPulse 0.5s infinite alternate;
-        }
-        
-        @keyframes textPulse {
-            from {
-                text-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
-            }
-            to {
-                text-shadow: 0 0 20px rgba(255, 204, 0, 0.9);
-            }
-        }
-        
-        .paylines {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .payline-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid #555;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .payline-btn.active {
-            border-color: #ffcc00;
-            background: rgba(255, 204, 0, 0.2);
-        }
-        
-        .win-highlight {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 204, 0, 0.2);
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
-            z-index: 5;
-            display: none;
-        }
-        
-        .combo-score {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #ffcc00;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-weight: bold;
-            display: none;
-            z-index: 10;
-            white-space: nowrap;
-        }
-        
-        @media (max-width: 700px) {
-            .slot {
-                width: 55px;
-                height: 55px;
-            }
-            
-            .slot-item {
-                height: 55px;
-                font-size: 24px;
-            }
-            
-            .combo-score {
-                top: -20px;
-                font-size: 0.8rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
+
+        .upgrade-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>包鱼塘--启动!!!</h1>
-        
-        <!--
-		<div class="score-board">
-            <div class="score-item">
-                <div>余额</div>
-                <div class="score-value" id="balance">1000</div>
-            </div>
-            <div class="score-item">
-                <div>下注</div>
-                <div class="score-value" id="bet">50</div>
-            </div>
-            <div class="score-item">
-                <div>获胜</div>
-                <div class="score-value" id="win">0</div>
-            </div>
-        </div>
-		-->
-        
-        <div class="slots-container" id="slotsContainer">
-            <!-- 5列将由JS动态生成 -->
-        </div>
-        
-        <div class="combo-score" id="comboScore">+0 金币</div>
-        
-        <div class="controls">
-            <button class="spin-btn" id="spinBtn">开始旋转</button>
-        </div>
-        
-        <div class="message" id="message"></div>
-        
+<!--<h1>🎰 Slots 游戏</h1>-->
+<div id="coin-pool">
+    <div class="coin-icon">💰</div>
+    <span id="coin-count">0</span>
+</div>
+<div id="slot-machine">
+    <div class="column" id="col-0" data-index="0"></div>
+    <div class="column" id="col-1" data-index="1"></div>
+    <div class="column" id="col-2" data-index="2"></div>
+    <div class="column" id="col-3" data-index="3"></div>
+    <div class="column" id="col-4" data-index="4"></div>
+</div>
+<div id="upgrade-panel">
+    <h2>🎁 选择一个构筑加成</h2>
+    <div id="upgrade-options"></div>
+    <div class="panel-buttons">
+        <button class="skip-button" onclick="hideUpgradePanel()">跳过选择</button>
+        <button class="hide-button" onclick="hideUpgradePanel()">隐藏面板</button>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 游戏状态
-            const gameState = {
-                balance: 1000,
-                bet: 50,
-                win: 0,
-                spinning: false,
-                symbols: [
-                    '🍒', '🍋', '🍊', '🍇', '🍉', '🍓', '🥝',  '💎', '🔔', '⭐', '🍀', '🎯', '🎰',
-                    '🐯', '🦁', '🐵', '🐸', '🐙', '🦄', '🦋'
-                ],
-                paylines: {
-                    horizontal: true,
-                },
-                symbolValues: {
-                    '🍒': 1,
-                    '🍋': 2,
-                    '🍊': 3,
-                    '🍇': 4,
-                    '🍉': 5,
-                    '🍓': 6,
-                    '🥝': 7,
-                    '💎': 8,
-                    '🔔': 9,
-                    '⭐': 10,
-                    '🍀': 11,
-                    '🎯': 12,
-                    '🎰': 13,
-                    '🐯': 14,
-                    '🦁': 15,
-                    '🐵': 16,
-                    '🐸': 17,
-                    '🐙': 18,
-                    '🦄': 19,
-                    '🦋': 20
-                }
+<!-- 游戏主界面添加显示构筑面板按钮 -->
+<div class="game-controls">
+    <button id="start-button" onclick="startSlots()">开始滚动</button>
+    <button id="show-upgrade-button" onclick="toggleUpgradePanel()" style="display: none;">选择奖励</button>
+</div>
+
+<script>
+    const iconData = [
+        { icon: '🍎', tip: '恢复生命值' },
+        { icon: '🪙', tip: '获得金币' },
+        { icon: '💎', tip: '稀有宝石' },
+        { icon: '🧪', tip: '神秘药水' },
+        { icon: '🗡️', tip: '攻击力提升' },
+        { icon: '🛡️', tip: '防御力提升' },
+        { icon: '🎯', tip: '精准打击' },
+        { icon: '🔥', tip: '火焰伤害' },
+        { icon: '❄️', tip: '冰冻效果' },
+        { icon: '⚡', tip: '闪电连击' },
+        { icon: '👑', tip: '王者加持' },
+        { icon: '🧲', tip: '吸收资源' },
+        { icon: '🎁', tip: '随机奖励' },
+        { icon: '🕹️', tip: '控制增强' },
+        { icon: '🧠', tip: '智力提升' },
+        { icon: '🦾', tip: '机械强化' },
+        { icon: '🧤', tip: '技能加速' },
+        { icon: '🕶️', tip: '隐身效果' },
+        { icon: '🪄', tip: '魔法增幅' },
+        { icon: '📦', tip: '储物空间' },
+    ];
+
+    const upgrades = [
+        { icon: '🧲', name: '磁力强化', desc: '增加资源类图标出现概率' },
+        { icon: '🔥', name: '火焰连击', desc: '连续出现火焰图标可触发额外奖励' },
+        { icon: '💎', name: '宝石祝福', desc: '稀有图标出现时获得双倍积分' },
+        { icon: '🛡️', name: '防御构筑', desc: '防御图标可抵挡一次失败' },
+        { icon: '🧪', name: '药剂流派', desc: '药水图标可触发随机事件' }
+    ];
+    let isPanelVisible = false;
+
+    function toggleUpgradePanel() {
+        const panel = document.getElementById('upgrade-panel');
+        isPanelVisible = !isPanelVisible;
+        panel.style.display = isPanelVisible ? 'block' : 'none';
+    }
+
+    function hideUpgradePanel() {
+        isPanelVisible = false;
+        document.getElementById('upgrade-panel').style.display = 'none';
+
+        // 显示"选择奖励"按钮
+        document.getElementById('show-upgrade-button').style.display = 'inline-block';
+    }
+
+    function showUpgradeChoices() {
+        const panel = document.getElementById('upgrade-panel');
+        const container = document.getElementById('upgrade-options');
+        container.innerHTML = '';
+        isPanelVisible = true;
+        panel.style.display = 'block';
+
+        // 隐藏"选择奖励"按钮
+        document.getElementById('show-upgrade-button').style.display = 'none';
+
+        const selected = [];
+        while (selected.length < 3) {
+            const rand = upgrades[Math.floor(Math.random() * upgrades.length)];
+            if (!selected.includes(rand)) {
+                selected.push(rand);
+            }
+        }
+
+        selected.forEach(upg => {
+            const card = document.createElement('div');
+            card.className = 'upgrade-card';
+            card.innerHTML = `
+          <div class="icon">${upg.icon}</div>
+          <h3>${upg.name}</h3>
+          <p>${upg.desc}</p>
+        `;
+            card.onclick = () => {
+                alert(`你选择了：${upg.name}`);
+                hideUpgradePanel();
             };
-            
-            // DOM元素
-            const balanceEl = document.getElementById('balance');
-            const betEl = document.getElementById('bet');
-            const winEl = document.getElementById('win');
-            const messageEl = document.getElementById('message');
-            const spinBtn = document.getElementById('spinBtn');
-            const slotsContainer = document.getElementById('slotsContainer');
-            const comboScoreEl = document.getElementById('comboScore');
-            
-            function initSlots() {
-                slotsContainer.innerHTML = '';
-                
-                for (let col = 0; col < 5; col++) {
-                    const column = document.createElement('div');
-                    column.className = 'column';
-                    column.id = `column-${col}`;
-                    
-                    // 为每列创建5个格子
-                    for (let row = 0; row < 5; row++) {
-                        const slot = document.createElement('div');
-                        slot.className = 'slot';
-                        slot.id = `slot-${col}-${row}`;
-                        const slotInner = document.createElement('div');
-                        slotInner.className = 'slot-inner';
-                        
-                        // 添加额外的符号用于滚动效果
-                        for (let i = 0; i < 20; i++) {
-                            const symbolIndex = i;
-                            const symbol = document.createElement('div');
-                            symbol.className = 'slot-item';
-                            symbol.textContent = gameState.symbols[symbolIndex];
-                            slotInner.appendChild(symbol);
-                        }
-                        
-                        // 添加高亮效果层
-                        const highlight = document.createElement('div');
-                        highlight.className = 'win-highlight';
-                        highlight.id = `highlight-${col}-${row}`;
-                        
-                        slot.appendChild(slotInner);
-                        slot.appendChild(highlight);
-                        column.appendChild(slot);
-                    }
-                    
-                    slotsContainer.appendChild(column);
-                }
-            }
-            
-            // 更新UI显示
-            function updateUI() {
-                //balanceEl.textContent = gameState.balance;
-                //betEl.textContent = gameState.bet;
-                //winEl.textContent = gameState.win;
-            }
-            
-            // 随机生成符号
-            function getRandomSymbol() {
-                const index = Math.floor(Math.random() * gameState.symbols.length);
-                return gameState.symbols[index];
-            }
-            
-            // 计算奖励
-            function calculateWin(results) {
-                let totalWin = 0;
-                const winningLines = [];
-                
-                // 检查水平连线
-                if (gameState.paylines.horizontal) {
-                    for (let row = 0; row < 5; row++) {
-                        for (let startCol = 0; startCol < 3; startCol++) {
-                            const symbol = results[row * 5 + startCol];
-                            let count = 1;
-                            
-                            // 检查连续相同的符号
-                            for (let col = startCol + 1; col < 5; col++) {
-                                if (results[row * 5 + col] === symbol) {
-                                    count++;
-                                } else {
-                                    break;
-                                }
-                            }
-                            
-                            if (count >= 3) {
-                                const winAmount = gameState.bet * gameState.symbolValues[symbol] * (count - 2);
-                                totalWin += winAmount;
-                                
-                                // 记录获胜位置
-                                const positions = [];
-                                for (let i = 0; i < count; i++) {
-                                    positions.push(row * 5 + startCol + i);
-                                }
-                                
-                                winningLines.push({
-                                    type: 'horizontal',
-                                    row: row,
-                                    start: startCol,
-                                    length: count,
-                                    symbol: symbol,
-                                    amount: winAmount,
-                                    positions: positions
-                                });
-                            }
-                        }
-                    }
-                }
-                
-                return { totalWin, winningLines };
-            }
-            
-            // 显示单个组合的高亮和得分
-            function showComboHighlight(combo, index, totalCombos) {
-                return new Promise(resolve => {
-                    // 清除所有高亮
-                    document.querySelectorAll('.win-highlight').forEach(el => {
-                        el.style.display = 'none';
-                    });
-                    
-                    // 显示当前组合的高亮
-                    combo.positions.forEach(pos => {
-                        const col = pos % 5;
-                        const row = Math.floor(pos / 5);
-                        const highlight = document.getElementById(`highlight-${col}-${row}`);
-                        if (highlight) {
-                            highlight.style.display = 'block';
-                        }
-                    });
-                    
-                    // 显示得分
-                    comboScoreEl.textContent = `+${combo.amount} 金币 (${index+1}/${totalCombos})`;
-                    comboScoreEl.style.display = 'block';
-                    
-                    // 800毫秒后隐藏高亮和得分
-                    setTimeout(() => {
-                        // 隐藏高亮
-                        combo.positions.forEach(pos => {
-                            const col = pos % 5;
-                            const row = Math.floor(pos / 5);
-                            const highlight = document.getElementById(`highlight-${col}-${row}`);
-                            if (highlight) {
-                                highlight.style.display = 'none';
-                            }
-                        });
-                        
-                        // 隐藏得分
-                        comboScoreEl.style.display = 'none';
-                        
-                        resolve();
-                    }, 800);
-                });
-            }
-            
-            // 依次显示所有获胜组合
-            async function showAllWinningCombos(winningLines) {
-                for (let i = 0; i < winningLines.length; i++) {
-                    await showComboHighlight(winningLines[i], i, winningLines.length);
-                }
-            }
-            
-            // 旋转老虎机
-            function spinSlots() {
-                if (gameState.spinning) return;
-                
-                // 清理上轮奖励
-                gameState.win = 0;
-                updateUI();
-                
-                // 清除之前的高亮
-                document.querySelectorAll('.win-highlight').forEach(el => {
-                    el.style.display = 'none';
-                });
-                comboScoreEl.style.display = 'none';
-                
-                // 设置旋转状态
-                gameState.spinning = true;
-                spinBtn.disabled = true;
-                messageEl.textContent = "旋转中...";
-                messageEl.classList.remove('win');
-                
-                // todo 生成随机结果 from sockets
-                const results = [];
-                for (let col = 0; col < 5; col++) {
-                    for (let row = 0; row < 5; row++) {
-						const columnSymbol = getRandomSymbol();
-                        results.push(columnSymbol);
-                    }
-                }
-                
-                // 计算每列需要停止的位置
-                const columns = document.querySelectorAll('.column');
-                columns.forEach((column, colIndex) => {
-                    
-                    const slotInners = column.querySelectorAll('.slot-inner');
-                    slotInners.forEach((slotInner,rowIndex) => {
-						const symbol = results[colIndex * 5+rowIndex];
-						const symbolIndex = gameState.symbols.indexOf(symbol);
-						const targetPosition = -symbolIndex * 70;
-                        // 重置位置
-                        slotInner.style.transition = 'none';
-                        slotInner.style.top = -((gameState.symbols.length + 5) * 70) + 'px';
-                        
-                        // 触发重绘
-                        void slotInner.offsetWidth;
-                        
-                        // 开始动画
-                        slotInner.style.transition = 'top 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
-                        slotInner.style.top = targetPosition + 'px';
-						
-                    });
-                });
-                
-                // 动画结束后计算奖励
-                setTimeout(async () => {
-                    gameState.spinning = false;
-                    spinBtn.disabled = false;
-                    
-                    // 计算获胜金额
-                    const { totalWin, winningLines } = calculateWin(results);
-                    gameState.win = totalWin;
-                    
-                    if (gameState.win > 0) {
-                        gameState.balance += gameState.win;
-                        messageEl.textContent = `恭喜！赢得 ${gameState.win} 金币！`;
-                        messageEl.classList.add('win');
-                        
-                        // 依次显示所有获胜组合
-                        if (winningLines.length > 0) {
-                            await showAllWinningCombos(winningLines);
-                        }
-                    } else {
-                        messageEl.textContent = "再试一次！";
-                    }
-                    
-                    updateUI();
-                }, 3000);
-            }
-            
-            // 初始化事件监听
-            function initEvents() {
-                // 旋转按钮
-                spinBtn.addEventListener('click', spinSlots);
-                
-            }
-            
-            // 初始化游戏
-            function initGame() {
-                initSlots();
-                initEvents();
-                updateUI();
-            }
-            
-            // 启动游戏
-            initGame();
+            container.appendChild(card);
         });
-    </script>
+    }
+
+    const columns = Array.from({ length: 5 }, (_, i) => document.getElementById(`col-${i}`));
+    const rows = 5;
+
+    function fillColumn(col) {
+        col.innerHTML = '';
+        const colIndex = parseInt(col.dataset.index);
+        for (let i = 0; i < rows; i++) {
+            const { icon, tip } = iconData[Math.floor(Math.random() * iconData.length)];
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            slot.textContent = icon;
+            slot.setAttribute('data-tooltip', tip);
+            slot.setAttribute('data-row', i);
+            slot.setAttribute('data-col', colIndex);
+            col.appendChild(slot);
+        }
+    }
+
+    function startSlots() {
+        clearHighlights();
+        columns.forEach((col, index) => {
+            let interval = setInterval(() => fillColumn(col), 100);
+            setTimeout(() => {
+                clearInterval(interval);
+                fillColumn(col);
+                if (index === columns.length - 1) {
+                    setTimeout(() => {
+                        checkWin();
+                        setTimeout(showUpgradeChoices, 2500);
+                    }, 500);
+                }
+            }, 1000 + index * 500);
+        });
+    }
+
+    function clearHighlights() {
+        document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+    }
+
+    function checkWin() {
+        const grid = [];
+        for (let row = 0; row < rows; row++) {
+            const rowElements = columns.map(col => col.children[row]);
+            grid.push(rowElements);
+        }
+
+        const highlightGroups = [];
+
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < columns.length; col++) {
+                const center = grid[row][col];
+                const centerIcon = center.textContent;
+                const group = [center];
+
+                const directions = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],          [0, 1],
+                    [1, -1], [1, 0], [1, 1]
+                ];
+
+                directions.forEach(([dy, dx]) => {
+                    const newRow = row + dy;
+                    const newCol = col + dx;
+                    if (
+                        newRow >= 0 && newRow < rows &&
+                        newCol >= 0 &&               newCol < columns.length
+                    ) {
+                        const neighbor = grid[newRow][newCol];
+                        if (neighbor.textContent === centerIcon) {
+                            group.push(neighbor);
+                        }
+                    }
+                });
+
+                if (group.length >= 3) {
+                    highlightGroups.push(group);
+                }
+            }
+        }
+
+        let delay = 0;
+        highlightGroups.forEach(group => {
+            setTimeout(() => {
+                group.forEach(el => {
+                    el.classList.add('highlight');
+                    onEnemyDefeated(el);
+                });
+
+            }, delay);
+            delay += 800;
+        });
+    }
+
+    function showUpgradeChoices() {
+        const panel = document.getElementById('upgrade-panel');
+        const container = document.getElementById('upgrade-options');
+        container.innerHTML = '';
+        panel.style.display = 'block';
+
+        const selected = [];
+        while (selected.length < 3) {
+            const rand = upgrades[Math.floor(Math.random() * upgrades.length)];
+            if (!selected.includes(rand)) {
+                selected.push(rand);
+            }
+        }
+
+        selected.forEach(upg => {
+            const card = document.createElement('div');
+            card.className = 'upgrade-card';
+            card.innerHTML = `
+          <div class="icon">${upg.icon}</div>
+          <h3>${upg.name}</h3>
+          <p>${upg.desc}</p>
+        `;
+            card.onclick = () => {
+                alert(`你选择了：${upg.name}`);
+                panel.style.display = 'none';
+            };
+            container.appendChild(card);
+        });
+    }
+
+    // 金币池代码
+    let coinCount = 0;
+
+    // 初始化金币池
+    function initCoinPool() {
+        updateCoinDisplay();
+    }
+
+    // 更新金币显示
+    function updateCoinDisplay() {
+        document.getElementById('coin-count').textContent = coinCount;
+    }
+
+    // 添加金币并显示动画
+    function addCoins(amount, sourceElement) {
+        // 高亮金币池图标
+        const coinIcon = document.querySelector('.coin-icon');
+        coinIcon.classList.add('coin-highlight');
+
+        // 在指定时间后移除高亮
+        setTimeout(() => {
+            coinIcon.classList.remove('coin-highlight');
+        }, 1500);
+
+        // 创建飞行金币动画
+        if (sourceElement) {
+            createFlyingCoin(sourceElement);
+        }
+
+        // 增加金币数量
+        coinCount += amount;
+        updateCoinDisplay();
+    }
+
+    // 创建飞向金币池的金币动画
+    function createFlyingCoin(sourceElement) {
+        const coinPool = document.getElementById('coin-pool');
+        const flyingCoin = document.createElement('div');
+        flyingCoin.className = 'flying-coin';
+        flyingCoin.textContent = '💰';
+        document.body.appendChild(flyingCoin);
+
+        // 获取起始位置和目标位置
+        const sourceRect = sourceElement.getBoundingClientRect();
+        const targetRect = coinPool.getBoundingClientRect();
+
+        // 设置金币初始位置
+        flyingCoin.style.left = `${sourceRect.left + sourceRect.width/2}px`;
+        flyingCoin.style.top = `${sourceRect.top + sourceRect.height/2}px`;
+
+        // 动画目标位置
+        const targetX = targetRect.left + targetRect.width/2;
+        const targetY = targetRect.top + targetRect.height/2;
+
+        // 使用Web Animations API创建飞行动画
+        flyingCoin.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { transform: `translate(${targetX - sourceRect.left - sourceRect.width/2}px,
+                                ${targetY - sourceRect.top - sourceRect.height/2}px) scale(0.5)`,
+                opacity: 0 }
+        ], {
+            duration: 800,
+            easing: 'ease-out'
+        }).onfinish = () => {
+            flyingCoin.remove();
+        };
+    }
+
+    // 游戏初始化时调用
+    document.addEventListener('DOMContentLoaded', () => {
+        initCoinPool();
+    });
+
+    // 示例：当击中敌人或获得奖励时调用
+    function onEnemyDefeated(enemyElement) {
+        const rewardAmount = Math.floor(Math.random() * 5) + 1; // 1-5枚金币
+        addCoins(rewardAmount, enemyElement);
+    }
+</script>
 </body>
 </html>
