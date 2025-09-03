@@ -520,17 +520,75 @@
     const columns = Array.from({ length: 5 }, (_, i) => document.getElementById(`col-${i}`));
     const rows = 5;
 
+    // 将 handCards 改成对象数组
+    let handCards = [
+        { icon: '🗡️', tip: '攻击力提升' },
+        { icon: '🛡️', tip: '防御力提升' },
+        { icon: '🔥', tip: '火焰伤害' },
+        { icon: '❄️', tip: '冰冻效果' },
+        { icon: '⚡', tip: '闪电连击' },
+        { icon: '💊', tip: '治疗药剂' },
+        { icon: '🎯', tip: '精准打击' },
+        { icon: '🦾', tip: '机械强化' },
+        { icon: '🌀', tip: '瞬间移动' },
+        { icon: '💫', tip: '魔法星尘' }
+    ];
+
     function fillColumn(col) {
         col.innerHTML = '';
         const colIndex = parseInt(col.dataset.index);
+
+        // 如果是第一列,创建临时栈并打乱
+        if(colIndex === 0) {
+            // 创建25个格子的数组
+            let slots = new Array(25).fill(null);
+
+            // 复制手牌数组创建临时栈
+            let tempStack = [...handCards];
+
+            // Fisher-Yates 洗牌算法打乱临时栈
+            for(let i = tempStack.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tempStack[i], tempStack[j]] = [tempStack[j], tempStack[i]];
+            }
+
+            // 随机分配临时栈中的对象到格子
+            let availableSlots = [...Array(25).keys()]; // 0-24的数组
+            tempStack.forEach(card => {
+                // 随机选择一个可用格子
+                const randomIndex = Math.floor(Math.random() * availableSlots.length);
+                const slotIndex = availableSlots[randomIndex];
+
+                // 将卡牌放入选中的格子
+                slots[slotIndex] = card;
+
+                // 从可用格子中移除已使用的格子
+                availableSlots.splice(randomIndex, 1);
+            });
+
+            // 保存打乱后的结果供其他列使用
+            window.currentSlots = slots;
+        }
+
+        // 渲染当前列的格子
         for (let i = 0; i < rows; i++) {
-            const { icon, tip } = iconData[Math.floor(Math.random() * iconData.length)];
             const slot = document.createElement('div');
             slot.className = 'slot';
-            slot.textContent = icon;
-            slot.setAttribute('data-tooltip', tip);
             slot.setAttribute('data-row', i);
             slot.setAttribute('data-col', colIndex);
+
+            // 计算当前格子对应的索引
+            const slotIndex = i * columns.length + colIndex;
+            const card = window.currentSlots[slotIndex];
+
+            if (card) {
+                slot.textContent = card.icon;
+                slot.setAttribute('data-tooltip', card.tip);
+            } else {
+                slot.textContent = '';
+                slot.setAttribute('data-tooltip', '空白');
+            }
+
             col.appendChild(slot);
         }
     }
@@ -568,6 +626,9 @@
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < columns.length; col++) {
                 const center = grid[row][col];
+                if (center.textContent == ''){
+                    continue;
+                }
                 const centerIcon = center.textContent;
                 const group = [center];
 
@@ -582,7 +643,7 @@
                     const newCol = col + dx;
                     if (
                         newRow >= 0 && newRow < rows &&
-                        newCol >= 0 &&               newCol < columns.length
+                        newCol >= 0 && newCol < columns.length
                     ) {
                         const neighbor = grid[newRow][newCol];
                         if (neighbor.textContent === centerIcon) {
