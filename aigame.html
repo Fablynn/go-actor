@@ -226,7 +226,7 @@
     <h2>🎁 选择一个构筑加成</h2>
     <div id="upgrade-options"></div>
     <div class="panel-buttons">
-        <button class="skip-button" onclick="hideUpgradePanel()">跳过选择</button>
+        <button class="skip-button" onclick="giveUpgrade()">跳过选择</button>
         <button class="hide-button" onclick="hideUpgradePanel()">隐藏面板</button>
     </div>
 </div>
@@ -477,9 +477,16 @@
     function hideUpgradePanel() {
         isPanelVisible = false;
         document.getElementById('upgrade-panel').style.display = 'none';
+        document.getElementById('start-button').disabled = false;
+        document.getElementById('show-upgrade-button').style.display = 'block';
+    }
 
-        // 显示"选择奖励"按钮
-        document.getElementById('show-upgrade-button').style.display = 'inline-block';
+    function giveUpgrade() {
+        hasSelectedUpgrade = true; // 标记已完成选择
+        document.getElementById('start-button').disabled = false; // 启用开始按钮
+        document.getElementById('show-upgrade-button').style.display = 'none';
+        isPanelVisible = false;
+        document.getElementById('upgrade-panel').style.display = 'none';
     }
 
     function showUpgradeChoices() {
@@ -489,8 +496,9 @@
         isPanelVisible = true;
         panel.style.display = 'block';
 
-        // 隐藏"选择奖励"按钮
         document.getElementById('show-upgrade-button').style.display = 'none';
+        document.getElementById('start-button').disabled = true; // 确保按钮保持禁用
+
 
         // 从 iconData 中随机选择3个不重复的元素
         const selected = [];
@@ -505,15 +513,15 @@
             const card = document.createElement('div');
             card.className = 'upgrade-card';
             card.innerHTML = `
-                <div class="icon">${icon.icon}</div>
-                <h3>获得图标</h3>
-                <p>${icon.tip}</p>
-            `;
+            <div class="icon">${icon.icon}</div>
+            <h3>获得图标</h3>
+            <p>${icon.tip}</p>
+        `;
             card.onclick = () => {
-                // 将选中的图标添加到 handCards
                 handCards.push(icon);
-                hideUpgradePanel();
-                document.getElementById('show-upgrade-button').style.display = 'none';
+                hasSelectedUpgrade = true; // 标记已完成选择
+                document.getElementById('start-button').disabled = false; // 启用开始按钮
+                giveUpgrade();
             };
             container.appendChild(card);
         });
@@ -595,8 +603,66 @@
         }
     }
 
+    let hasSelectedUpgrade = false; // 添加选择状态标记
+
     function startSlots() {
+        // 如果未完成上一轮选择,禁止开始
+        if(!hasSelectedUpgrade) {
+            const panel = document.getElementById('upgrade-panel');
+            const skipButton = panel.querySelector('.skip-button');
+
+            // 使用直接样式设置
+            panel.setAttribute('style', `
+            border: 3px solid #4a90e2 !important;
+            box-shadow: 0 0 20px #4a90e2 !important;
+            transition: all 0.3s ease !important;
+        `);
+
+            skipButton.setAttribute('style', `
+            background: #4a90e2 !important;
+            transform: scale(1.1) !important;
+            transition: all 0.3s ease !important;
+        `);
+
+            // 300ms 后恢复原样
+            setTimeout(() => {
+                panel.setAttribute('style', '');
+                skipButton.setAttribute('style', '');
+            }, 300);
+
+            // 重复高亮效果3次
+            let count = 1;
+            const flashInterval = setInterval(() => {
+                panel.setAttribute('style', `
+                border: 3px solid #4a90e2 !important;
+                box-shadow: 0 0 20px #4a90e2 !important;
+                transition: all 0.3s ease !important;
+            `);
+
+                skipButton.setAttribute('style', `
+                background: #4a90e2 !important;
+                transform: scale(1.1) !important;
+                transition: all 0.3s ease !important;
+            `);
+
+                setTimeout(() => {
+                    panel.setAttribute('style', '');
+                    skipButton.setAttribute('style', '');
+                }, 300);
+
+                count++;
+                if(count >= 3) {
+                    clearInterval(flashInterval);
+                }
+            }, 600);
+
+            return;
+        }
+
         clearHighlights();
+        hasSelectedUpgrade = false; // 重置选择状态
+        document.getElementById('start-button').disabled = true; // 禁用开始按钮
+
         columns.forEach((col, index) => {
             let interval = setInterval(() => fillColumn(col), 100);
             setTimeout(() => {
@@ -605,7 +671,7 @@
                 if (index === columns.length - 1) {
                     setTimeout(() => {
                         checkWin();
-                        setTimeout(showUpgradeChoices, 2500);
+                        setTimeout(showUpgradeChoices, 500);
                     }, 500);
                 }
             }, 1000 + index * 500);
@@ -743,6 +809,7 @@
 
     // 游戏初始化时调用
     document.addEventListener('DOMContentLoaded', () => {
+        hasSelectedUpgrade = true; // 第一次运行时允许开始
         initCoinPool();
     });
 
