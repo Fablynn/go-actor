@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8" />
-    <title>AI独立游戏</title>
+    <title>AI:幸运房东</title>
     <style>
         body {
             font-family: sans-serif;
@@ -266,10 +266,10 @@
 
     // 定义稀有度枚举
     const Rarity = {
-        COMMON: '优秀',         // 优秀 (2-3金币)
+        COMMON: '优秀',           // 优秀 (2-3金币)
         RARE: '精良',            // 精良 (4-6金币)
         EPIC: '史诗',            // 史诗 (7-9金币)
-        LEGENDARY: '传说'    // 传说 (15-20金币)
+        LEGENDARY: '传说'         // 传说 (15-20金币)
     };
 
     const iconData = [
@@ -512,6 +512,7 @@
         document.getElementById('show-upgrade-button').style.display = 'none';
         isPanelVisible = false;
         document.getElementById('upgrade-panel').style.display = 'none';
+        document.body.classList.remove('upgrade-panel-visible'); // 添加这行
         clearNoticeChoose();
     }
 
@@ -522,6 +523,8 @@
         isPanelVisible = true;
         panel.style.display = 'block';
 
+        // 添加这行：给 body 添加类名以控制金币提示的显示
+        document.body.classList.add('upgrade-panel-visible');
         document.getElementById('show-upgrade-button').style.display = 'none';
 
 
@@ -540,7 +543,7 @@
             card.innerHTML = `
                 <div class="icon">${icon.icon}</div>
                 <h3>${icon.rarity}</h3>
-                <p>${icon.tip}</p>
+                <p>${icon.tip}:获得金币${icon.baseCoins}</p>
             `;
             card.onclick = () => {
                 handCards.push(icon);
@@ -609,12 +612,15 @@
             slot.setAttribute('data-row', i);
             slot.setAttribute('data-col', colIndex);
 
-            // 计算当前格子对应的索引
             const slotIndex = i * columns.length + colIndex;
             const card = window.currentSlots[slotIndex];
 
             if (card) {
-                slot.textContent = card.icon;
+                // 修改slot的内部结构
+                slot.innerHTML = `
+                <div class="coin-indicator" title="基础金币">+${card.baseCoins}</div>
+                ${card.icon}
+            `;
                 slot.setAttribute('data-tooltip', card.tip);
             } else {
                 slot.textContent = '';
@@ -690,15 +696,30 @@
         }
 
         const highlightGroups = [];
+        let delay = 0;
 
+        // 遍历所有格子，处理金币效果
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < columns.length; col++) {
-                const center = grid[row][col];
-                if (center.textContent == ''){
+                const slot = grid[row][col];
+                // 获取槽位对应的索引和卡牌数据
+                const slotIndex = row * columns.length + col;
+                const card = window.currentSlots[slotIndex];
+
+                if (card && card.baseCoins) {
+                    // 设置延迟，使金币动画依次触发
+                    setTimeout(() => {
+                        addCoins(card.baseCoins, slot);
+                    }, delay);
+                    delay += 100; // 每个金币动画间隔100ms
+                }
+
+                // 原有的匹配检查逻辑
+                if (slot.textContent == '') {
                     continue;
                 }
-                const centerIcon = center.textContent;
-                const group = [center];
+                const centerIcon = slot.textContent;
+                const group = [slot];
 
                 const directions = [
                     [-1, -1], [-1, 0], [-1, 1],
@@ -726,16 +747,13 @@
             }
         }
 
-        let delay = 0;
+        // 处理匹配组的高亮效果
+        let highlightDelay = delay; // 在所有金币动画完成后再显示高亮
         highlightGroups.forEach(group => {
             setTimeout(() => {
-                group.forEach(el => {
-                    el.classList.add('highlight');
-                    onEnemyDefeated(el);
-                });
-
-            }, delay);
-            delay += 800;
+                group.forEach(el => el.classList.add('highlight'));
+            }, highlightDelay);
+            highlightDelay += 800;
         });
     }
 
@@ -1177,6 +1195,42 @@
         // 其他初始化代码...
     });
     //图鉴代码
+
+    // 金币右上角显示提示
+    const styles = `
+        .coin-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0, 0, 0, 0.7);
+            color: gold;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 修改这里：当面板显示时显示金币提示 */
+        .upgrade-panel-visible .coin-indicator {
+            opacity: 1;
+        }
+
+        .slot:hover .coin-indicator {
+            opacity: 1;
+        }
+
+        .slot.highlight .coin-indicator {
+            background: rgba(0, 0, 0, 0.8);
+        }
+    `;
+
+    // 将样式添加到文档中
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
 </script>
 </body>
 </html>
