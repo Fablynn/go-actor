@@ -603,7 +603,6 @@
     let hasSelectedUpgrade = false; // 添加选择状态标记
 
     function startSlots() {
-        console.log(!hasSelectedUpgrade)
         // 如果未完成上一轮选择,禁止开始
         if(!hasSelectedUpgrade) {
             noticeChoose();
@@ -1015,22 +1014,51 @@
             categories[category].push(item);
         });
 
+        // 绑定按钮点击事件
+        codexButton.addEventListener('click', toggleCodex);
+
         // 渲染图鉴内容
         function renderCodex() {
             codexContent.innerHTML = `
-        <h1 style="color: white; text-align: center;">图鉴系统</h1>
-        <div class="codex-tabs">
-            <div class="codex-tab active" data-tab="handcards">当前手牌</div>
-            <div class="codex-tab" data-tab="codex">图鉴大全</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="color: white; text-align: center; margin: 0;">图鉴系统</h1>
+            <button id="close-codex" style="
+                padding: 8px 16px;
+                background: #e74c3c;
+                border: none;
+                border-radius: 4px;
+                color: white;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s;
+            ">关闭图鉴</button>
         </div>
-        <div id="handcards-section" class="codex-content-section active">
-            <h2 style="color: white; margin-bottom: 20px;">当前手牌列表</h2>
-            <div class="handcards-grid"></div>
-        </div>
-        <div id="codex-section" class="codex-content-section">
-            <div id="full-codex"></div>
-        </div>
+    <div class="codex-tabs">
+        <div class="codex-tab active" data-tab="handcards">当前手牌</div>
+        <div class="codex-tab" data-tab="codex">图鉴大全</div>
+    </div>
+    <div id="handcards-section" class="codex-content-section active">
+        <h2 style="color: white; margin-bottom: 20px;">当前手牌列表</h2>
+        <div class="handcards-grid"></div>
+    </div>
+    <div id="codex-section" class="codex-content-section">
+        <div id="full-codex"></div>
+    </div>
     `;
+
+            const closeButton = codexContent.querySelector('#close-codex');
+            if (closeButton) {
+                closeButton.addEventListener('click', () => {
+                    codexContainer.style.display = 'none';
+                });
+
+                closeButton.addEventListener('mouseover', () => {
+                    closeButton.style.background = '#c0392b';
+                });
+                closeButton.addEventListener('mouseout', () => {
+                    closeButton.style.background = '#e74c3c';
+                });
+            }
 
             // 渲染手牌列表
             const handcardsGrid = codexContent.querySelector('.handcards-grid');
