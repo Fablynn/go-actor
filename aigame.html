@@ -238,234 +238,261 @@
 </div>
 
 <script>
+    // 定义图标类别枚举
+    const IconCategory = {
+        WEAPON: 'WEAPON',           // 武器装备类
+        CLASS: 'CLASS',            // 职业类
+        STATUS: 'STATUS',          // 状态效果类
+        WEATHER: 'WEATHER',        // 天气环境类
+        ANIMAL: 'ANIMAL',          // 动物伙伴类
+        BUILDING: 'BUILDING',      // 建筑设施类
+        PLANT: 'PLANT',           // 植物资源类
+        MAGIC: 'MAGIC',           // 魔法元素类
+        ITEM: 'ITEM',             // 道具消耗品
+        TREASURE: 'TREASURE',      // 宝物财富类
+        BUFF: 'BUFF',             // 效果增益类
+        ABILITY: 'ABILITY',        // 特殊能力类
+        FESTIVAL: 'FESTIVAL',      // 节日庆典类
+        ZODIAC: 'ZODIAC',         // 星座符号类
+        MUSIC: 'MUSIC',           // 音乐艺术类
+        VEHICLE: 'VEHICLE',        // 交通工具类
+        GEM: 'GEM',               // 水晶宝石类
+        RUNE: 'RUNE',             // 魔法符文类
+        TECH: 'TECH',             // 科技装备类
+        MARINE: 'MARINE',         // 海洋生物类
+        MYTH: 'MYTH',             // 神话生物类
+        TIME: 'TIME'              // 时空元素类
+    };
+
+    // 定义稀有度枚举
+    const Rarity = {
+        COMMON: '优秀',         // 优秀 (2-3金币)
+        RARE: '精良',            // 精良 (4-6金币)
+        EPIC: '史诗',            // 史诗 (7-9金币)
+        LEGENDARY: '传说'    // 传说 (15-20金币)
+    };
+
     const iconData = [
         // 武器装备类
-        { icon: '🗡️', tip: '攻击力提升' },
-        { icon: '🛡️', tip: '防御力提升' },
-        { icon: '🏹', tip: '远程攻击' },
-        { icon: '⚔️', tip: '双持武器' },
-        { icon: '🪓', tip: '重型武器' },
-        { icon: '🗝️', tip: '钥匙道具' },
-        { icon: '🔫', tip: '远程武器' },
-        { icon: '🪃', tip: '回旋镖' },
+        { icon: '🗡️', tip: '勇气之刃', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.WEAPON },
+        { icon: '🛡️', tip: '勇气之盾', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.WEAPON },
+        { icon: '🏹', tip: '勇气之弓', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.WEAPON },
+        { icon: '⚔️', tip: '英勇打击', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.WEAPON },
+        { icon: '🪓', tip: '一往无前', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.WEAPON },
+        { icon: '🗝️', tip: '开锁:开启相邻箱子(消耗)', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.ITEM },
+        { icon: '🔫', tip: '狙杀', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.WEAPON },
+        { icon: '🗡️', tip: '匕首', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.WEAPON },
 
-        // 新增职业类
-        { icon: '🧙‍♂️', tip: '法师' },
-        { icon: '🦹‍♂️', tip: '刺客' },
-        { icon: '🧝‍♀️', tip: '射手' },
-        { icon: '🦸‍♂️', tip: '战士' },
-        { icon: '🧟', tip: '亡灵' },
-        { icon: '👻', tip: '幽灵' },
-        { icon: '🧜‍♀️', tip: '海族' },
-        { icon: '🧚‍♀️', tip: '精灵' },
+        // 职业类
+        { icon: '🧙‍♂️', tip: '法师', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.CLASS },
+        { icon: '🦹‍♂️', tip: '刺客', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.CLASS },
+        { icon: '🧝‍♀️', tip: '射手', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.CLASS },
+        { icon: '🦸‍♂️', tip: '战士', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.CLASS },
+        { icon: '🧟', tip: '亡灵', baseCoins: 17, rarity: Rarity.LEGENDARY, category: IconCategory.CLASS },
+        { icon: '👻', tip: '幽灵', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.CLASS },
+        { icon: '🧜‍♀️', tip: '海族', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.CLASS },
+        { icon: '🤖', tip: '机械', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.CLASS },
 
         // 状态效果类
-        { icon: '💤', tip: '睡眠' },
-        { icon: '🤢', tip: '中毒' },
-        { icon: '💘', tip: '魅惑' },
-        { icon: '💢', tip: '愤怒' },
-        { icon: '😱', tip: '恐惧' },
-        { icon: '🤕', tip: '受伤' },
-        { icon: '🦾', tip: '强化' },
-        { icon: '🛸', tip: '浮空' },
+        { icon: '💤', tip: '睡眠', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.STATUS },
+        { icon: '🤢', tip: '中毒', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.STATUS },
+        { icon: '💘', tip: '魅惑', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.STATUS },
+        { icon: '💢', tip: '愤怒', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.STATUS },
+        { icon: '😱', tip: '恐惧', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.STATUS },
+        { icon: '🤕', tip: '受伤', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.STATUS },
+        { icon: '🦾', tip: '强化', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.STATUS },
+        { icon: '🛸', tip: '浮空', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.STATUS },
 
         // 天气环境类
-        { icon: '🌞', tip: '晴天' },
-        { icon: '🌧️', tip: '雨天' },
-        { icon: '⛈️', tip: '雷暴' },
-        { icon: '🌪️', tip: '龙卷风' },
-        { icon: '❄️', tip: '暴雪' },
-        { icon: '🌫️', tip: '迷雾' },
-        { icon: '🌋', tip: '火山' },
-        { icon: '🏔️', tip: '冰山' },
+        { icon: '🌞', tip: '晴天', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.WEATHER },
+        { icon: '🌧️', tip: '雨天', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.WEATHER },
+        { icon: '⛈️', tip: '雷暴', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.WEATHER },
+        { icon: '🌪️', tip: '龙卷风', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.WEATHER },
+        { icon: '❄️', tip: '暴雪', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.WEATHER },
+        { icon: '🌫️', tip: '迷雾', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.WEATHER },
+        { icon: '🌋', tip: '火山', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.WEATHER },
+        { icon: '🏔️', tip: '冰山', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.WEATHER },
+        { icon: '☁️', tip: '云朵', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.VEHICLE },
 
         // 动物伙伴类
-        { icon: '🐉', tip: '巨龙' },
-        { icon: '🦊', tip: '狐狸' },
-        { icon: '🐺', tip: '狼' },
-        { icon: '🦅', tip: '雄鹰' },
-        { icon: '🦁', tip: '狮子' },
-        { icon: '🐯', tip: '猛虎' },
-        { icon: '🦄', tip: '独角兽' },
-        { icon: '🐙', tip: '章鱼' },
+        { icon: '🐉', tip: '巨龙', baseCoins: 18, rarity: Rarity.LEGENDARY, category: IconCategory.ANIMAL },
+        { icon: '🦊', tip: '狐狸', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.ANIMAL },
+        { icon: '🐺', tip: '狼', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.ANIMAL },
+        { icon: '🦅', tip: '雄鹰', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.ANIMAL },
+        { icon: '🦁', tip: '狮子', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.ANIMAL },
+        { icon: '🐯', tip: '猛虎', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.ANIMAL },
+        { icon: '🦄', tip: '独角兽', baseCoins: 17, rarity: Rarity.LEGENDARY, category: IconCategory.ANIMAL },
+        { icon: '🐎', tip: '战马', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.ANIMAL },
 
         // 建筑设施类
-        { icon: '🏰', tip: '城堡' },
-        { icon: '⛪', tip: '教堂' },
-        { icon: '🏯', tip: '要塞' },
-        { icon: '🗼', tip: '瞭望塔' },
-        { icon: '🏚️', tip: '废墟' },
-        { icon: '⛲', tip: '喷泉' },
-        { icon: '🎪', tip: '帐篷' },
-        { icon: '🏺', tip: '祭坛' },
+        { icon: '🏰', tip: '城堡', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.BUILDING },
+        { icon: '⛪', tip: '教堂', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.BUILDING },
+        { icon: '🏯', tip: '要塞', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.BUILDING },
+        { icon: '🗼', tip: '瞭望塔', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.BUILDING },
+        { icon: '🏚️', tip: '废墟', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.BUILDING },
+        { icon: '⛲', tip: '喷泉', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.BUILDING },
+        { icon: '🎪', tip: '帐篷', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.BUILDING },
+        { icon: '🏺', tip: '祭坛', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.BUILDING },
 
         // 植物资源类
-        { icon: '🌳', tip: '古树' },
-        { icon: '🌺', tip: '魔花' },
-        { icon: '🍄', tip: '蘑菇' },
-        { icon: '🌿', tip: '药草' },
-        { icon: '🎋', tip: '竹子' },
-        { icon: '🌵', tip: '仙人掌' },
-        { icon: '🍀', tip: '幸运草' },
-        { icon: '🌸', tip: '樱花' },
+        { icon: '🌳', tip: '古树', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.PLANT },
+        { icon: '🌺', tip: '魔花', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.PLANT },
+        { icon: '🍄', tip: '蘑菇', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.PLANT },
+        { icon: '🌿', tip: '药草', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.PLANT },
+        { icon: '🎋', tip: '竹子', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.PLANT },
+        { icon: '🌵', tip: '仙人掌', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.PLANT },
+        { icon: '🍀', tip: '幸运草', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.PLANT },
+        { icon: '🌸', tip: '樱花', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.PLANT },
 
         // 魔法元素类
-        { icon: '🔥', tip: '火焰伤害' },
-        { icon: '❄️', tip: '冰冻效果' },
-        { icon: '⚡', tip: '闪电连击' },
-        { icon: '🌪️', tip: '旋风攻击' },
-        { icon: '💫', tip: '魔法星尘' },
-        { icon: '🌟', tip: '星光祝福' },
-        { icon: '🌊', tip: '水元素攻击' },
-        { icon: '🌋', tip: '熔岩爆发' },
+        { icon: '🔥', tip: '火焰伤害', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.MAGIC },
+        { icon: '❄️', tip: '冰冻效果', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.MAGIC },
+        { icon: '⚡', tip: '闪电连击', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.MAGIC },
+        { icon: '💧', tip: '水流冲击', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.MAGIC },
+        { icon: '🌈', tip: '彩虹祝福', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.MAGIC },
+        { icon: '💫', tip: '魔法星尘', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.MAGIC },
+        { icon: '🌟', tip: '星光祝福', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.MAGIC },
+        { icon: '🌀', tip: '空间扭曲', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.MAGIC },
+        { icon: '☄️', tip: '陨石坠落', baseCoins: 18, rarity: Rarity.LEGENDARY, category: IconCategory.MAGIC },
 
         // 道具消耗品
-        { icon: '🍎', tip: '恢复生命' },
-        { icon: '🧪', tip: '神秘药水' },
-        { icon: '📜', tip: '法术卷轴' },
-        { icon: '💊', tip: '治疗药剂' },
-        { icon: '🧉', tip: '能量饮品' },
-        { icon: '🍖', tip: '食物补给' },
-        { icon: '🍩', tip: '甜点补给' },
-        { icon: '🍵', tip: '热饮恢复' },
+        { icon: '🍎', tip: '恢复生命', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.ITEM },
+        { icon: '🧪', tip: '神秘药水', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.ITEM },
+        { icon: '📜', tip: '法术卷轴', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.ITEM },
+        { icon: '💊', tip: '治疗药剂', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.ITEM },
+        { icon: '🧉', tip: '能量饮品', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.ITEM },
+        { icon: '🔮', tip: '预言水晶', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.ITEM },
 
         // 宝物财富类
-        { icon: '💰', tip: '金币收益' },
-        { icon: '💎', tip: '稀有宝石' },
-        { icon: '👑', tip: '皇冠宝物' },
-        { icon: '💍', tip: '魔法戒指' },
-        { icon: '🏆', tip: '荣誉奖杯' },
-        { icon: '💝', tip: '神秘宝箱' },
-        { icon: '📦', tip: '储藏物品' },
-        { icon: '🔮', tip: '预言水晶球' },
+        { icon: '💰', tip: '金币', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.TREASURE },
+        { icon: '💎', tip: '稀有宝石', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.TREASURE },
+        { icon: '👑', tip: '皇冠宝物', baseCoins: 17, rarity: Rarity.LEGENDARY, category: IconCategory.TREASURE },
+        { icon: '💍', tip: '魔法戒指', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.TREASURE },
+        { icon: '🏆', tip: '荣誉奖杯', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.TREASURE },
+        { icon: '📦', tip: '神秘宝箱', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.TREASURE },
+        { icon: '🔑', tip: '宝藏钥匙', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.TREASURE },
 
         // 效果增益类
-        { icon: '🎯', tip: '精准打击' },
-        { icon: '🧲', tip: '磁力吸收' },
-        { icon: '🦾', tip: '机械强化' },
-        { icon: '🎭', tip: '伪装效果' },
-        { icon: '👁️', tip: '真实视觉' },
-        { icon: '🎪', tip: '战斗光环' },
-        { icon: '🛡️‍🔥', tip: '火焰护盾' },
-        { icon: '🌀', tip: '能量漩涡' },
+        { icon: '🎯', tip: '精准打击', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.BUFF },
+        { icon: '🧲', tip: '磁力吸收', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.BUFF },
+        { icon: '🦾', tip: '机械强化', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.BUFF },
+        { icon: '🎭', tip: '伪装效果', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.BUFF },
+        { icon: '👁️', tip: '真实视觉', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.BUFF },
+        { icon: '🛡️', tip: '护盾加成', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.BUFF },
+        { icon: '⚔️', tip: '攻击强化', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.BUFF },
+        { icon: '💥', tip: '爆炸增幅', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.BUFF },
 
         // 特殊能力类
-        { icon: '🌀', tip: '瞬间移动' },
-        { icon: '🎲', tip: '随机效果' },
-        { icon: '🎮', tip: '技能强化' },
-        { icon: '🃏', tip: '复制能力' },
-        { icon: '🦸', tip: '英雄模式' },
-        { icon: '🧙', tip: '召唤法师' },
-        { icon: '🦹', tip: '反派技能' },
-        { icon: '🧞', tip: '召唤精灵' },
+        { icon: '🌀', tip: '瞬间移动', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.ABILITY },
+        { icon: '🎲', tip: '随机效果', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.ABILITY },
+        { icon: '🎮', tip: '技能强化', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.ABILITY },
+        { icon: '🃏', tip: '复制能力', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.ABILITY },
+        { icon: '🦸', tip: '英雄模式', baseCoins: 17, rarity: Rarity.LEGENDARY, category: IconCategory.ABILITY },
+        { icon: '🧙', tip: '召唤法师', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.ABILITY },
+        { icon: '🦹', tip: '反派技能', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.ABILITY },
+        { icon: '🧞', tip: '召唤精灵', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.ABILITY },
+
         // 节日庆典类
-        { icon: '🎄', tip: '圣诞树' },
-        { icon: '🎅', tip: '圣诞老人' },
-        { icon: '🏮', tip: '红灯笼' },
-        { icon: '🎋', tip: '七夕竹' },
-        { icon: '🎭', tip: '狂欢面具' },
-        { icon: '🎪', tip: '嘉年华' },
-        { icon: '🎨', tip: '彩绘' },
-        { icon: '🎉', tip: '庆典' },
+        { icon: '🎄', tip: '圣诞树', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.FESTIVAL },
+        { icon: '🎅', tip: '圣诞老人', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.FESTIVAL },
+        { icon: '🏮', tip: '红灯笼', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.FESTIVAL },
+        { icon: '🎋', tip: '七夕竹', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.FESTIVAL },
+        { icon: '🎭', tip: '狂欢面具', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.FESTIVAL },
+        { icon: '🎪', tip: '嘉年华', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.FESTIVAL },
+        { icon: '🎨', tip: '彩绘', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.FESTIVAL },
+        { icon: '🎇', tip: '烟花', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.FESTIVAL },
 
         // 星座符号类
-        { icon: '♈', tip: '白羊座' },
-        { icon: '♉', tip: '金牛座' },
-        { icon: '♊', tip: '双子座' },
-        { icon: '♋', tip: '巨蟹座' },
-        { icon: '♌', tip: '狮子座' },
-        { icon: '♍', tip: '处女座' },
-        { icon: '♎', tip: '天秤座' },
-        { icon: '♏', tip: '天蝎座' },
+        { icon: '♈', tip: '白羊座', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.ZODIAC },
+        { icon: '♉', tip: '金牛座', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.ZODIAC },
+        { icon: '♊', tip: '双子座', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.ZODIAC },
+        { icon: '♋', tip: '巨蟹座', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.ZODIAC },
+        { icon: '♌', tip: '狮子座', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.ZODIAC },
+        { icon: '♍', tip: '处女座', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.ZODIAC },
+        { icon: '♎', tip: '天秤座', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.ZODIAC },
+        { icon: '♏', tip: '天蝎座', baseCoins: 17, rarity: Rarity.LEGENDARY, category: IconCategory.ZODIAC },
 
         // 音乐艺术类
-        { icon: '🎼', tip: '乐谱' },
-        { icon: '🎸', tip: '吉他' },
-        { icon: '🎻', tip: '小提琴' },
-        { icon: '🎹', tip: '钢琴' },
-        { icon: '🎺', tip: '小号' },
-        { icon: '🥁', tip: '战鼓' },
-        { icon: '🪗', tip: '手风琴' },
-        { icon: '🎧', tip: '音符' },
+        { icon: '🎸', tip: '吉他', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.MUSIC },
+        { icon: '🎻', tip: '小提琴', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.MUSIC },
+        { icon: '🎹', tip: '钢琴', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.MUSIC },
+        { icon: '🎺', tip: '小号', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.MUSIC },
+        { icon: '🥁', tip: '战鼓', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.MUSIC },
+        { icon: '🎶', tip: '旋律', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.MUSIC },
+        { icon: '🎵', tip: '音符', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.MUSIC },
+        { icon: '🎼', tip: '乐谱', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.MUSIC },
 
         // 交通工具类
-        { icon: '🐎', tip: '战马' },
-        { icon: '🦅', tip: '飞鹰' },
-        { icon: '🐉', tip: '龙骑' },
-        { icon: '🚤', tip: '快艇' },
-        { icon: '🛸', tip: '飞碟' },
-        { icon: '🎈', tip: '热气球' },
-        { icon: '🦋', tip: '蝶翼' },
-        { icon: '☁️', tip: '云端' },
+        { icon: '🚗', tip: '跑车', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.VEHICLE },
+        { icon: '✈️', tip: '飞机', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.VEHICLE },
+        { icon: '🚀', tip: '火箭', baseCoins: 20, rarity: Rarity.LEGENDARY, category: IconCategory.VEHICLE },
+        { icon: '🚲', tip: '自行车', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.VEHICLE },
+        { icon: '🛶', tip: '独木舟', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.VEHICLE },
+        { icon: '🚤', tip: '快艇', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.VEHICLE },
+        { icon: '🛸', tip: '飞碟', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.VEHICLE },
+        { icon: '🦄', tip: '独角兽', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.VEHICLE },
 
         // 水晶宝石类
-        { icon: '💎', tip: '钻石' },
-        { icon: '🔷', tip: '蓝宝石' },
-        { icon: '♦️', tip: '红宝石' },
-        { icon: '🟡', tip: '黄宝石' },
-        { icon: '🟣', tip: '紫水晶' },
-        { icon: '⬜', tip: '月光石' },
-        { icon: '🔶', tip: '琥珀' },
-        { icon: '💠', tip: '海蓝宝' },
+        { icon: '💎', tip: '钻石', baseCoins: 18, rarity: Rarity.LEGENDARY, category: IconCategory.GEM },
+        { icon: '🔷', tip: '蓝宝石', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.GEM },
+        { icon: '♦️', tip: '红宝石', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.GEM },
+        { icon: '🟡', tip: '黄宝石', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.GEM },
+        { icon: '🟣', tip: '紫水晶', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.GEM },
+        { icon: '⬜', tip: '普通矿石', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.GEM },
+        { icon: '🔶', tip: '琥珀', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.GEM },
+        { icon: '🔹', tip: '水晶', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.GEM },
 
         // 魔法符文类
-        { icon: '✡️', tip: '六芒星' },
-        { icon: '🕯️', tip: '魔法烛' },
-        { icon: '⚜️', tip: '圣印' },
-        { icon: '🔯', tip: '法阵' },
-        { icon: '☯️', tip: '阴阳' },
-        { icon: '⚛️', tip: '元素' },
-        { icon: '🕸️', tip: '结界' },
-        { icon: '🎴', tip: '符咒' },
+        { icon: '✡️', tip: '六芒星', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.RUNE },
+        { icon: '🕯️', tip: '魔法烛台', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.RUNE },
+        { icon: '⚜️', tip: '圣印', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.RUNE },
+        { icon: '🔯', tip: '法阵', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.RUNE },
+        { icon: '☯️', tip: '阴阳符', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.RUNE },
+        { icon: '⚛️', tip: '元素符文', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.RUNE },
+        { icon: '🔮', tip: '预言符文', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.RUNE },
+        { icon: '📜', tip: '古代卷轴', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.RUNE },
 
         // 科技装备类
-        { icon: '⚡', tip: '能源' },
-        { icon: '🔋', tip: '电池' },
-        { icon: '💻', tip: '终端' },
-        { icon: '🎮', tip: '控制器' },
-        { icon: '📱', tip: '设备' },
-        { icon: '🛰️', tip: '卫星' },
-        { icon: '🤖', tip: '机器人' },
-        { icon: '⚙️', tip: '齿轮' },
+        { icon: '⚡', tip: '能源核心', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.TECH },
+        { icon: '🔋', tip: '高能电池', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.TECH },
+        { icon: '💻', tip: '终端设备', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.TECH },
+        { icon: '🎮', tip: '控制器', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.TECH },
+        { icon: '📱', tip: '智能设备', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.TECH },
+        { icon: '🛰️', tip: '卫星模块', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.TECH },
+        { icon: '🤖', tip: '机器人', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.TECH },
+        { icon: '⚙️', tip: '机械齿轮', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.TECH },
 
         // 海洋生物类
-        { icon: '🐋', tip: '巨鲸' },
-        { icon: '🦈', tip: '鲨鱼' },
-        { icon: '🐙', tip: '章鱼' },
-        { icon: '🦑', tip: '乌贼' },
-        { icon: '🐠', tip: '热带鱼' },
-        { icon: '🦀', tip: '螃蟹' },
-        { icon: '🐚', tip: '贝壳' },
-        { icon: '🪸', tip: '珊瑚' },
+        { icon: '🐋', tip: '巨鲸', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.MARINE },
+        { icon: '🦈', tip: '鲨鱼', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.MARINE },
+        { icon: '🐙', tip: '章鱼', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.MARINE },
+        { icon: '🦀', tip: '螃蟹', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.MARINE },
+        { icon: '🐠', tip: '热带鱼', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.MARINE },
+        { icon: '🐡', tip: '河豚', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.MARINE },
+        { icon: '🦐', tip: '虾', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.MARINE },
+        { icon: '🐚', tip: '贝壳', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.MARINE },
 
         // 神话生物类
-        { icon: '🐉', tip: '巨龙' },
-        { icon: '🦄', tip: '独角兽' },
-        { icon: '🧜‍♀️', tip: '美人鱼' },
-        { icon: '🧚', tip: '精灵' },
-        { icon: '🦅', tip: '凤凰' },
-        { icon: '🐲', tip: '神龙' },
-        { icon: '🦕', tip: '利维坦' },
-        { icon: '👻', tip: '幽灵' },
+        { icon: '🐉', tip: '巨龙', baseCoins: 18, rarity: Rarity.LEGENDARY, category: IconCategory.MYTH },
+        { icon: '🦄', tip: '独角兽', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.MYTH },
+        { icon: '🧜', tip: '美人鱼', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.MYTH },
+        { icon: '🧚', tip: '精灵', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.MYTH },
+        { icon: '🧞', tip: '灯神', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.MYTH },
+        { icon: '🧛', tip: '吸血鬼', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.MYTH },
+        { icon: '👹', tip: '恶魔', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.MYTH },
+        { icon: '👻', tip: '幽灵', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.MYTH },
 
         // 时空元素类
-        { icon: '⌛', tip: '时之沙' },
-        { icon: '🕰️', tip: '时钟' },
-        { icon: '🌌', tip: '星云' },
-        { icon: '🌠', tip: '流星' },
-        { icon: '🎆', tip: '星尘' },
-        { icon: '🌍', tip: '位面' },
-        { icon: '🌑', tip: '月相' },
-        { icon: '☄️', tip: '彗星' }
+        { icon: '⌛', tip: '时之沙', baseCoins: 15, rarity: Rarity.LEGENDARY, category: IconCategory.TIME },
+        { icon: '🕰️', tip: '时钟', baseCoins: 8, rarity: Rarity.EPIC, category: IconCategory.TIME },
+        { icon: '⏳', tip: '沙漏', baseCoins: 7, rarity: Rarity.EPIC, category: IconCategory.TIME },
+        { icon: '⏰', tip: '闹钟', baseCoins: 6, rarity: Rarity.RARE, category: IconCategory.TIME },
+        { icon: '🌀', tip: '时间漩涡', baseCoins: 16, rarity: Rarity.LEGENDARY, category: IconCategory.TIME },
+        { icon: '🌌', tip: '星空', baseCoins: 9, rarity: Rarity.EPIC, category: IconCategory.TIME },
+        { icon: '🌠', tip: '流星', baseCoins: 5, rarity: Rarity.RARE, category: IconCategory.TIME },
+        { icon: '🌙', tip: '月光', baseCoins: 4, rarity: Rarity.RARE, category: IconCategory.TIME }
     ];
 
-    const upgrades = [
-        { icon: '🧲', name: '磁力强化', desc: '增加资源类图标出现概率' },
-        { icon: '🔥', name: '火焰连击', desc: '连续出现火焰图标可触发额外奖励' },
-        { icon: '💎', name: '宝石祝福', desc: '稀有图标出现时获得双倍积分' },
-        { icon: '🛡️', name: '防御构筑', desc: '防御图标可抵挡一次失败' },
-        { icon: '🧪', name: '药剂流派', desc: '药水图标可触发随机事件' }
-    ];
     let isPanelVisible = false;
 
     function toggleUpgradePanel() {
@@ -511,10 +538,10 @@
             const card = document.createElement('div');
             card.className = 'upgrade-card';
             card.innerHTML = `
-            <div class="icon">${icon.icon}</div>
-            <h3>获得图标</h3>
-            <p>${icon.tip}</p>
-        `;
+                <div class="icon">${icon.icon}</div>
+                <h3>${icon.rarity}</h3>
+                <p>${icon.tip}</p>
+            `;
             card.onclick = () => {
                 handCards.push(icon);
                 hasSelectedUpgrade = true; // 标记已完成选择
@@ -529,16 +556,14 @@
 
     // 将 handCards 改成对象数组
     let handCards = [
-        { icon: '🗡️', tip: '攻击力提升' },
-        { icon: '🛡️', tip: '防御力提升' },
-        { icon: '🔥', tip: '火焰伤害' },
-        { icon: '❄️', tip: '冰冻效果' },
-        { icon: '⚡', tip: '闪电连击' },
-        { icon: '💊', tip: '治疗药剂' },
-        { icon: '🎯', tip: '精准打击' },
-        { icon: '🦾', tip: '机械强化' },
-        { icon: '🌀', tip: '瞬间移动' },
-        { icon: '💫', tip: '魔法星尘' }
+        { icon: '🦐', tip: '虾', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.MARINE },
+        { icon: '🐚', tip: '贝壳', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.MARINE },
+        { icon: '🎇', tip: '烟花', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.FESTIVAL },
+        { icon: '⚙️', tip: '机械齿轮', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.TECH },
+        { icon: '🎵', tip: '音符', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.MUSIC },
+        { icon: '🎼', tip: '乐谱', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.MUSIC },
+        { icon: '🏚️', tip: '废墟', baseCoins: 3, rarity: Rarity.COMMON, category: IconCategory.BUILDING },
+        { icon: '🦊', tip: '狐狸', baseCoins: 2, rarity: Rarity.COMMON, category: IconCategory.ANIMAL },
     ];
 
     function fillColumn(col) {
