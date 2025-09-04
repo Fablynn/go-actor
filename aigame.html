@@ -477,16 +477,15 @@
     function hideUpgradePanel() {
         isPanelVisible = false;
         document.getElementById('upgrade-panel').style.display = 'none';
-        document.getElementById('start-button').disabled = false;
         document.getElementById('show-upgrade-button').style.display = 'block';
     }
 
     function giveUpgrade() {
         hasSelectedUpgrade = true; // 标记已完成选择
-        document.getElementById('start-button').disabled = false; // 启用开始按钮
         document.getElementById('show-upgrade-button').style.display = 'none';
         isPanelVisible = false;
         document.getElementById('upgrade-panel').style.display = 'none';
+        clearNoticeChoose();
     }
 
     function showUpgradeChoices() {
@@ -497,7 +496,6 @@
         panel.style.display = 'block';
 
         document.getElementById('show-upgrade-button').style.display = 'none';
-        document.getElementById('start-button').disabled = true; // 确保按钮保持禁用
 
 
         // 从 iconData 中随机选择3个不重复的元素
@@ -520,7 +518,6 @@
             card.onclick = () => {
                 handCards.push(icon);
                 hasSelectedUpgrade = true; // 标记已完成选择
-                document.getElementById('start-button').disabled = false; // 启用开始按钮
                 giveUpgrade();
             };
             container.appendChild(card);
@@ -606,62 +603,15 @@
     let hasSelectedUpgrade = false; // 添加选择状态标记
 
     function startSlots() {
+        console.log(!hasSelectedUpgrade)
         // 如果未完成上一轮选择,禁止开始
         if(!hasSelectedUpgrade) {
-            const panel = document.getElementById('upgrade-panel');
-            const skipButton = panel.querySelector('.skip-button');
-
-            // 使用直接样式设置
-            panel.setAttribute('style', `
-            border: 3px solid #4a90e2 !important;
-            box-shadow: 0 0 20px #4a90e2 !important;
-            transition: all 0.3s ease !important;
-        `);
-
-            skipButton.setAttribute('style', `
-            background: #4a90e2 !important;
-            transform: scale(1.1) !important;
-            transition: all 0.3s ease !important;
-        `);
-
-            // 300ms 后恢复原样
-            setTimeout(() => {
-                panel.setAttribute('style', '');
-                skipButton.setAttribute('style', '');
-            }, 300);
-
-            // 重复高亮效果3次
-            let count = 1;
-            const flashInterval = setInterval(() => {
-                panel.setAttribute('style', `
-                border: 3px solid #4a90e2 !important;
-                box-shadow: 0 0 20px #4a90e2 !important;
-                transition: all 0.3s ease !important;
-            `);
-
-                skipButton.setAttribute('style', `
-                background: #4a90e2 !important;
-                transform: scale(1.1) !important;
-                transition: all 0.3s ease !important;
-            `);
-
-                setTimeout(() => {
-                    panel.setAttribute('style', '');
-                    skipButton.setAttribute('style', '');
-                }, 300);
-
-                count++;
-                if(count >= 3) {
-                    clearInterval(flashInterval);
-                }
-            }, 600);
-
+            noticeChoose();
             return;
         }
 
         clearHighlights();
         hasSelectedUpgrade = false; // 重置选择状态
-        document.getElementById('start-button').disabled = true; // 禁用开始按钮
 
         columns.forEach((col, index) => {
             let interval = setInterval(() => fillColumn(col), 100);
@@ -676,6 +626,32 @@
                 }
             }, 1000 + index * 500);
         });
+    }
+
+    function noticeChoose(){
+        const panel = document.getElementById('upgrade-panel');
+        const skipButton = panel.querySelector('.skip-button');
+        // 使用直接样式设置
+        panel.style.border = '3px solid #4a90e2';
+        panel.style.boxShadow = '0 0 20px #4a90e2';
+        panel.style.transition = 'all 0.3s ease';
+
+        skipButton.style.background = '#4a90e2';
+        skipButton.style.transform = 'scale(1.1)';
+        skipButton.style.transition = 'all 0.3s ease';
+    }
+
+    function clearNoticeChoose(){
+        const panel = document.getElementById('upgrade-panel');
+        const skipButton = panel.querySelector('.skip-button');
+        // 使用直接样式设置
+        panel.style.border = '';
+        panel.style.boxShadow = '';
+        panel.style.transition = '';
+
+        skipButton.style.background = '';
+        skipButton.style.transform = '';
+        skipButton.style.transition = '';
     }
 
     function clearHighlights() {
