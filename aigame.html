@@ -640,6 +640,15 @@
             return;
         }
 
+        if (remainingSlots <= 0) {
+            checkChallengeResult();
+            return;
+        }
+
+        remainingSlots--;
+        totalSlots++;
+        updateRemainingSlots();
+
         clearHighlights();
         hasSelectedUpgrade = false; // 重置选择状态
 
@@ -824,12 +833,6 @@
             flyingCoin.remove();
         };
     }
-
-    // 游戏初始化时调用
-    document.addEventListener('DOMContentLoaded', () => {
-        hasSelectedUpgrade = true; // 第一次运行时允许开始
-        initCoinPool();
-    });
 
     // 示例：当击中敌人或获得奖励时调用
     function onEnemyDefeated(enemyElement) {
@@ -1227,10 +1230,221 @@
         }
     `;
 
-    // 将样式添加到文档中
     const styleSheet = document.createElement('style');
     styleSheet.textContent = styles;
     document.head.appendChild(styleSheet);
+    //挑战目标
+    // 在 coin-pool div 下方添加挑战目标显示区域
+    const challengeHTML = `
+    <div id="challenge-container">
+        <div class="challenge-header">
+            <span>📋 租金挑战</span>
+            <span id="remaining-slots">剩余次数: 5</span>
+        </div>
+        <div id="challenge-list"></div>
+    </div>
+    `;
+
+    // 添加样式
+    const challengeStyles = `
+        #challenge-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            min-width: 200px;
+            z-index: 100;
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .challenge-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .challenge-item.active {
+            background: rgba(74, 144, 226, 0.2);
+            border: 1px solid #4a90e2;
+        }
+
+        .challenge-item.completed {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid #27ae60;
+        }
+
+        .challenge-item.failed {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+        }
+    `;
+
+    // 挑战列表数据
+    const challenges = [
+        { slots: 5, coins: 100, completed: false },
+        { slots: 7, coins: 200, completed: false },
+        { slots: 10, coins: 500, completed: false }
+    ];
+
+    let currentChallenge = 0;
+    let remainingSlots = challenges[0].slots;
+    let totalSlots = 0;
+
+    // 初始化挑战系统
+    function initChallengeSystem() {
+        // 添加 HTML 和样式
+        document.body.insertAdjacentHTML('beforeend', challengeHTML);
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = challengeStyles;
+        document.head.appendChild(styleSheet);
+
+        // 渲染挑战列表
+        renderChallenges();
+        updateRemainingSlots();
+    }
+
+    // 渲染挑战列表
+    function renderChallenges() {
+        const list = document.getElementById('challenge-list');
+        list.innerHTML = challenges.map((challenge, index) => `
+        <div class="challenge-item ${index === currentChallenge ? 'active' : ''}
+                                  ${challenge.completed ? 'completed' : ''}">
+            <span>🎯 ${challenge.slots}次抽取</span>
+            <span>💰 ${challenge.coins}金币</span>
+        </div>
+    `).join('');
+    }
+
+    // 更新剩余次数显示
+    function updateRemainingSlots() {
+        document.getElementById('remaining-slots').textContent =
+            `剩余次数: ${remainingSlots}`;
+    }
+
+
+    // 检查挑战结果
+    function checkChallengeResult() {
+        const currentTarget = challenges[currentChallenge];
+
+        if (coinCount >= currentTarget.coins) {
+            // 完成挑战
+            coinCount -= currentTarget.coins;
+            updateCoinDisplay();
+            currentTarget.completed = true;
+            showChallengeComplete();
+
+            // 进入下一个挑战
+            if (currentChallenge < challenges.length - 1) {
+                currentChallenge++;
+                remainingSlots = challenges[currentChallenge].slots;
+                renderChallenges();
+                updateRemainingSlots();
+            } else {
+                showGameComplete();
+            }
+        } else {
+            showGameOver();
+        }
+    }
+
+    // 显示挑战完成消息
+    function showChallengeComplete() {
+        const message = document.createElement('div');
+        message.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(39, 174, 96, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        font-size: 24px;
+        z-index: 1000;
+    `;
+        message.textContent = '🎉 成功支付租金！进入下一阶段';
+        document.body.appendChild(message);
+        setTimeout(() => message.remove(), 2000);
+    }
+
+    // 显示游戏结束消息
+    function showGameOver() {
+        const message = document.createElement('div');
+        message.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(231, 76, 60, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        font-size: 24px;
+        z-index: 1000;
+    `;
+        message.textContent = '😢 租金不足，你被赶了出去';
+        document.body.appendChild(message);
+        disableControls();
+    }
+
+    // 显示通关动画
+    function showGameComplete() {
+        const container = document.createElement('div');
+        container.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 1000;
+    `;
+
+        container.innerHTML = `
+        <h1 style="color: gold; font-size: 48px; margin-bottom: 20px;">
+            🎊 恭喜通关！ 🎊
+        </h1>
+        <p style="color: white; font-size: 24px;">
+            你已经成为了一个成功的房东！
+        </p>
+    `;
+
+        document.body.appendChild(container);
+        disableControls();
+    }
+
+    // 禁用游戏控制
+    function disableControls() {
+        document.getElementById('start-button').disabled = true;
+        document.getElementById('show-upgrade-button').disabled = true;
+    }
+
+    // 游戏初始化时调用
+    document.addEventListener('DOMContentLoaded', () => {
+        hasSelectedUpgrade = true; // 第一次运行时允许开始
+        initCoinPool();
+        initChallengeSystem();
+    });
 </script>
 </body>
 </html>
