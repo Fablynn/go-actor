@@ -274,3 +274,61 @@ func MGetNodeTypeActorNameFuncName(NodeType pb.NodeType, ActorName string, FuncN
 @struct|sheet@结构名
 @enum|sheet
 ```
+
+### 宿主机模式日志集成
+```
+初始化宿主机 fluent-bit
+
+chmod -R 755 /workerdir/log
+curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
+todo vi /etc/fluent-bit/fluent-bit.conf vi /etc/fluent-bit/parser_multiline.conf
+systemctl start fluent-bit
+```
+
+```
+vi /etc/fluent-bit/fluent-bit.conf
+[SERVICE]
+    Flush         1
+    Daemon        off
+    Log_Level     debug
+    Parsers_File  /etc/fluent-bit/parser_multiline.conf
+[INPUT]
+    Name               tail
+    Path               /workerdir/log/*/*.log
+    Tag                gamelog
+    Read_from_Head     true
+    Refresh_Interval   5
+    multiline.parser   go_log_heapstack
+    DB                 /var/log/game_json.db
+[FILTER]
+    name             parser
+    match            gamelog
+    key_name         log
+    parser           go_log_header
+[OUTPUT]
+    Name              es
+    Match             gamelog
+    Host              es-host
+    Port              9200
+    Index             poker-logs
+    Generate_ID       On
+    Time_Key          datetime
+    Replace_Dots      On
+    Trace_Error       On
+    Logstash_Format   Off
+```
+
+```
+vi /etc/fluent-bit/parser_multiline.conf
+[MULTILINE_PARSER]
+    Name          go_log_heapstack
+    Type          regex
+    Flush_Timeout 1000
+    rule          "start_state"  "/^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}\]\s+\[[A-Z]+\]\s+/"  "cont"
+    rule          "cont"         "/^(?!\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}\]\s+\[[A-Z]+\]\s+)/" "cont"
+[PARSER]
+    Name         go_log_header
+    Format       regex
+    Regex       ^\[(?<datetime>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\]\s+\[(?<level>[A-Z]+)\]\s+(?<message>[\s\S]+)$
+    Time_Key     datetime
+```
