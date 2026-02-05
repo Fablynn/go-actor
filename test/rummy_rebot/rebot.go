@@ -542,7 +542,7 @@ func decision(cards []uint32, showCard uint32) (lose uint32) { // 考虑是否�
 	after := rankSum(decisionChoose.unqiue)
 	fmt.Printf("吃牌牌型： 组合牌：%v 单牌:%v 无效分:%d \n", showGroup(decisionChoose.group), CardList(decisionChoose.unqiue).String(), after)
 	lose = outputDecision(decisionChoose)
-	if odd-(after-rankSum([]uint32{lose})) < 5 { // 抓牌收益不大于5分 不抓
+	if odd-(after-rankSum([]uint32{lose})) < 5 || lose == showCard { // 抓牌收益不大于5分 不抓
 		fmt.Printf("预期打牌：%s 分差:%d 本轮： 抓牌收益不大于5分 不抓牌 \n", Card(lose), odd-(after-rankSum([]uint32{lose})))
 		return 0
 	}
