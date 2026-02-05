@@ -33,10 +33,12 @@ func Train() {
 	handCards = append(handCards, cards[idx:idx+13]...)
 	idx += 13
 
-	fmt.Printf("Race Init 手牌:%v 可吃明牌:%v 百搭牌：%v \n", CardList(handCards), Card(showCard), Card(ghostCard))
+	fmt.Printf("Race Init 手牌:%v 可吃明牌:%v 百搭牌：%v \n", CardList(sortHand(handCards)), Card(showCard), Card(ghostCard))
 	for {
 		fmt.Printf("\n\nNew Round:%d 手牌:%v 可吃明牌:%v \n", round, CardList(handCards), Card(showCard))
-		if choose := filterChoose(append(handCards, showCard)); choose.unqiue != nil && len(choose.unqiue) <= 1 {
+		mock := append([]uint32{}, handCards...)
+		mock = append(mock, showCard)
+		if choose := filterChoose(mock); choose.unqiue != nil && len(choose.unqiue) <= 1 {
 
 			if len(choose.unqiue) == 0 { // win
 				var item uint32
@@ -50,6 +52,7 @@ func Train() {
 		}
 		if lose := decision(handCards, showCard); lose > 0 {
 			handCards = getDiff(append(handCards, showCard), []uint32{lose})
+			fmt.Printf("Round:%d 手牌:%v 吃牌:%v 打出牌:%v \n", round, CardList(handCards), Card(showCard), Card(lose))
 		} else {
 			idx++
 			drawCard := cards[idx]
@@ -66,7 +69,7 @@ func Train() {
 				}
 			}
 			handCards = sortHand(getDiff(handCards, []uint32{lose}))
-			fmt.Printf("Round:%d 手牌:%v 抽牌:%v \n", round, CardList(handCards), Card(drawCard))
+			fmt.Printf("Round:%d 手牌:%v 抽牌:%v 打出牌:%v \n", round, CardList(handCards), Card(drawCard), Card(lose))
 		}
 		round++
 		idx++

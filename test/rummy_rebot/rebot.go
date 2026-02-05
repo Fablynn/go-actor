@@ -495,7 +495,9 @@ func showGroup(groups [][]uint32) (ret string) {
 	return
 }
 
-func filterChoose(cards []uint32) (bestChoose RummyGroup) {
+func filterChoose(real []uint32) (bestChoose RummyGroup) {
+	cards := make([]uint32, len(real))
+	copy(cards, real)
 	cards = sortHand(cards)
 	prueSeq := bsFindSeq(cards)
 	prueSeq = append(prueSeq, []uint32{})
@@ -532,14 +534,19 @@ func sortHand(card []uint32) []uint32 {
 
 func decision(cards []uint32, showCard uint32) (lose uint32) { // 考虑是否抓牌并丢弃价值最低手牌
 	bestChoose := filterChoose(cards)
-	fmt.Printf("手上牌型： 组合牌：%v 单牌:%v 无效分:%d \n", showGroup(bestChoose.group), CardList(bestChoose.unqiue).String(), rankSum(bestChoose.unqiue))
-	decisionChoose := filterChoose(append(cards, showCard))
-	fmt.Printf("吃牌牌型： 组合牌：%v 单牌:%v 无效分:%d \n", showGroup(decisionChoose.group), CardList(decisionChoose.unqiue).String(), rankSum(decisionChoose.unqiue))
+	odd := rankSum(bestChoose.unqiue)
+	fmt.Printf("手上牌型： 组合牌：%v 单牌:%v 无效分:%d \n", showGroup(bestChoose.group), CardList(bestChoose.unqiue).String(), odd)
+	hands := make([]uint32, len(cards))
+	copy(hands, cards)
+	decisionChoose := filterChoose(append(hands, showCard))
+	after := rankSum(decisionChoose.unqiue)
+	fmt.Printf("吃牌牌型： 组合牌：%v 单牌:%v 无效分:%d \n", showGroup(decisionChoose.group), CardList(decisionChoose.unqiue).String(), after)
 	lose = outputDecision(decisionChoose)
-	if rankSum(getDiff(decisionChoose.unqiue, []uint32{lose}))-rankSum(bestChoose.unqiue) < 5 { // 抓牌收益不大于5分 不抓
-		fmt.Printf("本轮： 抓牌收益不大于5分 不抓牌 \n")
+	if odd-(after-rankSum([]uint32{lose})) < 5 { // 抓牌收益不大于5分 不抓
+		fmt.Printf("预期打牌：%s 分差:%d 本轮： 抓牌收益不大于5分 不抓牌 \n", Card(lose), odd-(after-rankSum([]uint32{lose})))
 		return 0
 	}
+	fmt.Printf("预期打牌：%s 分差:%d  \n", Card(lose), odd-(after-rankSum([]uint32{lose})))
 	return lose
 }
 
@@ -560,6 +567,9 @@ func outputDecision(choose RummyGroup) (lose uint32) {
 
 func rankSum(cards []uint32) (sum int) {
 	for _, card := range cards {
+		if Card(card).IsWild() {
+			continue
+		}
 		sum += int(Card(card).Rank())
 	}
 	return
